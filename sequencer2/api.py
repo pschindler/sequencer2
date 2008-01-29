@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "29-Jan-2008 19:26:18 viellieb"
+# Time-stamp: "29-Jan-2008 19:39:10 viellieb"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -78,6 +78,7 @@ class api():
         self.sequencer.add_insn(instructions.label(label_name))
 
     def end_subroutine(self):
+        self.sequencer.add_insn(instructions.ret())
         self.sequencer.sub_list.append(copy.copy(self.sequencer.current_sequence))
         self.sequencer.current_sequence=[]
 

@@ -35,6 +35,9 @@ class Test_Sequencer(unittest.TestCase):
 
 
   def test_subroutine(self):
+    """
+    Test the subroutine calling
+    """
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
     my_api.begin_subroutine("test")
@@ -47,7 +50,7 @@ class Test_Sequencer(unittest.TestCase):
     my_api.call_subroutine("test")
     my_api.dac_value(12,1)
     my_sequencer.compile_sequence()
-    #my_sequencer.debug_sequence()
+    my_sequencer.debug_sequence()
     target=my_sequencer.current_sequence[6].target_address
     label=my_sequencer.current_sequence[target].label
     self.assertEquals(target,13)
