@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "29-Jan-2008 00:24:53 viellieb"
+# Time-stamp: "29-Jan-2008 17:23:41 viellieb"
 
 #  file       test_speed.py
 #  copyright  (c) Philipp Schindler 2008
@@ -10,15 +10,17 @@
 
 import time
 from  sequencer2 import sequencer
+from  sequencer2 import api
 
 time1=time.time()
 my_sequencer=sequencer.sequencer()
-N0=10
-my_sequencer.dac_value(12,1)
-my_sequencer.jump("test")
+my_api=api.api(my_sequencer)
+N0=10000
+my_api.dac_value(12,1)
+my_api.jump("test")
 for i in range(N0):
-    my_sequencer.dac_value(N0,1)
-my_sequencer.label("test")
+    my_api.dac_value(N0,1)
+my_api.label("test")
 my_sequencer.compile_sequence()
 if N0 < 100:
     my_sequencer.debug_sequence()

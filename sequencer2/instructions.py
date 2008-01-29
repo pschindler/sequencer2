@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "29-Jan-2008 00:41:05 viellieb"
+# Time-stamp: "29-Jan-2008 17:33:18 viellieb"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -53,9 +53,9 @@ class p(insn_class):
     """
     name="p"
     opcode=0xc
-    change_state=None
-    output_state=None
-
+    def __init__(self,output_state,change_state):
+        self.output_state=output_state
+        self.change_state=change_state
     def get_value(self):
         if self.change_state!=None:
             return self.opcode << 28 | self.change_state << 16 | self.output_state

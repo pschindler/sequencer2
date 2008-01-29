@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-01-29 14:21:20 c704271"
+# Time-stamp: "29-Jan-2008 19:31:10 viellieb"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -14,6 +14,7 @@ class sequencer():
         self.jump_list=[]
         self.word_list=[]
         self.label_dict={}
+        self.sub_list=[]
 
     def get_binary_charlist(self,hex_num,byte_width):
         """
@@ -43,9 +44,16 @@ class sequencer():
         """
         generates the binary list
         """
+        # Addresses are broken when using subroutines
+        sequence_list=self.current_sequence
+        word_index=len(self.current_sequence)
+        for insn_list in self.sub_list:
+            self.label_dict[insn_list[0].label]=word_index
+            sequence_list+=insn_list
+            word_index += len(insn_list)
         self.word_list=[]
         address=0
-        for insn in self.current_sequence:
+        for insn in sequence_list:
             value=insn.get_value()
             if value==None:
                 self.word_list.append(insn)
@@ -64,54 +72,13 @@ class sequencer():
                 self.word_list[word_num]=self.get_binary_charlist(value,4)
             except SyntaxError:
                 print "error while handling jump"
+        self.current_sequence=sequence_list
 
     def debug_sequence(self):
         for insn in self.current_sequence:
             print insn
 
-    def dac_value(self,dac_nr,val):
-        """
-        simple example for a DAC event
-        """
-        addr_insn=sequencer2.instructions.p()
-        addr_insn.change_state=3
-        addr_insn.output_state=dac_nr << 12
-        self.add_insn(addr_insn)
-        data_insn=sequencer2.instructions.p()
-        data_insn.change_state=0
-        data_insn.opcode=0x7
-        data_insn.output_state=val << 2
-        self.add_insn(data_insn)
-        data2_insn=copy.copy(data_insn)
-        data2_insn.output_state=val << 2 | 2
-        self.add_insn(data2_insn)
 
-    def ttl_value(self,value):
-        """
-        simple example for a TTL event
-        """
-        ttl_insn=sequencer2.instructions.p()
-        ttl_insn.change_state=2
-        ttl_insn.output_state=value
-        self.add_insn(ttl_insn)
-
-    def label(self,label_name):
-        """
-        inserts a label and a NOP
-        """
-        label_insn=sequencer2.instructions.label(label_name)
-        self.add_insn(label_insn)
-
-    def jump(self,target_name):
-        """
-        jumps to label
-        """
-        jump_insn=sequencer2.instructions.j(target_name)
-        nop_insn=sequencer2.instructions.nop()
-        self.add_insn(jump_insn)
-        self.add_insn(nop_insn)
-        self.add_insn(nop_insn)
-        self.add_insn(nop_insn)
 ## sequencer.py
 ## Login : <viellieb@ohm>
 ## Started on  Mon Jan 28 22:44:57 2008 Philipp Schindler
