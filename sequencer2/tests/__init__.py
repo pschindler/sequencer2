@@ -22,3 +22,6 @@ all_suites.addTest(sequencer.all_suites)
 
 def run():
   unittest.TextTestRunner(verbosity=2).run(all_suites)
+
+def debug():
+  all_suites.debug()

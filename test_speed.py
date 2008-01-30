@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "29-Jan-2008 17:23:41 viellieb"
+# Time-stamp: "30-Jan-2008 23:02:43 viellieb"
 
 #  file       test_speed.py
 #  copyright  (c) Philipp Schindler 2008

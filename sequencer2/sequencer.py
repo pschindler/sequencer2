@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "29-Jan-2008 19:31:10 viellieb"
+# Time-stamp: "30-Jan-2008 23:41:42 viellieb"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://wiki.havens.de
-import sequencer2.instructions
+import instructions
 import copy
 class sequencer():
 
@@ -45,6 +45,8 @@ class sequencer():
         generates the binary list
         """
         # Addresses are broken when using subroutines
+        halt_insn=instructions.halt()
+        self.add_insn(halt_insn)
         sequence_list=self.current_sequence
         word_index=len(self.current_sequence)
         for insn_list in self.sub_list:

@@ -45,18 +45,31 @@ class Test_Sequencer(unittest.TestCase):
     my_api.dac_value(12,1)
     my_api.dac_value(12,1)
     my_api.end_subroutine()
+
+    my_api.begin_subroutine("test1")
+    my_api.dac_value(0xf,3)
+    my_api.dac_value(0xf,3)
+    my_api.dac_value(0xf,3)
+    my_api.end_subroutine()
+
     my_api.dac_value(12,1)
     my_api.dac_value(12,1)
+    my_api.call_subroutine("test")
+    my_api.call_subroutine("test1")
     my_api.call_subroutine("test")
     my_api.dac_value(12,1)
     my_sequencer.compile_sequence()
     my_sequencer.debug_sequence()
     target=my_sequencer.current_sequence[6].target_address
     label=my_sequencer.current_sequence[target].label
-    self.assertEquals(target,13)
+    self.assertEquals(target,22)
     self.assertEquals(label,"test")
+    target=my_sequencer.current_sequence[10].target_address
+    label=my_sequencer.current_sequence[target].label
+    self.assertEquals(target,33)
+    self.assertEquals(label,"test1")
 
-  def test_j(self):
+  def test_j_seq(self):
     """
     test the jump address
     """
@@ -67,6 +80,7 @@ class Test_Sequencer(unittest.TestCase):
     my_api.dac_value(12,1)
     my_api.jump("test")
     my_sequencer.compile_sequence()
+    my_sequencer.current_sequence.pop()
     my_sequencer.current_sequence.pop()
     my_sequencer.current_sequence.pop()
     my_sequencer.current_sequence.pop()
@@ -97,7 +111,7 @@ class Test_Sequencer(unittest.TestCase):
     #    print my_my_sequencer.word_list
     time2=time.time()
     print str(time2-time1)
-    if time2-time1 > 1:
+    if time2-time1 > 2:
       self.fail("Failed speed test")
 
 #  def tearDown(self):

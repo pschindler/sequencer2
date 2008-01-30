@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "29-Jan-2008 17:33:18 viellieb"
+# Time-stamp: "30-Jan-2008 23:37:32 viellieb"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -11,6 +11,7 @@
 # pp
 # bdec
 # ldc
+
 
 class insn_class():
     """
@@ -29,12 +30,20 @@ class insn_class():
                " -- op:  "+str(hex(self.opcode)) + \
                " -- nam: "+str(self.name)
 
+
 class nop(insn_class):
     """
     No operation
     """
     name="nop"
     opcode=0x0
+
+class halt(insn_class):
+   """
+   stop the processor
+   """
+   name="halt"
+   opcode=0x8
 
 class label(insn_class):
     """

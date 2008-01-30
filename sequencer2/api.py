@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "29-Jan-2008 19:39:10 viellieb"
+# Time-stamp: "30-Jan-2008 23:10:36 viellieb"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
