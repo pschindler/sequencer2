@@ -1,0 +1,9 @@
+Missing features:
+
+* PTP protocol
+* finite loops (bdec,ldc)
+
+Missing tests
+
+* Additional label/subroutine/loop testing
+* Test on physical PCP
