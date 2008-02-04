@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "30-Jan-2008 23:37:32 viellieb"
+# Time-stamp: "03-Feb-2008 17:56:55 viellieb"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -17,13 +17,14 @@ class insn_class():
     """
     Base class for an instruction
     """
-    name="None"
-    address=None
-    label=None
-    change_state=None
-    opcode=0x0
-    output_state=[0,0,0,0]
+    name = "None"
+    address = None
+    label = None
+    change_state = None
+    opcode = 0x0
+    output_state = [0, 0, 0, 0]
     def get_value(self):
+        """returns the hex value"""
         return self.opcode << 28
     def __str__(self):
         return " add: "+str(self.address) + \
@@ -35,24 +36,24 @@ class nop(insn_class):
     """
     No operation
     """
-    name="nop"
-    opcode=0x0
+    name = "nop"
+    opcode = 0x0
 
 class halt(insn_class):
-   """
-   stop the processor
-   """
-   name="halt"
-   opcode=0x8
+    """
+    stop the processor
+    """
+    name = "halt"
+    opcode = 0x8
 
 class label(insn_class):
     """
     inserts a NOP and a label
     """
-    name="label"
-    opcode=0x0
-    def __init__(self,label_name):
-        self.label=label_name
+    name = "label"
+    opcode = 0x0
+    def __init__(self, label_name):
+        self.label = label_name
 
 class p(insn_class):
     """
@@ -60,13 +61,14 @@ class p(insn_class):
     p.output_state : hex value of the (16bit)
     p.change state : output select bits (2bit)
     """
-    name="p"
-    opcode=0xc
-    def __init__(self,output_state,change_state):
-        self.output_state=output_state
-        self.change_state=change_state
+    name = "p"
+    opcode = 0xc
+    def __init__(self, output_state, change_state):
+        self.output_state = output_state
+        self.change_state = change_state
     def get_value(self):
-        if self.change_state!=None:
+        """returns the hex value"""
+        if self.change_state != None:
             return self.opcode << 28 | self.change_state << 16 | self.output_state
 
     def __str__(self):
@@ -80,16 +82,18 @@ class j(insn_class):
     """
     Jumps to a defined label
     """
-    opcode=0x4
-    name="j"
-    def __init__(self,label_name):
-        self.target_name=label_name
+    opcode = 0x4
+    name = "j"
+    def __init__(self, label_name):
+        self.target_name = label_name
 
     def get_value(self):
+        """returns the hex value"""
         return None
 
-    def get_jump_value(self,target_address):
-        self.target_address=target_address
+    def get_jump_value(self, target_address):
+        """returns the hex value for j insns"""
+        self.target_address = target_address
         return self.opcode << 28 | target_address
     def __str__(self):
         return " add: "+str(self.address) + \
@@ -102,28 +106,30 @@ class btr(j):
     Jumps to a defined label if the trigger is satisfied
     trigge is the trigger state in HEX
     """
-    name="btr"
-    opcode=0x3
-    def __init__(self,label_name,trigger):
-        self.target_name=target_name
-        self.trigger=trigger
 
-    def get_jump_value(self,target_address):
+    name = "btr"
+    opcode = 0x3
+    def __init__(self, label_name, trigger):
+        self.target_name = label_name
+        self.trigger = trigger
+
+    def get_jump_value(self, target_address):
+        """returns the hex value for j insns"""
         return self.opcode << 28 | self.trigger << 19 | target_address
 
 class call(j):
     """
     Calls a subroutine
     """
-    name="call"
-    opcode=0x5
+    name = "call"
+    opcode = 0x5
 
 class ret(insn_class):
     """
     returns from the last subroutine
     """
-    name="ret"
-    opcode=0x6
+    name = "ret"
+    opcode = 0x6
 ##
 ## instructions.py
 ## Login : <viellieb@ohm>
