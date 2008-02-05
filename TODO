@@ -1,9 +1,30 @@
-Missing features:
+* Missing features:
 
-* PTP protocol
-* finite loops (bdec,ldc)
+- PTP protocol
+- finite loops (bdec,ldc)
+- High level functions for the DAC,DDS
 
-Missing tests
+* Missing tests
 
-* Additional label/subroutine/loop testing
-* Test on physical PCP
+- Additional label/subroutine/loop testing
+- Test on physical PCP
+
+* Important DDS registers:
+
+0x00  Control Register 1
+   Autoclr Phase
+
+0x01  Control Register 2
+   PDCLK enable
+   Parallel data port enable
+
+0x07 Frequency Tuning Word
+
+0x08 Phase Offset Word
+
+0x0E Single Tone Profile 0
+...
+...
+0x15 Single Tone Profile 7
+
+0x16 RAM
