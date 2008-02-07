@@ -14,8 +14,7 @@ class Test_Sequencer(unittest.TestCase):
 
 
   def test_dac_sequence(self):
-    """
-    test if the dac instruction generates the right number of insns
+    """test if the dac instruction generates the right number of insns
     """
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
@@ -25,8 +24,7 @@ class Test_Sequencer(unittest.TestCase):
     del(my_sequencer)
 
   def test_p_insn(self):
-    """
-    Tests the hex value of the p_insn
+    """Tests the hex value of the p_insn
     """
     p_insn=instructions.p(12,3)
     value=0xc << 28 | 3 << 16 | 12
@@ -35,8 +33,7 @@ class Test_Sequencer(unittest.TestCase):
 
 
   def test_subroutine(self):
-    """
-    Test the subroutine calling
+    """Test the subroutine calling
     """
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
@@ -59,7 +56,8 @@ class Test_Sequencer(unittest.TestCase):
     my_api.call_subroutine("test")
     my_api.dac_value(12,1)
     my_sequencer.compile_sequence()
-    my_sequencer.debug_sequence()
+#    my_sequencer.debug_sequence()
+#    print "\n\n"
     target=my_sequencer.current_sequence[6].target_address
     label=my_sequencer.current_sequence[target].label
     self.assertEquals(target,22)
@@ -70,8 +68,7 @@ class Test_Sequencer(unittest.TestCase):
     self.assertEquals(label,"test1")
 
   def test_j_seq(self):
-    """
-    test the jump address
+    """test the jump address
     """
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
@@ -93,8 +90,7 @@ class Test_Sequencer(unittest.TestCase):
     del(my_sequencer)
 
   def test_compile_speed(self):
-    """
-    Test if 10000 DAC events may be compiled in under 1s
+    """Test if 10000 DAC events may be compiled in under 1s
     """
     time1=time.time()
     my_sequencer=sequencer.sequencer()

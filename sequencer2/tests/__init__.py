@@ -18,8 +18,9 @@ all_suites = unittest.TestSuite((
 # Run all sub-test modules in this package by importing them
 #import sequencer2.tests.sequencer
 import sequencer
+import ad9910
 all_suites.addTest(sequencer.all_suites)
-
+all_suites.addTest(ad9910.all_suites)
 def run():
   unittest.TextTestRunner(verbosity=2).run(all_suites)
 
