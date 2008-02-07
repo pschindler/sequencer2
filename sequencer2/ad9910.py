@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-02-07 10:53:52 c704271"
+# Time-stamp: "2008-02-07 11:05:04 c704271"
 
 #  file       ad9910.py
 #  copyright  (c) Philipp Schindler 2008
@@ -9,7 +9,7 @@
 Class for the registers of the AD9910 DDS
 """
 import copy
-from bitmask import Bitmask
+from sequencer2.bitmask import Bitmask
 
 class ProfileRegister():
     """Class for a profile register contains of:
