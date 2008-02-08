@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-02-07 11:05:04 c704271"
+# Time-stamp: "2008-02-07 14:16:28 c704271"
 
 #  file       ad9910.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
-"""
-Class for the registers of the AD9910 DDS
+"""Class for the registers of the AD9910 DDS
 """
 import copy
 from sequencer2.bitmask import Bitmask
@@ -29,6 +28,7 @@ class AD9910():
     # format: (address, length)
     CFR1 = (0x00, 32)
     CFR2 = (0x01, 32)
+    CFR3 = (0x02, 32)
     FTW = (0x07, 32)
     PHOW = (0x08, 16)
     PROF_START = (0x0E, 64)
@@ -37,6 +37,8 @@ class AD9910():
     auto_clr = Bitmask(label="auto_clr", width=1, shift=13)
     pdclk_en = Bitmask(label="pdclk_en", width=1, shift=11)
     para_en = Bitmask(label="parallel_en", width=1, shift=4)
+    divider_bypass = Bitmask(label="divider_bypass", width=1, shift=15)
+    divider_reset = Bitmask(label="divider_reset", width=1, shift=14)
 
     def __init__(self, device_addr, ref_freq):
         """generates the register variables
@@ -52,7 +54,7 @@ class AD9910():
         self.reg_bitmask_dict = {}
         self.reg_bitmask_dict[self.CFR1] = [self.auto_clr]
         self.reg_bitmask_dict[self.CFR2] = [self.pdclk_en, self.para_en]
-
+        self.reg_bitmask_dict[self.CFR3] = [self.divider_bypass,self.divider_reset]
         self.reg_value_dict = {}
 
         self.init_device()
@@ -63,9 +65,11 @@ class AD9910():
         self.auto_clr.set_value(1)
         self.pdclk_en.set_value(0)
         self.para_en.set_value(1)
+        self.divider_bypass.set_value(1)
+        self.divider_reset.set_value(1)
         self.set_conf_register(self.CFR1)
         self.set_conf_register(self.CFR2)
-
+        self.set_conf_register(self.CFR3)
     def set_conf_register(self, register):
         """sets the binary value of the configuration register
         """
