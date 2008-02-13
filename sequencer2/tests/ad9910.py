@@ -19,7 +19,7 @@ class Test_AD9910(unittest.TestCase):
     val_cfr1 = device.reg_value_dict[device.CFR1]
     val_cfr2 = device.reg_value_dict[device.CFR2]
     self.assertEquals(val_cfr1, 0x2000)
-    self.assertEquals(val_cfr2, 0x10)
+    self.assertEquals(val_cfr2, 0x5f)
 
   def test_freq_ad9910(self):
     """Tests the freq profile value of the dds

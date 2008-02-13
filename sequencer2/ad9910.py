@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-02-07 14:16:28 c704271"
+# Time-stamp: "2008-02-13 13:30:34 c704271"
 
 #  file       ad9910.py
 #  copyright  (c) Philipp Schindler 2008
@@ -36,7 +36,9 @@ class AD9910():
 
     auto_clr = Bitmask(label="auto_clr", width=1, shift=13)
     pdclk_en = Bitmask(label="pdclk_en", width=1, shift=11)
-    para_en = Bitmask(label="parallel_en", width=1, shift=4)
+    para_en = Bitmask(label="parallel_enable", width=1, shift=4)
+    para_gain = Bitmask(label="parallel_gain", width=4, shift=0)
+    para_hold_last = Bitmask(label="data assembler hold last", width=1, shift=6)
     divider_bypass = Bitmask(label="divider_bypass", width=1, shift=15)
     divider_reset = Bitmask(label="divider_reset", width=1, shift=14)
 
@@ -53,7 +55,8 @@ class AD9910():
 
         self.reg_bitmask_dict = {}
         self.reg_bitmask_dict[self.CFR1] = [self.auto_clr]
-        self.reg_bitmask_dict[self.CFR2] = [self.pdclk_en, self.para_en]
+        self.reg_bitmask_dict[self.CFR2] = [self.pdclk_en, self.para_en,
+                                            self.para_gain, self.para_hold_last]
         self.reg_bitmask_dict[self.CFR3] = [self.divider_bypass,self.divider_reset]
         self.reg_value_dict = {}
 
@@ -64,12 +67,17 @@ class AD9910():
         """
         self.auto_clr.set_value(1)
         self.pdclk_en.set_value(0)
+#        self.para_en.set_value(1)
+        self.para_gain.set_value(0xf)
         self.para_en.set_value(1)
+        self.para_hold_last.set_value(1)
+        self.para_gain.set_value(0x0)
         self.divider_bypass.set_value(1)
         self.divider_reset.set_value(1)
         self.set_conf_register(self.CFR1)
         self.set_conf_register(self.CFR2)
         self.set_conf_register(self.CFR3)
+
     def set_conf_register(self, register):
         """sets the binary value of the configuration register
         """
