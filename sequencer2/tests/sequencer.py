@@ -17,9 +17,9 @@ class Test_Sequencer(unittest.TestCase):
     """test if the dac instruction generates the right number of insns
     """
     my_sequencer=sequencer.sequencer()
-    my_api=api.api(my_sequencer)
-    my_api.dac_value(12,1)
-    current_seq=my_sequencer.current_sequence
+    my_api = api.api(my_sequencer)
+    my_api.dac_value(12, 1)
+    current_seq = my_sequencer.current_sequence
     self.assertEquals(len(current_seq),3)
     del(my_sequencer)
 
@@ -29,6 +29,15 @@ class Test_Sequencer(unittest.TestCase):
     p_insn=instructions.p(12,3)
     value=0xc << 28 | 3 << 16 | 12
     test_value=p_insn.get_value()
+    self.assertEquals(test_value,value)
+
+  def test_wait_insn(self):
+    """Tests the wait instruction
+    """
+    wait_cycles = 0xaf0
+    value = 0x9 << 28 | wait_cycles
+    wait_insn = instructions.wait(wait_cycles)
+    test_value = wait_insn.get_value()
     self.assertEquals(test_value,value)
 
 

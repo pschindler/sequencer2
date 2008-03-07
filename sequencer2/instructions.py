@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "03-Feb-2008 17:56:55 viellieb"
+# Time-stamp: "2008-03-07 14:46:44 c704271"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -14,8 +14,7 @@
 
 
 class insn_class():
-    """
-    Base class for an instruction
+    """Base class for an instruction
     """
     name = "None"
     address = None
@@ -33,22 +32,19 @@ class insn_class():
 
 
 class nop(insn_class):
-    """
-    No operation
+    """No operation
     """
     name = "nop"
     opcode = 0x0
 
 class halt(insn_class):
-    """
-    stop the processor
+    """stop the processor
     """
     name = "halt"
     opcode = 0x8
 
 class label(insn_class):
-    """
-    inserts a NOP and a label
+    """inserts a NOP and a label
     """
     name = "label"
     opcode = 0x0
@@ -56,8 +52,7 @@ class label(insn_class):
         self.label = label_name
 
 class p(insn_class):
-    """
-    The p instruction:
+    """The p instruction:
     p.output_state : hex value of the (16bit)
     p.change state : output select bits (2bit)
     """
@@ -79,8 +74,7 @@ class p(insn_class):
                " -- val: "+str(hex(self.output_state))
 
 class j(insn_class):
-    """
-    Jumps to a defined label
+    """Jumps to a defined label
     """
     opcode = 0x4
     name = "j"
@@ -102,8 +96,7 @@ class j(insn_class):
                " -- tar: "+str(self.target_address)
 
 class btr(j):
-    """
-    Jumps to a defined label if the trigger is satisfied
+    """Jumps to a defined label if the trigger is satisfied
     trigge is the trigger state in HEX
     """
 
@@ -118,18 +111,28 @@ class btr(j):
         return self.opcode << 28 | self.trigger << 19 | target_address
 
 class call(j):
-    """
-    Calls a subroutine
+    """ Calls a subroutine
     """
     name = "call"
     opcode = 0x5
 
 class ret(insn_class):
-    """
-    returns from the last subroutine
+    """returns from the last subroutine
     """
     name = "ret"
     opcode = 0x6
+
+class wait(insn_class):
+    """inserts a wait insn
+    """
+    name = "wait"
+    opcode = 0x9
+    def __init__(self, wait_cycles):
+        self.wait_cycles = wait_cycles
+
+    def get_value(self):
+        return self.opcode << 28 | self.wait_cycles
+
 ##
 ## instructions.py
 ## Login : <viellieb@ohm>

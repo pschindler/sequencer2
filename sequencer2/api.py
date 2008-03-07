@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-03-07 13:10:27 c704271"
+# Time-stamp: "2008-03-07 14:59:18 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -24,7 +24,8 @@ class api():
         # The LVDS opcodes
         self.fifo_opcode = 0x2
         self.addr_opcode = 0x1
-
+        # number of branch delay necessary:
+        self.branch_delay_slots = 4
 
     def dac_value(self, dac_nr, val):
         """simple example for a DAC event
@@ -47,6 +48,20 @@ class api():
         """
         ttl_insn = instructions.p(value, 2)
         self.sequencer.add_insn(ttl_insn)
+
+    def wait(self, wait_cycles):
+        """inserts a wait event
+        wait_cycles : nr of clock cycles to wait
+        """
+        nop_insn = instructions.nop()
+        if wait_cycles > self.branch_delay_slots:
+            for i in range(self.branch_delay_slots):
+                self.sequencer.add_insn(copy.copy(nop_insn))
+            wait_insn = instructions.wait(wait_cycles - 4)
+            self.sequencer.add_insn(wait_insns)
+        else:
+            for i in range(wait_cycles):
+                self.sequencer.add_insn(copy.copy(nop_insn))
 
     def label(self, label_name):
         """inserts a label and a NOP
