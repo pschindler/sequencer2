@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "03-Feb-2008 17:48:06 viellieb"
+# Time-stamp: "2008-03-07 13:21:19 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -85,6 +85,7 @@ class sequencer():
         """
         Prints out the current instruction list
         """
+        print ""
         for insn in self.current_sequence:
             print insn
 

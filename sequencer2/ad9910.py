@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-02-13 13:30:34 c704271"
+# Time-stamp: "2008-03-07 13:14:00 c704271"
 
 #  file       ad9910.py
 #  copyright  (c) Philipp Schindler 2008
@@ -11,7 +11,7 @@ import copy
 from sequencer2.bitmask import Bitmask
 
 class ProfileRegister():
-    """Class for a profile register contains of:
+    """Class for a profile register containing of:
         ftw : frequency tuning word
         phow : phase offset word
         asf : amplitude scale factor
@@ -65,15 +65,16 @@ class AD9910():
     def init_device(self):
         """initialized the control registers
         """
+        #CFR1
         self.auto_clr.set_value(1)
-        self.pdclk_en.set_value(0)
-#        self.para_en.set_value(1)
-        self.para_gain.set_value(0xf)
+        #CFR2
         self.para_en.set_value(1)
         self.para_hold_last.set_value(1)
         self.para_gain.set_value(0x0)
+        #CFR3
         self.divider_bypass.set_value(1)
         self.divider_reset.set_value(1)
+
         self.set_conf_register(self.CFR1)
         self.set_conf_register(self.CFR2)
         self.set_conf_register(self.CFR3)
