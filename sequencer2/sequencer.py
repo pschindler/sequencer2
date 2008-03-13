@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-03-07 14:40:57 c704271"
+# Time-stamp: "2008-03-13 12:47:25 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -9,7 +9,7 @@
 """
 
 import instructions
-#import copy
+import copy
 class sequencer():
 
     def __init__(self):
@@ -18,6 +18,7 @@ class sequencer():
         self.word_list = []
         self.label_dict = {}
         self.sub_list = []
+        self.branch_delay_slots = 5
 
     def get_binary_charlist(self, hex_num, byte_width):
         """hex_char_list(hex_num, byte_width)
@@ -49,6 +50,9 @@ class sequencer():
 
         halt_insn = instructions.halt()
         self.add_insn(halt_insn)
+        nop_insn = instructions.nop()
+        for i in range(self.branch_delay_slots):
+            self.add_insn(copy.copy(nop_insn))
         sequence_list = self.current_sequence
         word_index = len(self.current_sequence)
 

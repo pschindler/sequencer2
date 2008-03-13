@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-03-07 14:46:44 c704271"
+# Time-stamp: "2008-03-13 11:25:21 c704271"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -132,6 +132,12 @@ class wait(insn_class):
 
     def get_value(self):
         return self.opcode << 28 | self.wait_cycles
+
+    def __str__(self):
+        return " add: "+str(self.address) + \
+               " -- op:  "+str(hex(self.opcode)) + \
+               " -- nam: "+str(self.name) + \
+               " -- val: "+str(hex(self.wait_cycles))
 
 ##
 ## instructions.py

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-03-07 14:59:18 c704271"
+# Time-stamp: "2008-03-13 12:54:36 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -25,7 +25,7 @@ class api():
         self.fifo_opcode = 0x2
         self.addr_opcode = 0x1
         # number of branch delay necessary:
-        self.branch_delay_slots = 4
+        self.branch_delay_slots = 5
 
     def dac_value(self, dac_nr, val):
         """simple example for a DAC event
@@ -42,23 +42,24 @@ class api():
         data2_insn.output_state = val << 2 | 2
         self.sequencer.add_insn(data2_insn)
 
-    def ttl_value(self, value):
+    def ttl_value(self, value, select=2):
         """simple example for a TTL event
         NOT usable for the LVDS bus
         """
-        ttl_insn = instructions.p(value, 2)
+        ttl_insn = instructions.p(value, select)
         self.sequencer.add_insn(ttl_insn)
 
     def wait(self, wait_cycles):
         """inserts a wait event
         wait_cycles : nr of clock cycles to wait
+        needs calibration !!! wait has to be > 4 ?
         """
         nop_insn = instructions.nop()
         if wait_cycles > self.branch_delay_slots:
+            wait_insn = instructions.wait(wait_cycles - 4)
+            self.sequencer.add_insn(wait_insn)
             for i in range(self.branch_delay_slots):
                 self.sequencer.add_insn(copy.copy(nop_insn))
-            wait_insn = instructions.wait(wait_cycles - 4)
-            self.sequencer.add_insn(wait_insns)
         else:
             for i in range(wait_cycles):
                 self.sequencer.add_insn(copy.copy(nop_insn))
@@ -75,9 +76,8 @@ class api():
         jump_insn = instructions.j(target_name)
         nop_insn = instructions.nop()
         self.sequencer.add_insn(jump_insn)
-        self.sequencer.add_insn(nop_insn)
-        self.sequencer.add_insn(copy.copy(nop_insn))
-        self.sequencer.add_insn(copy.copy(nop_insn))
+        for n in range(self.branch_delay_slots):
+            self.sequencer.add_insn(copy.copy(nop_insn))
 
     def jump_trigger(self, target_name, trigger):
         """branch on trigger
@@ -88,6 +88,7 @@ class api():
         nop_insn = instructions.nop()
         self.sequencer.add_insn(jump_insn)
         self.sequencer.add_insn(nop_insn)
+        self.sequencer.add_insn(copy.copy(nop_insn))
         self.sequencer.add_insn(copy.copy(nop_insn))
         self.sequencer.add_insn(copy.copy(nop_insn))
 
