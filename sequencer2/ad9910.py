@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-03-07 13:14:00 c704271"
+# Time-stamp: "2008-03-21 16:28:58 c704271"
 
 #  file       ad9910.py
 #  copyright  (c) Philipp Schindler 2008
@@ -68,15 +68,15 @@ class AD9910():
         #CFR1
         self.auto_clr.set_value(1)
         #CFR2
-        self.para_en.set_value(1)
-        self.para_hold_last.set_value(1)
-        self.para_gain.set_value(0x0)
+#        self.para_en.set_value(1)
+#        self.para_hold_last.set_value(1)
+ #       self.para_gain.set_value(0x0)
         #CFR3
         self.divider_bypass.set_value(1)
         self.divider_reset.set_value(1)
 
         self.set_conf_register(self.CFR1)
-        self.set_conf_register(self.CFR2)
+#        self.set_conf_register(self.CFR2)
         self.set_conf_register(self.CFR3)
 
     def set_conf_register(self, register):

@@ -7,8 +7,10 @@ class PTPComm:
   """class for communication with the box over the PTP protocol
 
   """
+
   # constants
 #  MY_PORT  = 0x221e
+
   MY_PORT  = 0x221f
   HIS_PORT = 0x2229
   HIS_IP   = '192.168.0.229'
@@ -18,17 +20,27 @@ class PTPComm:
   PCP_DISCOVER_REQUEST = "\x09\x00\x00\x0b\x00\x00\x02"
   PCP_START_REQUEST   = "\x04\x00\x00\x0b\x00\x00\x01"
   PCP_STOP_REQUEST    = "\x04\x00\x00\x0b\x00\x00\x02"
-#  DDS_RESET_REQUEST   = "\x07\x00\x00\x0f\x00\x00\x61\x00\x00\x44\x00"
-  DDS_RESET_REQUEST   = "\x09\x00\x00\x06\x00\x00\x61\x00\x00\x02\x00"
+  DDS_RESET_REQUEST   = "\x07\x00\x00\x0f\x00\x00\x61\x00\x00\x44\x00"
   DDS_UNRESET_REQUEST = "\x07\x00\x00\x0f\x00\x00\x61\x00\x00\x44\xff"
 
 
   # globals
   client_socket = None
 
+  def __init__(self, log = None):
+    """configuration handler missing
+    """
+    if log == None:
+      self.log = self.debug_print
+    else:
+      self.log = log
+
+  def debug_print(self, message, level=0):
+    print message
 
   # functions
   def print_binary(self, code):
+    """Prints a readeable version of the UDP packets"""
     length = len(code) / 4
     code_list = struct.unpack("!"+str(length)+"L", code[:length*4])
     for i in range(length):
@@ -42,6 +54,8 @@ class PTPComm:
 
 
   def send_frame(self, data):
+    """Sends an already generated frame to the PCP
+    """
     # create a client_socket
     if self.client_socket == None:
       self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -106,11 +120,14 @@ class PTPComm:
 
 
   def reset_dds(self):
+    """Sends I2C reset events to the PCP
+    """
     self.send_frame(self.DDS_RESET_REQUEST)
-#    self.send_frame(self.DDS_UNRESET_REQUEST)
-    self.send_frame(self.PCP_START_REQUEST)
+    self.send_frame(self.DDS_UNRESET_REQUEST)
 
   def send_code(self, code_list):
+    """Sends a bytecode to the PCP
+    """
     code = ""
     for code_item in code_list:
       code += code_item
