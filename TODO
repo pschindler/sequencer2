@@ -1,9 +1,8 @@
 * Missing features:
 
-- PTP protocol
+- Configuration mechanism
 - finite loops (bdec,ldc)
 - High level functions for the DAC,DDS
-- Wait insn
 - Phase coherent switching
 
 * Missing tests
@@ -11,6 +10,7 @@
 - Additional label/subroutine/loop testing
 - Test on physical PCP
 - Additional tests for the LVDS Bus
+- Wait insn
 
 * Important DDS registers:
 

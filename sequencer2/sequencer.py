@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-03-14 08:24:34 c704271"
+# Time-stamp: "21-Mar-2008 21:47:42 viellieb"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -19,6 +19,7 @@ class sequencer():
         self.label_dict = {}
         self.sub_list = []
         self.branch_delay_slots = 5
+        self.is_subroutine = False
 
     def get_binary_charlist(self, hex_num, byte_width):
         """hex_char_list(hex_num, byte_width)
@@ -40,14 +41,33 @@ class sequencer():
         """adds instruction to the current_sequence
         """
         self.current_sequence.append(instruction)
+        # If insn is a label add it to the label list
         if instruction.label != None:
             self.label_dict[instruction.label] = len(self.current_sequence)-1
+
+    def begin_subroutine(self):
+        # checl if the previous subroutine was ended
+        if self.is_subroutine:
+            raise RuntimeError, "Previous subroutine not ended"
+        #check if current sequence is empty
+        if self.current_sequence != []:
+            raise RuntimeError, "Subroutine can only be started at beginnig of sequence"
+        self.is_subroutine = True
+
+    def end_subroutine(self):
+        """ends the current subroutine#
+        appends current_sequence to sub_list
+        flushes current_sequence"""
+        self.sub_list.append(copy.copy(self.current_sequence))
+        self.current_sequence = []
+        self.is_subroutine = False
 
     def compile_sequence(self):
         """generates the binary list
         """
         # Addresses are broken when using subroutines
 
+        # Add a halt instruction to the current sequence !
         halt_insn = instructions.halt()
         self.add_insn(halt_insn)
         nop_insn = instructions.nop()
@@ -56,23 +76,32 @@ class sequencer():
         sequence_list = self.current_sequence
         word_index = len(self.current_sequence)
 
+        # Add  the subroutines to current_sequence
         for insn_list in self.sub_list:
             self.label_dict[insn_list[0].label] = word_index
             sequence_list += insn_list
             word_index += len(insn_list)
         self.word_list = []
+        # reset the address cpunter
         address = 0
+        # Append the binary charlist to the word_list
+        # If the calue of the insn is None we are dealing
+        # with a jump insn and adding it to the jump_list
 
         for insn in sequence_list:
+            #calculate the instruction's machine code as an int
             value = insn.get_value()
-            if value == None:
+            if insn.is_branch == True:
                 self.word_list.append(insn)
                 self.jump_list.append(len(self.word_list)-1)
             else:
+                # Generate a 32bit binary word from value
                 self.word_list.append(self.get_binary_charlist(value, 4))
+            # set the insn address and increase the address counter
             insn.address = address
             address += 1
 
+        # calculate the addresses for the branch insns in jump_list
         for word_num in self.jump_list:
             jump_insn = self.word_list[word_num]
             try:
@@ -83,6 +112,7 @@ class sequencer():
                 self.word_list[word_num] = self.get_binary_charlist(value, 4)
             except SyntaxError:
                 print "error while handling jump"
+        #update current_sequence to make debugging possible
         self.current_sequence = sequence_list
 
     def debug_sequence(self):

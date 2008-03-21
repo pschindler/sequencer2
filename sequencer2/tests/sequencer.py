@@ -65,15 +65,17 @@ class Test_Sequencer(unittest.TestCase):
     my_api.call_subroutine("test")
     my_api.dac_value(12,1)
     my_sequencer.compile_sequence()
-#    my_sequencer.debug_sequence()
+    my_sequencer.debug_sequence()
 #    print "\n\n"
     target=my_sequencer.current_sequence[6].target_address
     label=my_sequencer.current_sequence[target].label
-    self.assertEquals(target,22)
+
+    self.assertEquals(target,27)
     self.assertEquals(label,"test")
+
     target=my_sequencer.current_sequence[10].target_address
     label=my_sequencer.current_sequence[target].label
-    self.assertEquals(target,33)
+    self.assertEquals(target,38)
     self.assertEquals(label,"test1")
 
   def test_j_seq(self):
@@ -90,7 +92,8 @@ class Test_Sequencer(unittest.TestCase):
     my_sequencer.current_sequence.pop()
     my_sequencer.current_sequence.pop()
     my_sequencer.current_sequence.pop()
-    j_insn=my_sequencer.current_sequence.pop()
+    my_sequencer.debug_sequence()
+    j_insn=my_sequencer.current_sequence[7]
     label_insn=my_sequencer.current_sequence[3]
     self.assertEquals(label_insn.address,3)
     self.assertEquals(label_insn.name,"label")

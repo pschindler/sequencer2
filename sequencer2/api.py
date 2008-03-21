@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-03-13 12:54:36 c704271"
+# Time-stamp: "21-Mar-2008 21:48:35 viellieb"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://wiki.havens.de
-
-# Missing: subroutine handling
 
 #from exceptions import *
 import instructions
@@ -20,7 +18,6 @@ class api():
         The LVDS bus opcodes are defined here
         """
         self.sequencer = sequencer
-        self.is_subroutine = False
         # The LVDS opcodes
         self.fifo_opcode = 0x2
         self.addr_opcode = 0x1
@@ -94,20 +91,18 @@ class api():
 
     def begin_subroutine(self, label_name):
         """inserts a label for a subroutine
-        label_name
+        It has to be called with an empty sequencer.current_sequence
         """
-        if self.is_subroutine:
-            raise RuntimeError, "Previous subroutine not ended"
-        if self.sequencer.current_sequence != []:
-            raise RuntimeError, "Subroutine can only be started at beginnig of sequence"
+        self.sequencer.begin_subroutine()
         self.sequencer.add_insn(instructions.label(label_name))
 
     def end_subroutine(self):
         """ends the subroutine
+        Adds the current sequence to the sequencer.sub_list
+        Flushes  sequencer.current_sequence
         """
         self.sequencer.add_insn(instructions.ret())
-        self.sequencer.sub_list.append(copy.copy(self.sequencer.current_sequence))
-        self.sequencer.current_sequence = []
+        self.sequencer.end_subroutine()
 
     def call_subroutine(self, label_name):
         """calls a subroutine

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-03-13 11:25:21 c704271"
+# Time-stamp: "21-Mar-2008 21:30:07 viellieb"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -22,6 +22,7 @@ class insn_class():
     change_state = None
     opcode = 0x0
     output_state = [0, 0, 0, 0]
+    is_branch = False
     def get_value(self):
         """returns the hex value"""
         return self.opcode << 28
@@ -76,6 +77,7 @@ class p(insn_class):
 class j(insn_class):
     """Jumps to a defined label
     """
+    is_branch = True
     opcode = 0x4
     name = "j"
     def __init__(self, label_name):
