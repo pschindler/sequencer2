@@ -65,7 +65,7 @@ class Test_Sequencer(unittest.TestCase):
     my_api.call_subroutine("test")
     my_api.dac_value(12,1)
     my_sequencer.compile_sequence()
-    my_sequencer.debug_sequence()
+#    my_sequencer.debug_sequence()
 #    print "\n\n"
     target=my_sequencer.current_sequence[6].target_address
     label=my_sequencer.current_sequence[target].label
