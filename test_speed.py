@@ -1,21 +1,26 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "30-Jan-2008 23:02:43 viellieb"
+# Time-stamp: "2008-03-26 09:01:20 c704271"
 
 #  file       test_speed.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://wiki.havens.de
 #  license    GPL (see file COPYING)
 
-
+import logging
 import time
 from  sequencer2 import sequencer
 from  sequencer2 import api
+from  sequencer2 import ptplog
 
+
+level = logging.DEBUG
+logger = ptplog.ptplog(level=level)
 time1=time.time()
 my_sequencer=sequencer.sequencer()
 my_api=api.api(my_sequencer)
 N0=10000
+logger.logger.info("generating " + str(N0)+" DAC events")
 my_api.dac_value(12,1)
 my_api.jump("test")
 for i in range(N0):
@@ -26,8 +31,7 @@ if N0 < 100:
     my_sequencer.debug_sequence()
 #    print my_sequencer.word_list
 time2=time.time()
-print str(time2-time1)
-print N0
+logger.logger.info("time needed: " + str(time2-time1))
 ##
 ## test_speed.py
 ## Login : <viellieb@ohm>

@@ -4,13 +4,14 @@
 
 import unittest
 import time
+import logging
 from  sequencer2 import sequencer
 from  sequencer2 import api
 from  sequencer2 import instructions
 #------------------------------------------------------------------------------
 class Test_Sequencer(unittest.TestCase):
 
-#  def setUp(self):
+
 
 
   def test_dac_sequence(self):
@@ -20,7 +21,7 @@ class Test_Sequencer(unittest.TestCase):
     my_api = api.api(my_sequencer)
     my_api.dac_value(12, 1)
     current_seq = my_sequencer.current_sequence
-    self.assertEquals(len(current_seq),3)
+    self.assertEquals(len(current_seq),4)
     del(my_sequencer)
 
   def test_p_insn(self):
@@ -65,18 +66,31 @@ class Test_Sequencer(unittest.TestCase):
     my_api.call_subroutine("test")
     my_api.dac_value(12,1)
     my_sequencer.compile_sequence()
-#    my_sequencer.debug_sequence()
+    my_sequencer.debug_sequence()
 #    print "\n\n"
-    target=my_sequencer.current_sequence[6].target_address
+    target=my_sequencer.current_sequence[8].target_address
     label=my_sequencer.current_sequence[target].label
 
-    self.assertEquals(target,27)
+    self.assertEquals(target,30)
     self.assertEquals(label,"test")
 
-    target=my_sequencer.current_sequence[10].target_address
+    target=my_sequencer.current_sequence[12].target_address
     label=my_sequencer.current_sequence[target].label
-    self.assertEquals(target,38)
+    self.assertEquals(target,44)
     self.assertEquals(label,"test1")
+
+
+  def test_subroutine_error_handler(self):
+    """Test if the subroutine error handler works correctly
+    """
+    my_sequencer=sequencer.sequencer()
+    my_api=api.api(my_sequencer)
+    my_api.begin_subroutine("test")
+    my_api.dac_value(12,1)
+    try:
+      self.assertRaises(RuntimeError, my_api.begin_subroutine("test1"))
+    except RuntimeError:
+      None
 
   def test_j_seq(self):
     """test the jump address
@@ -93,12 +107,12 @@ class Test_Sequencer(unittest.TestCase):
     my_sequencer.current_sequence.pop()
     my_sequencer.current_sequence.pop()
     my_sequencer.debug_sequence()
-    j_insn=my_sequencer.current_sequence[7]
-    label_insn=my_sequencer.current_sequence[3]
-    self.assertEquals(label_insn.address,3)
+    j_insn=my_sequencer.current_sequence[9]
+    label_insn=my_sequencer.current_sequence[4]
+    self.assertEquals(label_insn.address,4)
     self.assertEquals(label_insn.name,"label")
     self.assertEquals(j_insn.name,"j")
-    self.assertEquals(j_insn.target_address,3)
+    self.assertEquals(j_insn.target_address,4)
     del(my_sequencer)
 
   def test_compile_speed(self):

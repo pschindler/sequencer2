@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "21-Mar-2008 21:48:35 viellieb"
+# Time-stamp: "2008-04-04 13:40:35 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -9,6 +9,7 @@
 #from exceptions import *
 import instructions
 import copy
+import logging
 
 class api():
     """api.py the api commands for sequencer2
@@ -19,32 +20,13 @@ class api():
         """
         self.sequencer = sequencer
         # The LVDS opcodes
-        self.fifo_opcode = 0x2
         self.addr_opcode = 0x1
+        self.fifo_opcode = 0x2
+        self.dds_up_opcode = 0x4
+        self.dac_opcode = 0x7
         # number of branch delay necessary:
         self.branch_delay_slots = 5
-
-    def dac_value(self, dac_nr, val):
-        """simple example for a DAC event
-        NOT usable for the LVDS bus
-        """
-        #insert the chainboard address event
-        addr_insn = instructions.p(dac_nr << 12, 3)
-        self.sequencer.add_insn(addr_insn)
-        #Set the data bus
-        data_insn = instructions.p(val << 2, 0)
-        self.sequencer.add_insn(data_insn)
-        #Set the WRB
-        data2_insn = copy.copy(data_insn)
-        data2_insn.output_state = val << 2 | 2
-        self.sequencer.add_insn(data2_insn)
-
-    def ttl_value(self, value, select=2):
-        """simple example for a TTL event
-        NOT usable for the LVDS bus
-        """
-        ttl_insn = instructions.p(value, select)
-        self.sequencer.add_insn(ttl_insn)
+        self.logger = logging.getLogger("sequencer2")
 
     def wait(self, wait_cycles):
         """inserts a wait event
@@ -134,22 +116,22 @@ class api():
         data_val = data % (2**16)
 
         # Set the low word first
-        low_insn = instructions.p(data_val, 0)
+        low_insn = instructions.p(data_val, 1)
         self.sequencer.add_insn(low_insn)
         # Set the hight words
-        high_insn = instructions.p(high_word, 1)
+        high_insn = instructions.p(high_word, 0)
         self.sequencer.add_insn(high_insn)
-        high_insn_avail = instructions.p(high_word_avail, 1)
+        high_insn_avail = instructions.p(high_word_avail, 0)
         self.sequencer.add_insn(high_insn_avail)
-        # ?? Missing add wait command
+        self.wait(wait)
         # Add a copy of high_insn
         self.sequencer.add_insn(copy.copy(high_insn))
 
     def dds_to_serial(self, word, length, reg_address, dds_address=0):
         """Generates LVDS commands for writing the registers of the DDS
         """
-        fifo_wait = 1
-        addr_wait = 20 + 30*int(length / 16)
+        fifo_wait = 8
+        addr_wait = 20 + 30*int(length / 16) * 2
 
         num_words = int(length) / 16
         # Write the FIFO with the data
@@ -167,7 +149,31 @@ class api():
             val = dds_instance.reg_value_dict[register]
             self.dds_to_serial(val, register[1], register[0])
 
+    def update_dds(self, dds_instance):
+        "updates the DDS IO registers after a write"
+        address = 0
+        val = 0
+        self.lvds_cmd(self.dds_up_opcode, address, val, wait=100)
 
+    def set_dds_freq(self, dds_instance, freq_value, profile=0):
+        "Sets the dds frequency of a given profile register"
+        dds_instance.set_freq_register(profile, freq_value)
+        freq_register = dds_instance.PROF_START
+        reg_addr = freq_register[0] + profile
+        word_length =  freq_register[1]
+        reg_value = dds_instance.reg_value_dict[(reg_addr, word_length)]
+        self.dds_to_serial(reg_value, word_length, reg_addr)
+
+    def dac_value(self, address, val):
+        """simple example for a DAC event
+        """
+        self.lvds_cmd(self.dac_opcode, address, val)
+
+    def ttl_value(self, value, select=2):
+        """simple example for a TTL event
+        """
+        ttl_insn = instructions.p(value, select)
+        self.sequencer.add_insn(ttl_insn)
 
 ##
 ## api.py

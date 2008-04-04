@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "21-Mar-2008 21:30:07 viellieb"
+# Time-stamp: "2008-04-04 13:33:35 c704271"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -16,13 +16,17 @@
 class insn_class():
     """Base class for an instruction
     """
-    name = "None"
-    address = None
     label = None
-    change_state = None
-    opcode = 0x0
-    output_state = [0, 0, 0, 0]
+    address = None
     is_branch = False
+
+    def __init__(self):
+        self.name = "None"
+        self.change_state = None
+        self.opcode = 0x0
+        self.output_state = [0, 0, 0, 0]
+
+
     def get_value(self):
         """returns the hex value"""
         return self.opcode << 28
@@ -35,14 +39,16 @@ class insn_class():
 class nop(insn_class):
     """No operation
     """
-    name = "nop"
-    opcode = 0x0
+    def __init__(self):
+        self.name = "nop"
+        self.opcode = 0x0
 
 class halt(insn_class):
     """stop the processor
     """
-    name = "halt"
-    opcode = 0x8
+    def __init__(self):
+        self.name = "halt"
+        self.opcode = 0x8
 
 class label(insn_class):
     """inserts a NOP and a label
@@ -57,11 +63,13 @@ class p(insn_class):
     p.output_state : hex value of the (16bit)
     p.change state : output select bits (2bit)
     """
-    name = "p"
-    opcode = 0xc
+
     def __init__(self, output_state, change_state):
+        self.name = "p"
+        self.opcode = 0xc
         self.output_state = output_state
         self.change_state = change_state
+
     def get_value(self):
         """returns the hex value"""
         if self.change_state != None:

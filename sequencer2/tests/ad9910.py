@@ -42,10 +42,18 @@ class Test_AD9910(unittest.TestCase):
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
     my_api.init_dds(dds_device)
-
     my_sequencer.compile_sequence()
     my_sequencer.debug_sequence()
 
+  def test_freq_api_ad9910(self):
+    "Tests the API set freq fcuntion for the ad9910"
+    dds_device = ad9910.AD9910(1, 1e3)
+    my_sequencer=sequencer.sequencer()
+    my_api=api.api(my_sequencer)
+    my_api.init_dds(dds_device)
+    my_api.set_dds_freq(dds_device, 300, 2)
+    my_sequencer.compile_sequence()
+    my_sequencer.debug_sequence()
 #------------------------------------------------------------------------------
 # Collect all test suites for running
 all_suites = unittest.TestSuite((

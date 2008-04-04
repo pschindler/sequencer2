@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "21-Mar-2008 21:47:42 viellieb"
+# Time-stamp: "2008-04-04 15:05:55 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://wiki.havens.de
 """Sequencer module with compiling functions
 """
-
+import logging
 import instructions
 import copy
+
 class sequencer():
 
     def __init__(self):
@@ -20,6 +21,7 @@ class sequencer():
         self.sub_list = []
         self.branch_delay_slots = 5
         self.is_subroutine = False
+        self.logger = logging.getLogger("sequencer2")
 
     def get_binary_charlist(self, hex_num, byte_width):
         """hex_char_list(hex_num, byte_width)
@@ -48,9 +50,11 @@ class sequencer():
     def begin_subroutine(self):
         # checl if the previous subroutine was ended
         if self.is_subroutine:
+            self.logger.exception("Previous subroutine not ended")
             raise RuntimeError, "Previous subroutine not ended"
         #check if current sequence is empty
         if self.current_sequence != []:
+            self.logger.exception("tried to insert subroutine with a non empty sqeuence")
             raise RuntimeError, "Subroutine can only be started at beginnig of sequence"
         self.is_subroutine = True
 
@@ -73,6 +77,8 @@ class sequencer():
         nop_insn = instructions.nop()
         for i in range(self.branch_delay_slots):
             self.add_insn(copy.copy(nop_insn))
+
+
         sequence_list = self.current_sequence
         word_index = len(self.current_sequence)
 
@@ -110,18 +116,21 @@ class sequencer():
                 target_address = target_insn.address
                 value = jump_insn.get_jump_value(target_address)
                 self.word_list[word_num] = self.get_binary_charlist(value, 4)
-            except SyntaxError:
-                print "error while handling jump"
+            except:
+                self.logger.exception("error while handling jump")
         #update current_sequence to make debugging possible
         self.current_sequence = sequence_list
 
     def debug_sequence(self):
         """Prints out the current instruction list
-        """
-        print ""
-        for insn in self.current_sequence:
-            print insn
 
+        """
+#        logging.basicConfig(level=logging.DEBUG,
+#                            format="%(levelname)-10s %(asctime)s %(message)s")
+        insn_str = "\n\n"
+        for insn in self.current_sequence:
+            insn_str += str(insn) + "\n"
+        self.logger.debug(insn_str)
 
 ## sequencer.py
 ## Login : <viellieb@ohm>

@@ -1,7 +1,8 @@
-# (c) by Lutz Petersen
+# (c) by Lutz Petersen, Philipp Schindler
 
 import struct
 import socket
+import logging
 
 class PTPComm:
   """class for communication with the box over the PTP protocol
@@ -27,20 +28,22 @@ class PTPComm:
   # globals
   client_socket = None
 
-  def __init__(self, log = None):
+  def __init__(self, nonet=False):
     """configuration handler missing
     """
-    if log == None:
-      self.log = self.debug_print
+    self.nonet = nonet
+    self.logger = logging.getLogger("sequencer2")
+    if self.logger.level <= 30:
+      self.debug = True
     else:
-      self.log = log
-
-  def debug_print(self, message, level=0):
-    print message
+      self.debug = False
+    self.logger.info("Running in nonet mode")
 
   # functions
   def print_binary(self, code):
     """Prints a readeable version of the UDP packets"""
+    if self.debug == False:
+      return
     length = len(code) / 4
     code_list = struct.unpack("!"+str(length)+"L", code[:length*4])
     for i in range(length):
@@ -57,6 +60,8 @@ class PTPComm:
     """Sends an already generated frame to the PCP
     """
     # create a client_socket
+    if self.nonet:
+      return
     if self.client_socket == None:
       self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
       self.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
@@ -94,6 +99,8 @@ class PTPComm:
 
 
   def recv_frame(self):
+    if self.nonet:
+      return
     try:
       data = self.client_socket.recvfrom(1024)
       # data is a tuple (string, (ip_address, port))
