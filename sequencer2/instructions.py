@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-04-04 13:33:35 c704271"
+# Time-stamp: "2008-04-07 12:38:54 c704271"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://wiki.havens.de
-
+"""The instruction set for the PCP
+"""
 # Missing insns:
 # lp
 # pp

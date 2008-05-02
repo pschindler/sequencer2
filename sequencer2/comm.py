@@ -1,5 +1,5 @@
 # (c) by Lutz Petersen, Philipp Schindler
-
+"""class for communicating over the ethernet"""
 import struct
 import socket
 import logging

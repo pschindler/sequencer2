@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-04-04 13:40:35 c704271"
+# Time-stamp: "2008-05-02 11:31:19 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://wiki.havens.de
+"""API functions for tzhe DDS / TTL / DAC /Builtin Commands
+"""
 
 #from exceptions import *
 import instructions
@@ -36,6 +38,7 @@ class api():
         nop_insn = instructions.nop()
         if wait_cycles > self.branch_delay_slots:
             wait_insn = instructions.wait(wait_cycles - 4)
+            # Do we really need wait_cycles - 4 ??
             self.sequencer.add_insn(wait_insn)
             for i in range(self.branch_delay_slots):
                 self.sequencer.add_insn(copy.copy(nop_insn))
@@ -132,6 +135,7 @@ class api():
         """
         fifo_wait = 8
         addr_wait = 20 + 30*int(length / 16) * 2
+        reg_address = reg_address << 8 #Our upper 8 Bits are the Address bits  Duuh
 
         num_words = int(length) / 16
         # Write the FIFO with the data
@@ -153,7 +157,7 @@ class api():
         "updates the DDS IO registers after a write"
         address = 0
         val = 0
-        self.lvds_cmd(self.dds_up_opcode, address, val, wait=100)
+        self.lvds_cmd(self.dds_up_opcode, address, val, wait=10)
 
     def set_dds_freq(self, dds_instance, freq_value, profile=0):
         "Sets the dds frequency of a given profile register"

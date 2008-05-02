@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-04-04 14:52:18 c704271"
+# Time-stamp: "2008-05-02 11:21:33 c704271"
 
 #  file       ad9910.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
 """Class for the registers of the AD9910 DDS
+Register names are described in the AD9910 datasheet.
 """
 import copy
 from sequencer2.bitmask import Bitmask
@@ -26,7 +27,7 @@ class AD9910():
     """
 
     # Adrresses for the registers
-    # format: (address, length)
+    # format: (address, length in Bits)
     CFR1 = (0x00, 32)
     CFR2 = (0x01, 32)
     CFR3 = (0x02, 32)
@@ -59,7 +60,7 @@ class AD9910():
         self.reg_bitmask_dict[self.CFR3] = [self.divider_bypass,self.divider_reset]
         self.reg_value_dict = {}
         #set the clk divider for DDS/FPGA Clock
-        self.clk_divider = 8
+        self.clk_divider = clk_divider
         #Generate the init register values
         self.init_device()
 
@@ -76,9 +77,9 @@ class AD9910():
         self.divider_bypass.set_value(1)
         self.divider_reset.set_value(1)
 
-        self.set_conf_register(self.CFR1)
+        #self.set_conf_register(self.CFR1)
         #self.set_conf_register(self.CFR2)
-        self.set_conf_register(self.CFR3)
+        #self.set_conf_register(self.CFR3)
 
     def set_conf_register(self, register):
         """sets the binary value of the configuration register
@@ -104,10 +105,10 @@ class AD9910():
         val=hex(freq_val | asf_val | phase_val)
 
     def get_fpga_ftw(self, register_addr):
-        "Returns the tuning word for the DDS phase register"
+        """Returns the tuning word for the FPGA phase register
+        used for phase coherent switching"""
         addr_tuple = (self.PROF_START[0] + register_addr, self.PROF_START[1])
         dds_ftw = self.reg_value_dict[addr_tuple] % 2**32
-        print hex(dds_ftw)
         fpga_ftw = int(dds_ftw *  self.clk_divider) % 2**32
         return fpga_ftw
 

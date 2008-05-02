@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-04-04 15:05:55 c704271"
+# Time-stamp: "2008-04-07 11:46:38 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -22,6 +22,9 @@ class sequencer():
         self.branch_delay_slots = 5
         self.is_subroutine = False
         self.logger = logging.getLogger("sequencer2")
+        nop_insn = instructions.nop()
+        self.add_insn(nop_insn)
+        self.initial_sequence = copy.copy(self.current_sequence)
 
     def get_binary_charlist(self, hex_num, byte_width):
         """hex_char_list(hex_num, byte_width)
@@ -53,7 +56,7 @@ class sequencer():
             self.logger.exception("Previous subroutine not ended")
             raise RuntimeError, "Previous subroutine not ended"
         #check if current sequence is empty
-        if self.current_sequence != []:
+        if self.current_sequence != self.initial_sequence:
             self.logger.exception("tried to insert subroutine with a non empty sqeuence")
             raise RuntimeError, "Subroutine can only be started at beginnig of sequence"
         self.is_subroutine = True
