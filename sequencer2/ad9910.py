@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-02 11:21:33 c704271"
+# Time-stamp: "2008-05-05 12:56:55 c704271"
 
 #  file       ad9910.py
 #  copyright  (c) Philipp Schindler 2008
@@ -77,9 +77,9 @@ class AD9910():
         self.divider_bypass.set_value(1)
         self.divider_reset.set_value(1)
 
-        #self.set_conf_register(self.CFR1)
-        #self.set_conf_register(self.CFR2)
-        #self.set_conf_register(self.CFR3)
+        self.set_conf_register(self.CFR1)
+        self.set_conf_register(self.CFR2)
+        self.set_conf_register(self.CFR3)
 
     def set_conf_register(self, register):
         """sets the binary value of the configuration register
