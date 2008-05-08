@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-04-07 12:40:04 c704271"
+# Time-stamp: "2008-05-08 11:12:48 c704271"
 
 #  file       logging.py
 #  copyright  (c) Philipp Schindler 2008
@@ -29,5 +29,22 @@ class ptplog:
         #add ch to logger
         logger.addHandler(ch)
         self.logger = logger
+
+        level2 = logging.INFO
+        logger2 = logging.getLogger("api")
+        logger2.setLevel(level2)
+        ch2 = logging.StreamHandler()
+        ch2.setLevel(level)
+        #create formatter
+        if filename == None:
+            formatter = logging.Formatter("API :  %(message)s")
+        else:
+            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        #add formatter to ch
+        ch2.setFormatter(formatter)
+        #add ch to logger
+        #create console handler and set level to debug
+        logger2.addHandler(ch2)
+        self.logger2 = logger2
 
 # logging.py ends here

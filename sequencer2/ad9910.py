@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-05 12:56:55 c704271"
+# Time-stamp: "2008-05-07 14:29:37 c704271"
 
 #  file       ad9910.py
 #  copyright  (c) Philipp Schindler 2008
@@ -57,7 +57,7 @@ class AD9910():
         self.reg_bitmask_dict[self.CFR1] = [self.auto_clr]
         self.reg_bitmask_dict[self.CFR2] = [self.pdclk_en, self.para_en,
                                             self.para_gain, self.para_hold_last]
-        self.reg_bitmask_dict[self.CFR3] = [self.divider_bypass,self.divider_reset]
+        self.reg_bitmask_dict[self.CFR3] = [self.divider_bypass, self.divider_reset]
         self.reg_value_dict = {}
         #set the clk divider for DDS/FPGA Clock
         self.clk_divider = clk_divider
@@ -102,7 +102,7 @@ class AD9910():
         asf_val = asf << 48
         addr_tuple = (self.PROF_START[0] + register_addr, self.PROF_START[1])
         self.reg_value_dict[addr_tuple] = freq_val | asf_val | phase_val
-        val=hex(freq_val | asf_val | phase_val)
+        val = hex(freq_val | asf_val | phase_val)
 
     def get_fpga_ftw(self, register_addr):
         """Returns the tuning word for the FPGA phase register

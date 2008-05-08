@@ -47,6 +47,7 @@ class Test_Sequencer(unittest.TestCase):
     """
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
+    print my_sequencer.current_sequence
     my_api.begin_subroutine("test")
     my_api.dac_value(12,1)
     my_api.dac_value(12,1)

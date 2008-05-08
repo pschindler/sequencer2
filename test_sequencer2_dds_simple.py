@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-07 10:19:02 c704271"
+# Time-stamp: "2008-05-08 11:16:27 c704271"
 #  copyright  (c) Philipp Schindler 2008
 #  license    GPL (see file COPYING)
 
@@ -22,7 +22,7 @@ time1=time.time()
 logger=ptplog.ptplog(level=logging.DEBUG)
 my_sequencer=sequencer.sequencer()
 my_api=api.api(my_sequencer)
-dds_device = ad9910.AD9910(1, 800)
+dds_device = ad9910.AD9910(0, 800)
 ##########################################################
 # Program start
 ##########################################################
@@ -46,7 +46,7 @@ my_api.ttl_value(0x1f <<  11 | 1 << 10,0)
 # my_api.wait(1)
 
 #set frequency registers
-for i in range(1):
+for i in range(8):
     my_api.set_dds_freq(dds_device, 1, i % 8)
 #update dds
 my_api.update_dds(dds_device)
