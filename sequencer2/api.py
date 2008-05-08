@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-08 12:50:08 c704271"
+# Time-stamp: "2008-05-08 14:27:23 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
-#  url        http://wiki.havens.de
+#  url        http://pulse-sequencer.sf.net
 """API functions for the DDS / TTL / DAC /Builtin Commands
 """
 
@@ -25,11 +25,13 @@ class api():
         # The LVDS opcodes
         self.addr_opcode = 0x1
         self.fifo_opcode = 0x2
+        self.dds_profile_opcode = 0x3
         self.dds_up_opcode = 0x4
         self.dac_opcode = 0x7
         self.phase_load_opcode = 0xa
         self.phase_pulse_opcode = 0xb
         self.reset_opcode = 0x1f
+
         # number of branch delay necessary:
         self.branch_delay_slots = 5
         self.logger = logging.getLogger("api")
@@ -104,6 +106,12 @@ class api():
         self.sequencer.add_insn(copy.copy(nop_insn))
         self.sequencer.add_insn(copy.copy(nop_insn))
 
+    def ttl_value(self, value, select=2):
+        """Sets the status of a whole 16Bit output system
+        """
+        ttl_insn = instructions.p(value, select)
+        self.sequencer.add_insn(ttl_insn)
+
     def lvds_cmd(self, opcode, address, data, profile=0, control=0, wait=0):
         """Writes data to the lvds bus
         opcode : Bits 31:27
@@ -143,6 +151,11 @@ class api():
         # Add a copy of high_insn
         self.sequencer.add_insn(copy.copy(high_insn))
 
+    def dac_value(self, address, val):
+        """Sets the dac on the DDS board
+        """
+        self.lvds_cmd(self.dac_opcode, address, val)
+
     def reset_fifo(self, dds_instance):
         """resets the FIFO of the dds"""
         device_address = dds_instance.device_addr
@@ -179,6 +192,11 @@ class api():
         val = 0
         self.lvds_cmd(self.dds_up_opcode, address, val, wait=10)
 
+    def set_dds_profile(self, dds_instance, profile=0):
+        "Sets the dds profile pin on the DDS"
+        dds_address = dds_instance.device_addr
+        self.lvds_cmd(self.dds_profile_opcode, dds_address, profile)
+
     def set_dds_freq(self, dds_instance, freq_value, profile=0):
         "Sets the dds frequency of a given profile register"
         self.reset_fifo(dds_instance)
@@ -189,7 +207,7 @@ class api():
         reg_value = dds_instance.reg_value_dict[(reg_addr, word_length)]
         self.dds_to_serial(reg_value, word_length, reg_addr)
 
-    def load_phase(self, dds_instance, profile):
+    def load_phase(self, dds_instance, profile=0):
         "Loads the phase register with the FTW of the given register"
         # UNTESTED
         device_address = dds_instance.device_addr
@@ -197,6 +215,7 @@ class api():
         self.logger.warning("load phase fpga ftw: "+str(hex(fpga_tuning_word)))
         lower_val = fpga_tuning_word % (2**16)
         upper_val = (fpga_tuning_word >> 16) % (2**16)
+
         #The control is untested !!!
         self.lvds_cmd(self.phase_load_opcode, device_address, upper_val,
                       profile=profile, control=0x0, wait=0)
@@ -206,7 +225,6 @@ class api():
         # set control word to 3 for wren
         self.lvds_cmd(self.phase_load_opcode, device_address, lower_val,
                       profile=profile, control=0x3, wait=0)
-
 
     def pulse_phase(self, dds_instance, profile, phase_offset=0):
         """switches to the given phase register with additional phase offset"""
@@ -218,16 +236,19 @@ class api():
         self.lvds_cmd(self.phase_pulse_opcode, device_address, val,
                       profile=profile, wait=10)
 
-    def dac_value(self, address, val):
-        """Sets the dac on the DDS board
-        """
-        self.lvds_cmd(self.dac_opcode, address, val)
+    def init_frequency(self, dds_instance, freq_value, profile=0):
+        """Writes the frequency into the DDS and initializes a phase register in the FPGA
+        If a frequency is already initialized it is simply overwritten"""
+        # UNTESTED
+        self.set_dds_frequency(dds_instance, freq_value, profile)
+        self.load_phase(dds_instance, profile)
 
-    def ttl_value(self, value, select=2):
-        """Sets the status of a whole 16Bit output system
-        """
-        ttl_insn = instructions.p(value, select)
-        self.sequencer.add_insn(ttl_insn)
+    def switch_frequency(self, dds_instance, profile, phase_offset=0):
+        """Sets the profile pins of the DDS and generates a pulse phase instruction"""
+        # UNTESTED
+        self.set_dds_profile(dds_instance, profile)
+        self.update_dds(dds_instance)
+        self.pulse_phase(dds_instance, profile, phase_offset)
 
 ##
 ## api.py

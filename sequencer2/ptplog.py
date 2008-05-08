@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-08 11:12:48 c704271"
+# Time-stamp: "2008-05-08 14:23:09 c704271"
 
 #  file       logging.py
 #  copyright  (c) Philipp Schindler 2008
@@ -30,7 +30,7 @@ class ptplog:
         logger.addHandler(ch)
         self.logger = logger
 
-        level2 = logging.INFO
+        level2 = logging.ERROR
         logger2 = logging.getLogger("api")
         logger2.setLevel(level2)
         ch2 = logging.StreamHandler()
