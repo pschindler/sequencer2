@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-08 14:27:23 c704271"
+# Time-stamp: "2008-05-09 13:14:14 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -9,10 +9,13 @@
 """
 
 #from exceptions import *
-import instructions
+import math
 import copy
 import logging
-import math
+
+# sequencer2 classes:
+import outputsystem
+import instructions
 
 class api():
     """api.py the api commands for sequencer2
@@ -35,7 +38,11 @@ class api():
         # number of branch delay necessary:
         self.branch_delay_slots = 5
         self.logger = logging.getLogger("api")
+        self.ttl_sys = outputsystem.OutputSystem()
 
+    #################################################################
+    #   The general PCP instructions
+    #################################################################
     def wait(self, wait_cycles):
         """inserts a wait event
         wait_cycles : nr of clock cycles to wait
@@ -112,6 +119,10 @@ class api():
         ttl_insn = instructions.p(value, select)
         self.sequencer.add_insn(ttl_insn)
 
+    #################################################################
+    # The LVDS functions for the ad9910 board
+    #################################################################
+
     def lvds_cmd(self, opcode, address, data, profile=0, control=0, wait=0):
         """Writes data to the lvds bus
         opcode : Bits 31:27
@@ -176,6 +187,10 @@ class api():
             self.lvds_cmd(self.fifo_opcode, dds_address, value, wait=fifo_wait)
         # Set the register address and wait until finished
         self.lvds_cmd(self.addr_opcode, dds_address, reg_address, wait=addr_wait)
+
+    #################################################################
+    # Functions for the AD9910 DDS
+    #################################################################
 
     def init_dds(self, dds_instance):
         """Writes the CFR registers of the DDS
@@ -250,6 +265,29 @@ class api():
         self.update_dds(dds_instance)
         self.pulse_phase(dds_instance, profile, phase_offset)
 
+    #################################################################
+    # Functions for the TTL output system
+    #################################################################
+    def ttl_set_bit(self, key, value):
+        # UNTESTED
+        output_state = self.sequencer.current_output
+        (select, new_state) = self.ttl_sys.set_bit(key, value, output_state)
+        self.sequencer.current_output[select] = new_state
+        self.ttl_value(new_state, select)
+
+    def ttl_set_multiple(self, value_dict):
+        # save select is missing !!
+        select_list=[]
+        for  key in value_dict:
+            value = value_dict[key]
+            output_state = self.sequencer.current_output
+            (select, new_state) = self.ttl_sys.set_bit(key, value, output_state)
+            self.sequencer.current_output[select] = new_state
+            if select_list.count(select) == 0:
+                select_list.append(select)
+        for select in select_list:
+            value = self.sequencer.current_output[select]
+            self.ttl_value(value, select)
 ##
 ## api.py
 ## Login : <viellieb@ohm>

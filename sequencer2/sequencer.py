@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-07 14:21:39 c704271"
+# Time-stamp: "2008-05-09 09:44:11 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -22,6 +22,7 @@ class sequencer():
         self.branch_delay_slots = 5
         self.is_subroutine = False
         self.logger = logging.getLogger("sequencer2")
+        self.current_output=[0,0,0,0]
 # This would collide with the subroutine handling :-(
 # So we remove it and hope for the best
 #        nop_insn = instructions.nop()
@@ -51,6 +52,9 @@ class sequencer():
         # If insn is a label add it to the label list
         if instruction.label != None:
             self.label_dict[instruction.label] = len(self.current_sequence)-1
+        # Set current output for the TTL output system
+        if instruction.is_pulse:
+            self.current_output[instruction.change_state]=instruction.output_state
 
     def begin_subroutine(self):
         # checl if the previous subroutine was ended

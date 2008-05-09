@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-04-07 12:38:54 c704271"
+# Time-stamp: "2008-05-09 09:41:26 c704271"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -20,12 +20,13 @@ class insn_class():
     label = None
     address = None
     is_branch = False
+    is_pulse = False
 
     def __init__(self):
         self.name = "None"
-        self.change_state = None
+#        self.change_state = None
         self.opcode = 0x0
-        self.output_state = [0, 0, 0, 0]
+#        self.output_state = [0, 0, 0, 0]
 
 
     def get_value(self):
@@ -70,6 +71,7 @@ class p(insn_class):
         self.opcode = 0xc
         self.output_state = output_state
         self.change_state = change_state
+        self.is_pulse = True
 
     def get_value(self):
         """returns the hex value"""

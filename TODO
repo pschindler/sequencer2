@@ -2,8 +2,9 @@
 
 - Configuration mechanism
 - finite loops (bdec,ldc)
-- High level functions for the DAC,DDS
-- Phase coherent switching
+- Error handling
+- Server
+- TTL subsystem
 
 * Missing tests
 
@@ -11,6 +12,8 @@
 - Test on physical PCP
 - Additional tests for the LVDS Bus
 - Wait insn
+- phase coherent switching
+- High level functions for the DAC,DDS
 
 * Important DDS registers:
 

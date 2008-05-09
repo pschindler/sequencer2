@@ -8,11 +8,58 @@ import logging
 from  sequencer2 import sequencer
 from  sequencer2 import api
 from  sequencer2 import instructions
+from  sequencer2 import outputsystem
+
 #------------------------------------------------------------------------------
 class Test_Sequencer(unittest.TestCase):
 
+  def test_ttl_system(self):
+    "test the ttl subsystem"
+    output_status=[0,0,0,0]
+    ttl_sys = outputsystem.OutputSystem()
+
+    new_state = ttl_sys.set_bit("5",1,output_status)
+    output_status[new_state[0]] = new_state[1]
+    self.assertEquals(output_status,[0,0,2**5,0])
+
+    new_state = ttl_sys.set_bit("4",1,output_status)
+    output_status[new_state[0]] = new_state[1]
+    self.assertEquals(output_status,[0,0,2**4|2**5,0])
+
+    new_state = ttl_sys.set_bit("5",0,output_status)
+    output_status[new_state[0]] = new_state[1]
+    self.assertEquals(output_status,[0,0,2**4,0])
+
+  def test_ttl_set_bit(self):
+    "test the set bit api function"
+    my_sequencer=sequencer.sequencer()
+    my_api = api.api(my_sequencer)
+    my_api.ttl_set_bit("1",1)
+    my_api.ttl_set_bit("6",1)
+    my_api.ttl_set_bit("18",1)
+    my_sequencer.compile_sequence()
+    my_sequencer.debug_sequence()
+    self.assertEquals(my_sequencer.current_output,[0,0,66,4])
+    insn=my_sequencer.current_sequence[1]
+    self.assertEquals(insn.output_state,0x42)
+    insn=my_sequencer.current_sequence[2]
+    self.assertEquals(insn.change_state,0x3)
+    self.assertEquals(insn.output_state,0x4)
 
 
+  def test_ttl_multiple(self):
+    "test the ttl_set_multiple api function"
+    my_sequencer=sequencer.sequencer()
+    my_api = api.api(my_sequencer)
+    ttl_dict = {}
+    ttl_dict["3"] = 1
+    ttl_dict["20"] = 2
+    my_api.ttl_set_multiple(ttl_dict)
+    my_sequencer.compile_sequence()
+    my_sequencer.debug_sequence()
+    self.assertEquals(my_sequencer.current_output,[0,0,8,32])
+    insn=my_sequencer.current_sequence[1]
+    self.assertEquals(insn.output_state,32)
 
   def test_dac_sequence(self):
     """test if the dac instruction generates the right number of insns
@@ -134,8 +181,8 @@ class Test_Sequencer(unittest.TestCase):
     #    print my_my_sequencer.word_list
     time2=time.time()
     print str(time2-time1)
-    if time2-time1 > 2:
-      self.fail("Failed speed test")
+    if time2-time1 > 1:
+      self.fail("Failed speed test: "+str(time2-time1))
 
 #  def tearDown(self):
 
