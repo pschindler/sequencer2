@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-09 13:09:39 c704271"
+# Time-stamp: "2008-05-09 13:21:37 c704271"
 
 #  file       output_system.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
 """The digital output system"""
-class TTLChannel():
+class TTLChannel:
     def __init__(self, name, bit_nr, select):
         self.name = name
         self.bit_nr = bit_nr
         self.select = select
 
-class OutputSystem():
+class OutputSystem:
     """The digital output system. Handles TTL outputs"""
     def __init__(self, ttl_dict=None):
         "if ttl_dict=Nonne a defualt dictionary will be created"

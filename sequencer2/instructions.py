@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-09 09:41:26 c704271"
+# Time-stamp: "2008-05-09 13:21:09 c704271"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -14,7 +14,7 @@
 # ldc
 
 
-class insn_class():
+class insn_class:
     """Base class for an instruction
     """
     label = None

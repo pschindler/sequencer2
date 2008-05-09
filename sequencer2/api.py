@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-09 13:14:14 c704271"
+# Time-stamp: "2008-05-09 13:21:25 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -17,7 +17,7 @@ import logging
 import outputsystem
 import instructions
 
-class api():
+class api:
     """api.py the api commands for sequencer2
     """
     def __init__(self, sequencer):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-07 14:29:37 c704271"
+# Time-stamp: "2008-05-09 13:22:05 c704271"
 
 #  file       ad9910.py
 #  copyright  (c) Philipp Schindler 2008
@@ -11,7 +11,7 @@ Register names are described in the AD9910 datasheet.
 import copy
 from sequencer2.bitmask import Bitmask
 
-class ProfileRegister():
+class ProfileRegister:
     """Class for a profile register containing of:
         ftw : frequency tuning word
         phow : phase offset word
@@ -22,7 +22,7 @@ class ProfileRegister():
         self.phow = phow
         self.asf = asf
 
-class AD9910():
+class AD9910:
     """base class dor AD9910
     """
 

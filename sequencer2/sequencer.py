@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-09 09:44:11 c704271"
+# Time-stamp: "2008-05-09 13:20:52 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -11,8 +11,7 @@ import logging
 import instructions
 import copy
 
-class sequencer():
-
+class sequencer:
     def __init__(self):
         self.current_sequence = []
         self.jump_list = []

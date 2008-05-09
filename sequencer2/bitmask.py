@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-04-07 12:40:28 c704271"
+# Time-stamp: "2008-05-09 13:22:13 c704271"
 
 #  file       bitmmask.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
 """A bitmask class for setting single bits in registers
 """
-class Bitmask():
+class Bitmask:
     """A bitmask class for setting single bits in registers
     """
     def __init__(self, label, width, shift):
