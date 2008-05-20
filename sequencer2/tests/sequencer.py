@@ -5,6 +5,7 @@
 import unittest
 import time
 import logging
+import psyco
 from  sequencer2 import sequencer
 from  sequencer2 import api
 from  sequencer2 import instructions
@@ -166,6 +167,7 @@ class Test_Sequencer(unittest.TestCase):
   def test_compile_speed(self):
     """Test if 10000 DAC events may be compiled in under 1s
     """
+#    psyco.full()
     time1=time.time()
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-08 14:23:09 c704271"
+# Time-stamp: "2008-05-19 14:54:02 c704271"
 
 #  file       logging.py
 #  copyright  (c) Philipp Schindler 2008
@@ -30,7 +30,7 @@ class ptplog:
         logger.addHandler(ch)
         self.logger = logger
 
-        level2 = logging.ERROR
+        level2 = level
         logger2 = logging.getLogger("api")
         logger2.setLevel(level2)
         ch2 = logging.StreamHandler()
@@ -46,5 +46,22 @@ class ptplog:
         #create console handler and set level to debug
         logger2.addHandler(ch2)
         self.logger2 = logger2
+
+        level3 = level
+        logger3 = logging.getLogger("server")
+        logger3.setLevel(level2)
+        ch3 = logging.StreamHandler()
+        ch3.setLevel(level)
+        #create formatter
+        if filename == None:
+            formatter = logging.Formatter("SERVER : %(levelname)s  %(message)s")
+        else:
+            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        #add formatter to ch
+        ch3.setFormatter(formatter)
+        #add ch to logger
+        #create console handler and set level to debug
+        logger3.addHandler(ch3)
+        self.logger3 = logger3
 
 # logging.py ends here

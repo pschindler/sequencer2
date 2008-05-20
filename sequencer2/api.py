@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-09 13:21:25 c704271"
+# Time-stamp: "2008-05-19 14:55:19 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -25,6 +25,7 @@ class api:
         The LVDS bus opcodes are defined here
         """
         self.sequencer = sequencer
+
         # The LVDS opcodes
         self.addr_opcode = 0x1
         self.fifo_opcode = 0x2
@@ -36,7 +37,8 @@ class api:
         self.reset_opcode = 0x1f
 
         # number of branch delay necessary:
-        self.branch_delay_slots = 5
+        self.branch_delay_slots = self.sequencer.branch_delay_slots
+
         self.logger = logging.getLogger("api")
         self.ttl_sys = outputsystem.OutputSystem()
 
@@ -133,7 +135,7 @@ class api:
         data: Bits 15:0
         """
         #High Word consists of following values:
-        self.logger.info("lvds cmd: op: "+str(hex(opcode)) +" add: "+str(hex(address)) + \
+        self.logger.debug("lvds cmd: op: "+str(hex(opcode)) +" add: "+str(hex(address)) + \
             " prof: "+str(hex(profile)) + " ctl: "+str(hex(control)) + \
             " wait: " +str(hex(wait)))
         avail_val = 1 << 10
@@ -145,7 +147,7 @@ class api:
         high_word = opcode_val | address_val  \
             | profile_val |control_val
         high_word_avail = high_word | avail_val
-        self.logger.info("lvds cmd: highword: "+str(hex(high_word)))
+        self.logger.debug("lvds cmd: highword: "+str(hex(high_word)))
 
         #Low Word
         data_val = data % (2**16)
@@ -227,7 +229,7 @@ class api:
         # UNTESTED
         device_address = dds_instance.device_addr
         fpga_tuning_word = dds_instance.get_fpga_ftw(profile)
-        self.logger.warning("load phase fpga ftw: "+str(hex(fpga_tuning_word)))
+        self.logger.debug("load phase fpga ftw: "+str(hex(fpga_tuning_word)))
         lower_val = fpga_tuning_word % (2**16)
         upper_val = (fpga_tuning_word >> 16) % (2**16)
 

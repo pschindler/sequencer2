@@ -3,6 +3,7 @@
 import struct
 import socket
 import logging
+import config
 
 class PTPComm:
     """class for communication with the box over the PTP protocol
@@ -10,7 +11,7 @@ class PTPComm:
     """
 
     #constants
-    MY_PORT  = 0x221e
+#    MY_PORT  = 0x221e
 
     MY_PORT  = 0x221f
     HIS_PORT = 0x2229
@@ -39,6 +40,12 @@ class PTPComm:
             self.debug = False
         if self.nonet:
           self.logger.info("Running in nonet mode")
+
+        try:
+            self.config = config.Config()
+            self.HIS_IP = self.config.get_str("PTP","box_ip_address")
+        except:
+            self.logger.warn("COMM: cannot read configuration file")
 
     #functions
     def print_binary(self, code):
