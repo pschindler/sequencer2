@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-20 11:32:23 c704271"
+# Time-stamp: "2008-05-20 16:37:18 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -10,6 +10,7 @@
 import logging
 
 from sequencer2 import config
+from  sequencer2 import comm
 
 import server
 import handle_commands
@@ -66,9 +67,19 @@ class MainProgram:
         # end loops and generate IOs for LabView
         user_api.end_sequence()
         # Compile sequence
-        user_api.compile_sequence()
-        #Send sequence to
-        user_api.send_sequence()
+        try:
+            user_api.compile_sequence()
+        except:
+            self.logger.exception("Error while compiling sequence")
+            generate_str = "Error while compiling sequence"
+
+        #Send sequence to Box
+        try:
+            user_api.send_sequence()
+        except:
+            self.logger.exception("Error while sending sequence")
+            generate_str = "Error while sending sequence"
+
         del(user_api)
         return_var.return_string = generate_str
         return return_var

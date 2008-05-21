@@ -7,6 +7,7 @@ class CommandHandler:
     def __init__(self):
         self.command_dict = self.get_command_dict()
         self.logger = logging.getLogger("sequencer2")
+        self.transitions = []
 
     def get_variables(self, var_string):
         self.variables={}
@@ -112,7 +113,7 @@ class CommandHandler:
         elif splitted[0]=="IONS":
             transition.ion_list = get_dictionary(splitted)
 
-        parent.transitions[last_transition] = transition
+        self.transitions[last_transition] = transition
 
 
 

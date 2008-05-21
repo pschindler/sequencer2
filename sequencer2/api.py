@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-19 14:55:19 c704271"
+# Time-stamp: "2008-05-20 16:34:29 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -25,6 +25,7 @@ class api:
         The LVDS bus opcodes are defined here
         """
         self.sequencer = sequencer
+        self.cycle_time = 10.0
 
         # The LVDS opcodes
         self.addr_opcode = 0x1
@@ -42,14 +43,19 @@ class api:
         self.logger = logging.getLogger("api")
         self.ttl_sys = outputsystem.OutputSystem()
 
+
     #################################################################
     #   The general PCP instructions
     #################################################################
-    def wait(self, wait_cycles):
+    def wait(self, wait_time):
         """inserts a wait event
-        wait_cycles : nr of clock cycles to wait
+        wait_cycles : time in ns to wait
         needs calibration !!! wait has to be > 4 ?
         """
+        wait_cycles = int(wait_time/self.cycle_time)
+        if wait_cycles < 1.0:
+            self.logger.warn("Cannot wait for less than one cycle")
+            return
         nop_insn = instructions.nop()
         if wait_cycles > self.branch_delay_slots:
             wait_insn = instructions.wait(wait_cycles - 4)

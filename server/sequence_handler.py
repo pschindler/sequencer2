@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-20 14:56:03 c704271"
+# Time-stamp: "2008-05-21 14:43:18 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
+from  sequencer2 import comm
+
 "Base class for the user_api main object"
 
 class SequenceHandler:
@@ -24,13 +26,13 @@ class SequenceHandler:
                 while True:
                     last_insn = insn_array.pop()
                     #Set max time per is_last
-                    if last_insn.start_time > max_time:
+                    if last_insn.start_time + last_insn.duration > max_time:
                         max_time = last_insn.start_time + last_insn.duration
                     # Increase start time of instruction
                     last_insn.start_time += current_time
                     is_last_array.append(last_insn)
                     if last_insn.is_last:
-                        current_time = max_time
+                        current_time += max_time
                         is_last_array.sort(self.sort_method)
                         final_array += is_last_array
                         is_last_array = []
@@ -39,14 +41,36 @@ class SequenceHandler:
             except IndexError:
                 None
         final_array += is_last_array
-        print "FINAL"
-        for i in final_array:
-            print i
+        if self.logger.level < 11:
+            log_str  = ""
+            for i in final_array:
+                log_str += str(i) + "\n"
+            self.logger.debug(log_str)
+        return final_array
 
-    def set_variable(self, var_type, var_name, var_val, min_val=None, max_val=None):
+    def send_sequence(self):
+        "send the sequence to the Box"
+        #Missing: everything
+        ptp1 = comm.PTPComm(nonet=self.is_nonet)
+        ptp1.send_code(self.sequencer.word_list)
+
+    def generate_frequency(self, api, transition_list):
+        for trans in transition_list:
+            print trans
+
+
+    ####################################################################################
+    # General Helper functions
+    #####################################################################################
+
+    def set_variable(self, var_type, var_name, default_val, min_val=None, max_val=None):
         "sets a variable from a command string"
-        cmd_str = str(var_name) + " = " + str(var_val)
-        exec cmd_str
+        try:
+            var_val = self.chandler.variables[var_name]
+            cmd_str = str(var_name) + " = " + str(var_val)
+            exec cmd_str
+        except KeyError:
+            self.logger.warn("Variable not found in comand string: "+str(var_name))
 
     def sort_method(self, insn1, insn2):
         "helper method for sorting the time arrays"

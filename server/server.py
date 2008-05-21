@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-19 14:53:35 c704271"
+# Time-stamp: "2008-05-20 16:19:29 c704271"
 
 #  file      : server.py
 #  email     : philipp DOT emacs DOT schindler AT uibk DOT ac DOT at
@@ -13,7 +13,6 @@ import socket
 import time
 import logging
 #from innsbruck import *
-
 
 class tcp_Server:
   "The class for receiving data from LabView"

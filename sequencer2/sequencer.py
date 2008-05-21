@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-09 13:43:51 c704271"
+# Time-stamp: "2008-05-21 14:52:22 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -125,7 +125,8 @@ class sequencer:
                 value = jump_insn.get_jump_value(target_address)
                 self.word_list[word_num] = self.get_binary_charlist(value, 4)
             except:
-                self.logger.exception("error while handling jump")
+                self.logger.exception("error while handling jump: " \
+                                          + str(jump_insn.target_name))
         #update current_sequence to make debugging possible
         self.current_sequence = sequence_list
 
