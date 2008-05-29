@@ -1,13 +1,15 @@
 #from sequencer.constants import *
 import logging
 
+from sequence_handler import transition
+
 class CommandHandler:
     """The new command handler for the sequencer2
     The transitions routines are hopeless broken :-("""
     def __init__(self):
         self.command_dict = self.get_command_dict()
         self.logger = logging.getLogger("sequencer2")
-        self.transitions = []
+        self.transitions = {}
 
     def get_variables(self, var_string):
         self.variables={}
@@ -85,35 +87,38 @@ class CommandHandler:
         global last_transition
 
         if splitted[0]=="TRANSITION":
-            self.add_transition(splitted[1])
-            last_transition=splitted[1]
-        if splitted[0]=="DEFAULT_TRANSITION":
-            self.add_transition(splitted[1])
-            last_transition = splitted[1]
-            self.default_transition = self.transitions[last_transition]
+            name = splitted[1]
+            self.transitions[name] = transition(name, 0 ,0)
+            self.last_transition = splitted[1]
 
-        transition = self.transitions[last_transition]
+        if splitted[0]=="DEFAULT_TRANSITION":
+            name = splitted[1]
+            self.transitions[name] = transition(name, 0 ,0)
+            self.last_transition = splitted[1]
+            self.default_transition = self.transitions[self.last_transition]
+
+        self.transition = self.transitions[self.last_transition]
         if splitted[0]=="RABI":
-            transition.t_rabi = get_dictionary(splitted)
+            self.transition.t_rabi = self.get_dictionary(splitted)
         elif splitted[0]=="SLOPE_TYPE":
-            transition.slope_type = splitted[1]
+            self.transition.slope_type = splitted[1]
         elif splitted[0]=="SLOPE_DUR":
-            transition.slope_duration = float(splitted[1])
+            self.transition.slope_duration = float(splitted[1])
         elif splitted[0]=="AMPL":
-            transition.amplitude = float(splitted[1])
+            self.transition.amplitude = float(splitted[1])
         elif splitted[0]=="FREQ":
-            transition.frequency = float(splitted[1])
-            transition.freq_is_init = False
+            self.transition.frequency = float(splitted[1])
+            self.transition.freq_is_init = False
         elif splitted[0]=="AMPL2":
-            transition.amplitude2 = float(splitted[1])
+            self.transition.amplitude2 = float(splitted[1])
         elif splitted[0]=="FREQ2":
-            transition.frequency2 = float(splitted[1])
-            transition.freq_is_init = False
+            self.transition.frequency2 = float(splitted[1])
+            self.transition.freq_is_init = False
 
         elif splitted[0]=="IONS":
-            transition.ion_list = get_dictionary(splitted)
+            self.transition.ion_list = self.get_dictionary(splitted)
 
-        self.transitions[last_transition] = transition
+        self.transitions[self.last_transition] = self.transition
 
 
 

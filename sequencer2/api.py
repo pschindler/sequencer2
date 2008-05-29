@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-20 16:34:29 c704271"
+# Time-stamp: "2008-05-26 13:13:19 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -73,6 +73,11 @@ class api:
         label_insn = instructions.label(label_name)
         self.sequencer.add_insn(label_insn)
 
+    def start_finite_loop(self, loop_count):
+        "inserts a ldc instruction and a label"
+        ldc_insn = instructions.ldc(loop_count)
+        self.sequencer.add_insn(ldc_insn)
+
     def jump(self, target_name):
         """jumps to label
         """
@@ -89,11 +94,32 @@ class api:
         """
         jump_insn = instructions.btr(target_name, trigger)
         nop_insn = instructions.nop()
-        self.sequencer.add_insn(jump_insn)
-        self.sequencer.add_insn(nop_insn)
-        self.sequencer.add_insn(copy.copy(nop_insn))
-        self.sequencer.add_insn(copy.copy(nop_insn))
-        self.sequencer.add_insn(copy.copy(nop_insn))
+        for index in range(self.branch_delay_slots):
+            self.sequencer.add_insn(copy.copy(nop_insn))
+
+
+    def start_finite(self, label_name, loop_count):
+        """at the beginning of a finite loop
+        adds a ldc instruction and a label intruction"""
+        self.sequencer.bdec_register.append(loop_count)
+        register_addr = len(self.sequencer.bdec_register) - 1
+        ldc_insn = instructions.ldc(register_addr, loop_count)
+        self.sequencer.add_insn(ldc_insn)
+        label_insn = instructions.label(label_name)
+        self.sequencer.add_insn(label_insn)
+
+
+    def end_finite(self, label_name):
+        register_addr = len(self.sequencer.bdec_register) - 1
+        if register_addr < 0:
+            raise RuntimeError("Cannot pop from empty loop stack")
+        self.sequencer.bdec_register.pop()
+
+        bdec_insn = instructions.bdec(label_name, register_addr)
+        nop_insn = instructions.nop()
+        self.sequencer.add_insn(bdec_insn)
+        for index in range(self.branch_delay_slots):
+            self.sequencer.add_insn(copy.copy(nop_insn))
 
     def begin_subroutine(self, label_name):
         """inserts a label for a subroutine

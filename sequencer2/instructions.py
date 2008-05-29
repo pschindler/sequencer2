@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-09 13:21:09 c704271"
+# Time-stamp: "2008-05-26 13:38:30 c704271"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -123,6 +123,21 @@ class btr(j):
         """returns the hex value for j insns"""
         return self.opcode << 28 | self.trigger << 19 | target_address
 
+class bdec(j):
+    """Decrements the loop register and branches to label"""
+    name = "bdec"
+    opcode = 0xa
+    def __init__(self, label_name, register_address):
+        if register_address > 15:
+            raise RuntimeError("Register address canot be greater then 15")
+        self.target_name = label_name
+        self.register_address = register_address
+
+    def get_jump_value(self, target_address):
+        "returns the hex value for bdec insns"
+        self.target_address = target_address
+        return self.opcode << 28 | self.register_address << 23  | target_address
+
 class call(j):
     """ Calls a subroutine
     """
@@ -151,6 +166,25 @@ class wait(insn_class):
                " -- op:  "+str(hex(self.opcode)) + \
                " -- nam: "+str(self.name) + \
                " -- val: "+str(hex(self.wait_cycles))
+class ldc(insn_class):
+    "Loads constant into register for bdec"
+    name = "load const"
+    opcode = 0xb
+    def __init__(self, register_addr, value):
+        if value > 255:
+            raise RuntimeError("Cannot generate a bdec with more than 255 cycles")
+        self.register_addr = register_addr
+        self.value = value
+
+    def get_value(self):
+        return self.opcode << 28 | self.register_addr << 23 | self.value
+
+    def __str__(self):
+        return " add: "+str(self.address) + \
+               " -- op:  "+str(hex(self.opcode)) + \
+               " -- nam: "+str(self.name) + \
+               " -- addr: "+str(self.register_addr) + \
+               " -- val: "+str(hex(self.value))
 
 ##
 ## instructions.py

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-21 14:59:13 c704271"
+# Time-stamp: "2008-05-29 12:39:16 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -26,22 +26,46 @@ In this file the functions which are available are defined.
 Additionally external include files may be used
 """
 
+##################################################################################################
+# HIGH LEVEL STUFF ------- DO NOT EDIT ---- USE INCLUDES INSTEAD
+##################################################################################################
+
+
 def test_global(string1):
+    "Just testing ..."
     global return_str
 #    print string1
     return_str += string1
 
 def ttl_pulse(device_key, duration, start_time=0.0, is_last=True):
+    """generates a sequential ttl pulse"""
     global sequence_var
     pulse1 = TTL_Pulse(start_time, duration, device_key, is_last)
     sequence_var.append(pulse1.sequence_var)
 
+def rf_pulse(theta, phi, ion, transition_name, start_time=0.0, is_last=True, address=0):
+    "Generates a RF pulse"
+    global sequence_var
+    global transitions
+    if str(transition_name) == transition_name:
+        transition_obj = transitions[transition_name]
+    else:
+        transition_obj = transition_name
+    rf_pulse = RF_Pulse(start_time, theta, phi, ion, transition_obj, is_last=is_last, address=address)
+    sequence_var.append(rf_pulse.sequence_var)
+
 def generate_triggers(api, trigger_value):
+    "Generates the triggers for QFP"
     # Missing: Line trigger, ttl signal for QFP
     api.label("wait_label_1")
     api.jump_trigger("wait_label_2", trigger_value)
     api.jump("wait_label_1")
     api.label("wait_label_2")
+    api.label("finite_label")
+
+##################################################################################################
+# LOW LEVEL STUFF ------- DO NOT EDIT ---- YOU DON'T NEED TO
+##################################################################################################
 
 class userAPI(SequenceHandler):
     """This class is instanciated and used by main_program.py"""
@@ -63,12 +87,14 @@ class userAPI(SequenceHandler):
         generate_triggers(self.api, 0x1)
         self.generate_frequency(self.api, self.chandler.transitions)
         # Missing: triggering, frequency initialization
-        # What to do with the includes
 
     def generate_sequence(self):
-        "generates the sequence from the command string"
-        #Load sequence file
-
+        """Generates the sequence from the command string
+        This method executes the include files
+        Global variables for transitions and the sequence list are defined and reset.
+        The sequence file is loaded and executed
+        """
+        # Try to execute include files
         incl_list = self.include_handler.generate_include_list()
         for file_name, cmd_str in incl_list:
             try:
@@ -91,6 +117,8 @@ class userAPI(SequenceHandler):
         # Generate dictionary for sorting the files
         global sequence_var
         sequence_var = []
+        global transitions
+        transitions = self.chandler.transitions
         #Execute sequence
         exec(seq_str)
         self.final_array = self.get_sequence_array(sequence_var)
@@ -114,6 +142,7 @@ class userAPI(SequenceHandler):
     def end_sequence(self):
         "adds triggers and loop events"
         #Missing everything
+#        self.api.
         return None
 
 

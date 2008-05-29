@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-21 14:52:22 c704271"
+# Time-stamp: "2008-05-29 10:28:59 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -21,7 +21,8 @@ class sequencer:
         self.branch_delay_slots = 5
         self.is_subroutine = False
         self.logger = logging.getLogger("sequencer2")
-        self.current_output=[0,0,0,0]
+        self.current_output = [0,0,0,0]
+        self.bdec_register = []
 # This would collide with the subroutine handling :-(
 # So we remove it and hope for the best
 #        nop_insn = instructions.nop()

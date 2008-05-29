@@ -186,6 +186,20 @@ class Test_Sequencer(unittest.TestCase):
     if time2-time1 > 1:
       self.fail("Failed speed test: "+str(time2-time1))
 
+
+  def test_finite_loop(self):
+    my_sequencer=sequencer.sequencer()
+    my_api=api.api(my_sequencer)
+    my_api.start_finite("finite1", 100)
+    my_api.ttl_set_bit("1",1)
+    my_api.ttl_set_bit("6",1)
+    my_api.start_finite("finite2", 10)
+    my_api.ttl_set_bit("18",1)
+    my_api.end_finite("finite2")
+    my_api.end_finite("finite1")
+    my_sequencer.compile_sequence()
+    my_sequencer.debug_sequence()
+
 #  def tearDown(self):
 
 #------------------------------------------------------------------------------

@@ -1,20 +1,14 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-21 14:50:19 c704271"
+# Time-stamp: "2008-05-29 12:25:45 c704271"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
 
 
+"""Defines the high level instructions which are used by functions in user_fucntion.py"""
 
-# class SequenceClass:
-#     def __init__(self):
-#         self.sequence_dict = {}
-#         self.current_time = 0.0
-#         self.is_last_max_time = 0.0
-
-"""Defines the high level instructions"""
 class SeqInstruction:
     "Base class used for all intructions"
     duration = 0.0
@@ -66,6 +60,33 @@ class TTL_Pulse(SeqInstruction):
         self.sequence_var = start_event.add_insn(self.sequence_var)
         self.sequence_var = stop_event.add_insn(self.sequence_var)
 
+class RF_Pulse(SeqInstruction):
+    "Generates an RF pulse"
+    def __init__(self, start_time, theta, phi, ion, transition_obj, \
+                     is_last=False, address=0):
+        try:
+            pulse_duration = transition_obj.t_rabi[ion] * theta
+        except KeyError:
+            raise RuntimeError("Error while getting Rabi frequency for ion "+str(ion))
+
+        amplitude = int(transition_obj.amplitude)
+
+        cycle_time = 1e-2
+        dac_switch_time = 3.0*cycle_time
+        dds_switch_time = 3.0*cycle_time
+        dac_start_time = start_time
+        dds_start_time = start_time + dac_switch_time
+        dds_stop_time = dds_start_time + pulse_duration
+        dac_stop_time = dds_stop_time + dds_switch_time
+
+        amplitude_off = 0
+        print "RF_Pulse not implemented yet :-("
+
+        dac_start_event = DAC_Event(dac_start_time, amplitude, address, is_last=False)
+        dac_stop_event = DAC_Event(dac_start_time, amplitude_off, address, is_last=is_last)
+        self.sequence_var = dac_start_event.add_insn(self.sequence_var)
+        self.sequence_var = dac_stop_event.add_insn(self.sequence_var)
+
 class TTL_Event(SeqInstruction):
     "Generates a ttl high or low event"
     def __init__(self, start_time, device_key, value, is_last=True):
@@ -88,5 +109,23 @@ class TTL_Event(SeqInstruction):
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | key: " +str(self.val_dict)
 
+
+class DAC_Event(SeqInstruction):
+    "Generates a DAC event"
+    def __init__(self, start_time, value, address, is_last=True):
+        self.start_time = start_time
+        self.name = "DAC_Event"
+        self.duration = self.cycle_time * 3.0
+        self.is_last = is_last
+        self.value = value
+        self.address = address
+
+    def handle_instruction(self, api):
+        api.dac_value(self.address, self.value)
+
+    def __str__(self):
+        return str(self.name) + " start: " + str(self.start_time) \
+            + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
+            + " | addr: "+str(self.address) + " | val: "+str(self.value)
 
 # instruction_handler.py ends here

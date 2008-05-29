@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-08 11:16:27 c704271"
+# Time-stamp: "2008-05-26 09:12:28 c704271"
 #  copyright  (c) Philipp Schindler 2008
 #  license    GPL (see file COPYING)
 
@@ -15,7 +15,7 @@ from sequencer2 import ptplog
 # Set to true for testing without actual hardware
 nonet = False
 # Set to true for enabling the infinite loop
-loop_bool = False
+loop_bool = True
 
 time1=time.time()
 #Init logger, sequencer, API and DDS
@@ -30,6 +30,9 @@ dds_device = ad9910.AD9910(0, 800)
 if loop_bool:
     my_api.label("test")
 #send reset opcode to LVDS bus
+my_api.ttl_value(0xffff , 0)
+my_api.ttl_value(0xffff , 1)
+my_api.wait(100)
 my_api.ttl_value(0x1f <<  11,0)
 my_api.ttl_value(0x1f <<  11 | 1 << 10,0)
 my_api.wait(10)
@@ -46,7 +49,7 @@ my_api.ttl_value(0x1f <<  11 | 1 << 10,0)
 # my_api.wait(1)
 
 #set frequency registers
-for i in range(8):
+for i in range(1):
     my_api.set_dds_freq(dds_device, 1, i % 8)
 #update dds
 my_api.update_dds(dds_device)

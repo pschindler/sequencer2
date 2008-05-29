@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-21 14:43:18 c704271"
+# Time-stamp: "2008-05-29 10:46:39 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -80,4 +80,32 @@ class SequenceHandler:
             return 0
         if insn1.start_time < insn2.start_time:
             return -1
+
+# The transition main class
+class transition:
+    '''class for characterizing an atomic transition'''
+    def __init__(self, transition_name, t_rabi,
+                 frequency, sweeprange=0, amplitude=1, slope_type="None",
+                 slope_duration=0, ion_list=None, amplitude2=-1, frequency2=0,
+                 port=0, multiplier=.5, offset=0):
+
+        # The rabi frequency is unique for each ion !!!!
+#        configuration=innsbruck.configuration
+        self.name = str(transition_name)
+#        if ion_list == None:
+#            ion_list=configuration.ion_list
+        self.ion_list = ion_list
+        self.t_rabi = t_rabi
+        self.frequency = frequency
+        self.sweeprange = sweeprange
+        self.amplitude = float(amplitude)
+        self.slope_type = slope_type
+        self.slope_duration = slope_duration
+        self.amplitude2 = amplitude2
+        self.frequency2 = frequency2
+        self.offset = offset
+        self.multiplier = multiplier
+        self.freq_is_init = False
+        self.port = port
+
 # sequence_handler.py ends here

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-20 16:37:18 c704271"
+# Time-stamp: "2008-05-29 12:40:00 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -15,8 +15,9 @@ from  sequencer2 import comm
 import server
 import handle_commands
 import user_function
-"""This file includes the main_program class for the sequencer2
+"""This file defines the main_program class for the sequencer2
 """
+
 class ReturnClass:
     "a simple class consisting of two strings"
     def __init__(self):
@@ -24,7 +25,32 @@ class ReturnClass:
         self.return_string = ""
 
 class MainProgram:
-    "The mighty MainProgram class"
+    """The MainProgram class
+    The class should be invoked as follows:
+
+    var1 = MainProgram()
+
+    This command reads the configuration file and initializes the needed variables
+
+    The server is then started with the command:
+
+    var1.start_server()
+
+    This commands invokes the main_loop method of the server class.
+
+    The main_loop method invokes then the execute_program method of the MainProgram class
+    with the command string given from QFP as an argument
+
+    The execute_program method does following tasks with help of the userAPI class:
+
+      - The string is analyzed with the handle_command class
+      - The triggers for and from QFP are set in the init_sequence method
+      - The sequence is generated with generate_sequence
+      - The end sequence ttl channel is set with the end_sequence method
+      - The sequence is compiled with the compile_sequence method
+      - The sequence is sent to the Box
+    """
+
     def __init__(self):
         "sets up the configuration and the logger"
         self.logger = logging.getLogger("server")
@@ -48,10 +74,14 @@ class MainProgram:
 
     def execute_program(self, command_string):
         """This method is called by the main loop of the server
-        The argument passed to this method is the command string sent frm LabView
+        The argument passed to this method is the command string sent from LabView
         """
         return_var = ReturnClass()
-        self.variable_dict = self.chandler.get_variables(command_string)
+        try:
+            self.variable_dict = self.chandler.get_variables(command_string)
+        except ValueError, KeyError:
+            self.logger.exception("Error while interpreting command string")
+            return "Error while interpreting command string"
         # initialize API
         user_api = user_function.userAPI(self.chandler)
         # generate sequence  before loop trigger
