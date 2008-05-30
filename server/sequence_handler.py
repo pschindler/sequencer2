@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-29 10:46:39 c704271"
+# Time-stamp: "2008-05-30 13:06:14 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -54,9 +54,24 @@ class SequenceHandler:
         ptp1 = comm.PTPComm(nonet=self.is_nonet)
         ptp1.send_code(self.sequencer.word_list)
 
-    def generate_frequency(self, api, transition_list):
-        for trans in transition_list:
-            print trans
+    def generate_frequency(self, api, transition_list, dds_list):
+        "Generates the frequency events"
+        # Missing: DDS ADDRESSES
+        #raise RuntimeError("DDS instance not implemented yet")
+        index = 0
+        dds_profile_list = {}
+        for name, trans in transition_list.iteritems():
+            frequency = trans.frequency
+            for dds_instance in  dds_list:
+                api.set_dds_freq(dds_instance, frequency, index)
+            api.load_phase(dds_instance, index)
+            dds_profile_list[name] = index
+            index += 1
+            if index > 7:
+                raise RuntimeError("Cannot handle more than 7 transitions")
+        return dds_profile_list
+
+
 
 
     ####################################################################################

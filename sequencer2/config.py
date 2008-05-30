@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-16 13:28:52 c704271"
+# Time-stamp: "2008-05-30 11:24:26 c704271"
 
 #  file       config.py
 #  copyright  (c) Philipp Schindler 2008
@@ -25,6 +25,11 @@ class Config:
         """returns an int from option
         """
         return self.config.getint(section, option)
+
+    def get_float(self,section, option):
+        """returns an int from option
+        """
+        return self.config.getfloat(section, option)
 
     def get_bool(self,section, option):
         """returns a bool from option

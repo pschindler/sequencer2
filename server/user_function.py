@@ -1,15 +1,62 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-29 12:39:16 c704271"
+# Time-stamp: "2008-05-30 13:36:35 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
+
+"""
+user_function
+=============
+
+In this file the functions which are available are defined.
+
+This files provides only very general functions.
+Additionally external include files may be used
+
+Include Files:
+==============
+
+  General Usage
+  -------------
+
+  The destination of the inclued files is given in the config.ini file:
+
+  C{include_dir = PulseSequences/includes2/}
+
+  Each include file is executed and the defined functions are available in the
+  sequence files. An example file is PulseSequences/includes2/test.py
+
+  >>> def test_include(test_string):
+  >>>     print test_string
+  >>>     ttl_pulse("15",300, is_last=True)
+
+  This generates a 300 us TTL pulse on channel "15" with following command in
+  the sequence file:
+
+  >>> test_include("something")
+
+  Return Values
+  -------------
+
+  The return value for QFP may be set by the global vbariable return str.
+  It is set as follows:
+
+  >>> def test_include(test_string):
+  >>>     global return_str
+  >>>     return_str += test_string
+  >>>     ttl_pulse("15",300, is_last=True)
+
+
+"""
+
 import logging
 from math import *
 
 from  sequencer2 import sequencer
 from  sequencer2 import api
+from  sequencer2 import ad9910
 from  sequencer2 import instructions
 from  sequencer2 import outputsystem
 from  sequencer2 import config
@@ -20,11 +67,6 @@ from include_handler import IncludeHandler
 
 #Yes we need that cruel import ;-)
 from instruction_handler import *
-
-"""
-In this file the functions which are available are defined.
-Additionally external include files may be used
-"""
 
 ##################################################################################################
 # HIGH LEVEL STUFF ------- DO NOT EDIT ---- USE INCLUDES INSTEAD
@@ -48,7 +90,11 @@ def rf_pulse(theta, phi, ion, transition_name, start_time=0.0, is_last=True, add
     global sequence_var
     global transitions
     if str(transition_name) == transition_name:
-        transition_obj = transitions[transition_name]
+        try:
+            transition_obj = transitions[transition_name]
+        except:
+            raise RuntimeError("Transition name not found: "+str(transition_name))
+
     else:
         transition_obj = transition_name
     rf_pulse = RF_Pulse(start_time, theta, phi, ion, transition_obj, is_last=is_last, address=address)
@@ -69,23 +115,34 @@ def generate_triggers(api, trigger_value):
 
 class userAPI(SequenceHandler):
     """This class is instanciated and used by main_program.py"""
-    def __init__(self, chandler):
+    def __init__(self, chandler, dds_count=1):
+        # The command handler
         self.chandler = chandler
+        # The sequencer and the API
         self.sequencer=sequencer.sequencer()
         self.api = api.api(self.sequencer)
+        # Load the configuration
         self.config = config.Config()
         self.logger = logging.getLogger("server")
         self.seq_directory = self.config.get_str("SERVER","sequence_dir")
         self.is_nonet = self.config.get_bool("SERVER","nonet")
+        # Instnciate the IncludeHandler
         include_dir = self.config.get_str("SERVER","include_dir")
         self.include_handler = IncludeHandler(include_dir)
+        # The Return string
         global return_str
         return_str = ""
+        # Configure the DDS devices
+        self.api.dds_list=[]
+        ref_freq = self.config.get_float("SERVER","reference_frequency")
+        for dds_addr in range(dds_count):
+            self.api.dds_list.append(ad9910.AD9910(dds_addr, ref_freq))
+
 
     def init_sequence(self, initial_ttl=0x0):
         "generate triggers, frequency initialization and loop targets"
         generate_triggers(self.api, 0x1)
-        self.generate_frequency(self.api, self.chandler.transitions)
+        self.api.dds_profile_list = self.generate_frequency(self.api, self.chandler.transitions, self.api.dds_list)
         # Missing: triggering, frequency initialization
 
     def generate_sequence(self):
@@ -142,7 +199,6 @@ class userAPI(SequenceHandler):
     def end_sequence(self):
         "adds triggers and loop events"
         #Missing everything
-#        self.api.
         return None
 
 

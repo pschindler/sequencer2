@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-29 12:25:45 c704271"
+# Time-stamp: "2008-05-30 13:09:38 c704271"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -70,6 +70,7 @@ class RF_Pulse(SeqInstruction):
             raise RuntimeError("Error while getting Rabi frequency for ion "+str(ion))
 
         amplitude = int(transition_obj.amplitude)
+        transition_name = transition_obj.name
 
         cycle_time = 1e-2
         dac_switch_time = 3.0*cycle_time
@@ -83,8 +84,11 @@ class RF_Pulse(SeqInstruction):
         print "RF_Pulse not implemented yet :-("
 
         dac_start_event = DAC_Event(dac_start_time, amplitude, address, is_last=False)
+        dds_start_event = DDS_Switch_Event(start_time, address, transition_name,\
+                                               phi, is_last=False)
         dac_stop_event = DAC_Event(dac_start_time, amplitude_off, address, is_last=is_last)
         self.sequence_var = dac_start_event.add_insn(self.sequence_var)
+        self.sequence_var = dds_start_event.add_insn(self.sequence_var)
         self.sequence_var = dac_stop_event.add_insn(self.sequence_var)
 
 class TTL_Event(SeqInstruction):
@@ -127,5 +131,33 @@ class DAC_Event(SeqInstruction):
         return str(self.name) + " start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | addr: "+str(self.address) + " | val: "+str(self.value)
+
+
+class DDS_Switch_Event(SeqInstruction):
+    "Generates a DDS freq switching event"
+    def __init__(self, start_time, dds_address, index, phase=0, is_last=False):
+        self.start_time = start_time
+        self.index = index
+        self.phase = phase
+        self.is_last = is_last
+        self.dds_address = dds_address
+        self.name = "DDS_Switch_Event"
+
+    def handle_instruction(self, api):
+        try:
+            if int(self.index) == self.index:
+                real_index = self.index
+        except:
+            try:
+                real_index = api.dds_profile_list[self.index]
+            except:
+                raise RuntimeError("Transition name not found: "+str(index))
+        dds_instance = api.dds_list[self.dds_address]
+        api.switch_frequency(dds_instance, real_index, self.phase)
+
+    def __str__(self):
+        return str(self.name) + " start: " + str(self.start_time) \
+            + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
+            + " | dds_addr: "+str(self.dds_address) + " | index: "+str(self.index)
 
 # instruction_handler.py ends here

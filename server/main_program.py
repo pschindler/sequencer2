@@ -1,11 +1,42 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-29 12:40:00 c704271"
+# Time-stamp: "2008-05-30 13:48:50 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
+"""Main Program
+============
 
+  This module contains the main program lopp which starts the server and invokes
+  the user_function methods for sequence parsing and generation
+
+  MainProgram
+  -----------
+    The class should be invoked as follows:
+
+    >>> var1 = MainProgram()
+
+    This command reads the configuration file and initializes the needed variables
+
+    The server is then started with the command:
+
+    >>> var1.start_server()
+
+    This commands invokes the main_loop method of the server class.
+
+    The main_loop method invokes then the execute_program method of the MainProgram class
+    with the command string given from QFP as an argument
+
+    The execute_program method does following tasks with help of the userAPI class:
+
+      - The string is analyzed with the handle_command class
+      - The triggers for and from QFP are set in the init_sequence method
+      - The sequence is generated with generate_sequence
+      - The end sequence ttl channel is set with the end_sequence method
+      - The sequence is compiled with the compile_sequence method
+      - The sequence is sent to the Box
+"""
 
 import logging
 
@@ -26,30 +57,7 @@ class ReturnClass:
 
 class MainProgram:
     """The MainProgram class
-    The class should be invoked as follows:
-
-    var1 = MainProgram()
-
-    This command reads the configuration file and initializes the needed variables
-
-    The server is then started with the command:
-
-    var1.start_server()
-
-    This commands invokes the main_loop method of the server class.
-
-    The main_loop method invokes then the execute_program method of the MainProgram class
-    with the command string given from QFP as an argument
-
-    The execute_program method does following tasks with help of the userAPI class:
-
-      - The string is analyzed with the handle_command class
-      - The triggers for and from QFP are set in the init_sequence method
-      - The sequence is generated with generate_sequence
-      - The end sequence ttl channel is set with the end_sequence method
-      - The sequence is compiled with the compile_sequence method
-      - The sequence is sent to the Box
-    """
+        """
 
     def __init__(self):
         "sets up the configuration and the logger"
@@ -81,19 +89,30 @@ class MainProgram:
             self.variable_dict = self.chandler.get_variables(command_string)
         except ValueError, KeyError:
             self.logger.exception("Error while interpreting command string")
-            return "Error while interpreting command string"
+            generate_str = "Error while interpreting command string"
+            return_var.return_string = generate_str
+            return return_var
         # initialize API
         user_api = user_function.userAPI(self.chandler)
         # generate sequence  before loop trigger
         # initialize frequencies
         # Start looping and triggers
-        user_api.init_sequence()
+        try:
+            user_api.init_sequence()
+        except:
+
+            self.logger.exception("Error while initializing sequence")
+            generate_str = "Error while initializing sequence"
+            return_var.return_string = generate_str
+            return return_var
         # Generate sequence
         try:
             generate_str = user_api.generate_sequence()
         except:
             self.logger.exception("Error while generating sequence")
             generate_str = "Error while generating sequence"
+            return_var.return_string = generate_str
+            return return_var
         # end loops and generate IOs for LabView
         user_api.end_sequence()
         # Compile sequence
@@ -102,6 +121,8 @@ class MainProgram:
         except:
             self.logger.exception("Error while compiling sequence")
             generate_str = "Error while compiling sequence"
+            return_var.return_string = generate_str
+            return return_var
 
         #Send sequence to Box
         try:

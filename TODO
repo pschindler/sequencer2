@@ -1,14 +1,14 @@
 * Missing features:
 
-- Configuration mechanism
-- finite loops (bdec,ldc)
+- Pulse Shaping
+- DDS switching off
 - Error handling
-- Server
-- TTL subsystem
 - Stack for subroutines (in VHDL ???)
 
 * Missing tests
 
+- TTL subsystem
+- finite loops (bdec,ldc)
 - Additional label/subroutine/loop testing
 - Test on physical PCP
 - Additional tests for the LVDS Bus

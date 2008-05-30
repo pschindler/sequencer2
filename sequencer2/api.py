@@ -1,11 +1,24 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-26 13:13:19 c704271"
+# Time-stamp: "2008-05-30 11:33:38 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
-"""API functions for the DDS / TTL / DAC /Builtin Commands
+"""
+API
+===
+
+  API functions for the DDS / TTL / DAC /Builtin Commands
+
+  Important functions
+  -------------------
+
+    Following functions are mos commonly used:
+      - wait(wait_time)
+      - ttl_value(??)
+      - dac_value(??)
+
 """
 
 #from exceptions import *
@@ -54,7 +67,7 @@ class api:
         """
         wait_cycles = int(wait_time/self.cycle_time)
         if wait_cycles < 1.0:
-            self.logger.warn("Cannot wait for less than one cycle")
+            self.logger.info("Cannot wait for less than one cycle")
             return
         nop_insn = instructions.nop()
         if wait_cycles > self.branch_delay_slots:
@@ -97,7 +110,6 @@ class api:
         for index in range(self.branch_delay_slots):
             self.sequencer.add_insn(copy.copy(nop_insn))
 
-
     def start_finite(self, label_name, loop_count):
         """at the beginning of a finite loop
         adds a ldc instruction and a label intruction"""
@@ -107,7 +119,6 @@ class api:
         self.sequencer.add_insn(ldc_insn)
         label_insn = instructions.label(label_name)
         self.sequencer.add_insn(label_insn)
-
 
     def end_finite(self, label_name):
         register_addr = len(self.sequencer.bdec_register) - 1
