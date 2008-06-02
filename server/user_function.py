@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-30 13:36:35 c704271"
+# Time-stamp: "2008-06-02 11:06:07 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -14,6 +14,15 @@ In this file the functions which are available are defined.
 
 This files provides only very general functions.
 Additionally external include files may be used
+
+Basic Functions
+===============
+
+Following functions are defined in user_function and may be invoked by
+include files as well as directly in the sequence:
+
+  - ttl_pulse(device_key, duration, start_time=0.0, is_last=True)
+  - rf_pulse(theta, phi, ion, transition_name, start_time=0.0, is_last=True, address=0)
 
 Include Files:
 ==============

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-30 11:33:38 c704271"
+# Time-stamp: "2008-06-02 12:40:47 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -210,6 +210,7 @@ class api:
     def dac_value(self, address, val):
         """Sets the dac on the DDS board
         """
+        val = int(val)
         self.lvds_cmd(self.dac_opcode, address, val)
 
     def reset_fifo(self, dds_instance):

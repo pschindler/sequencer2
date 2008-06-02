@@ -1,12 +1,15 @@
 * Missing features:
 
-- Pulse Shaping
+- Timing config for instruction_handler
+- Conflict handling
+- Amplitude calibration
 - DDS switching off
 - Error handling
 - Stack for subroutines (in VHDL ???)
 
 * Missing tests
 
+- Pulse Shaping
 - TTL subsystem
 - finite loops (bdec,ldc)
 - Additional label/subroutine/loop testing
