@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-30 13:48:50 c704271"
+# Time-stamp: "2008-06-09 13:41:47 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -41,7 +41,6 @@
 import logging
 
 from sequencer2 import config
-from  sequencer2 import comm
 
 import server
 import handle_commands
@@ -62,9 +61,12 @@ class MainProgram:
     def __init__(self):
         "sets up the configuration and the logger"
         self.logger = logging.getLogger("server")
-        self.config=config.Config()
+        self.config = config.Config()
+        self.server = None
         self.setup_server()
         self.chandler = handle_commands.CommandHandler()
+        self.variable_dict = {}
+
 
     def setup_server(self):
         "Reads the configurations and configures the server"
@@ -87,7 +89,7 @@ class MainProgram:
         return_var = ReturnClass()
         try:
             self.variable_dict = self.chandler.get_variables(command_string)
-        except ValueError, KeyError:
+        except ValueError:
             self.logger.exception("Error while interpreting command string")
             generate_str = "Error while interpreting command string"
             return_var.return_string = generate_str
@@ -118,6 +120,8 @@ class MainProgram:
         # Compile sequence
         try:
             user_api.compile_sequence()
+            sequence_length = len(user_api.sequencer.current_sequence)
+            self.logger.info("sequence length: "+str(hex(sequence_length)))
         except:
             self.logger.exception("Error while compiling sequence")
             generate_str = "Error while compiling sequence"

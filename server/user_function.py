@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-02 11:06:07 c704271"
+# Time-stamp: "2008-06-10 13:36:41 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -15,6 +15,8 @@ In this file the functions which are available are defined.
 This files provides only very general functions.
 Additionally external include files may be used
 
+Some helper functions are in L{server.sequence_handler}
+
 Basic Functions
 ===============
 
@@ -22,7 +24,8 @@ Following functions are defined in user_function and may be invoked by
 include files as well as directly in the sequence:
 
   - ttl_pulse(device_key, duration, start_time=0.0, is_last=True)
-  - rf_pulse(theta, phi, ion, transition_name, start_time=0.0, is_last=True, address=0)
+  - rf_pulse(theta, phi, ion, transition_name, \
+                  start_time=0.0, is_last=True, address=0)
 
 Include Files:
 ==============
@@ -38,6 +41,12 @@ Include Files:
   sequence files. An example file is PulseSequences/includes2/test.py
 
   >>> def test_include(test_string):
+  >>>     \"""This is just a test comment
+  >>>     This funtion generates a 300us pulse on channel nr "15"
+  >>>
+  >>>     @param test_string: This is a meaningless test string which is
+  >>>    just printed to stdout
+  >>>     \"""
   >>>     print test_string
   >>>     ttl_pulse("15",300, is_last=True)
 
@@ -45,6 +54,15 @@ Include Files:
   the sequence file:
 
   >>> test_include("something")
+
+  Documenting include files
+  -------------------------
+
+  Documentation of the functions defined in include file is best given in the
+  epydoc standard.
+
+  The syntax for the documentation can be found at:
+  U{http://epydoc.sourceforge.net/manual-epytext.html}
 
   Return Values
   -------------
@@ -77,10 +95,12 @@ from include_handler import IncludeHandler
 #Yes we need that cruel import ;-)
 from instruction_handler import *
 
-##################################################################################################
+###############################################################################
 # HIGH LEVEL STUFF ------- DO NOT EDIT ---- USE INCLUDES INSTEAD
-##################################################################################################
-
+###############################################################################
+return_str = ""
+sequence_var = None
+transitions = None
 
 def test_global(string1):
     "Just testing ..."
@@ -106,21 +126,22 @@ def rf_pulse(theta, phi, ion, transition_name, start_time=0.0, is_last=True, add
 
     else:
         transition_obj = transition_name
-    rf_pulse = RF_Pulse(start_time, theta, phi, ion, transition_obj, is_last=is_last, address=address)
-    sequence_var.append(rf_pulse.sequence_var)
+    rf_pulse_insn = RF_Pulse(start_time, theta, phi, ion, transition_obj, \
+                            is_last=is_last, address=address)
+    sequence_var.append(rf_pulse_insn.sequence_var)
 
-def generate_triggers(api, trigger_value):
+def generate_triggers(my_api, trigger_value):
     "Generates the triggers for QFP"
     # Missing: Line trigger, ttl signal for QFP
-    api.label("wait_label_1")
-    api.jump_trigger("wait_label_2", trigger_value)
-    api.jump("wait_label_1")
-    api.label("wait_label_2")
-    api.label("finite_label")
+    my_api.label("wait_label_1")
+    my_api.jump_trigger("wait_label_2", trigger_value)
+    my_api.jump("wait_label_1")
+    my_api.label("wait_label_2")
+    my_api.label("finite_label")
 
-##################################################################################################
+################################################################################
 # LOW LEVEL STUFF ------- DO NOT EDIT ---- YOU DON'T NEED TO
-##################################################################################################
+###############################################################################
 
 class userAPI(SequenceHandler):
     """This class is instanciated and used by main_program.py"""
@@ -128,7 +149,7 @@ class userAPI(SequenceHandler):
         # The command handler
         self.chandler = chandler
         # The sequencer and the API
-        self.sequencer=sequencer.sequencer()
+        self.sequencer = sequencer.sequencer()
         self.api = api.api(self.sequencer)
         # Load the configuration
         self.config = config.Config()
@@ -142,11 +163,13 @@ class userAPI(SequenceHandler):
         global return_str
         return_str = ""
         # Configure the DDS devices
-        self.api.dds_list=[]
+        self.api.dds_list = []
         ref_freq = self.config.get_float("SERVER","reference_frequency")
         for dds_addr in range(dds_count):
             self.api.dds_list.append(ad9910.AD9910(dds_addr, ref_freq))
 
+        self.pulse_program_name = ""
+        self.final_array = []
 
     def init_sequence(self, initial_ttl=0x0):
         "generate triggers, frequency initialization and loop targets"
@@ -187,6 +210,8 @@ class userAPI(SequenceHandler):
         transitions = self.chandler.transitions
         #Execute sequence
         exec(seq_str)
+        # Here all the magic of sequence creation is done
+        # see sequence_handler.py for details
         self.final_array = self.get_sequence_array(sequence_var)
         return return_str
 

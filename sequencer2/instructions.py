@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-26 13:38:30 c704271"
+# Time-stamp: "2008-06-05 10:46:31 c704271"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -59,6 +59,12 @@ class label(insn_class):
     opcode = 0x0
     def __init__(self, label_name):
         self.label = label_name
+
+    def __str__(self):
+        return " add: "+str(self.address) + \
+               " -- op:  "+str(hex(self.opcode)) + \
+               " -- nam: "+str(self.name) + \
+               " -- id: " +str(self.label)
 
 class p(insn_class):
     """The p instruction:
@@ -137,6 +143,11 @@ class bdec(j):
         "returns the hex value for bdec insns"
         self.target_address = target_address
         return self.opcode << 28 | self.register_address << 23  | target_address
+    def __str__(self):
+        return " add: "+str(self.address) + \
+               " -- op:  "+str(hex(self.opcode)) + \
+               " -- nam: "+str(self.name) + \
+               " -- reg addr: "+str(self.register_address)
 
 class call(j):
     """ Calls a subroutine
@@ -173,17 +184,17 @@ class ldc(insn_class):
     def __init__(self, register_addr, value):
         if value > 255:
             raise RuntimeError("Cannot generate a bdec with more than 255 cycles")
-        self.register_addr = register_addr
+        self.register_address = register_addr
         self.value = value
 
     def get_value(self):
-        return self.opcode << 28 | self.register_addr << 23 | self.value
+        return self.opcode << 28 | self.register_address << 23 | self.value
 
     def __str__(self):
         return " add: "+str(self.address) + \
                " -- op:  "+str(hex(self.opcode)) + \
                " -- nam: "+str(self.name) + \
-               " -- addr: "+str(self.register_addr) + \
+               " -- reg addr: "+str(self.register_address) + \
                " -- val: "+str(hex(self.value))
 
 ##

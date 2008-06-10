@@ -1,28 +1,37 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-02 13:03:08 c704271"
+# Time-stamp: "2008-06-10 11:03:57 c704271"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
 
 
-"""Defines the high level instructions which are used by functions in user_fucntion.py"""
+"""Defines the high level instructions which are used by
+functions in user_fucntion.py"""
 
 from transitions import Transitions
+from  sequencer2 import config
+
+global_config = config.Config()
+global_reference_frequency = global_config.get_float("SERVER","reference_frequency")
+global_clk_divider = global_config.get_float("SERVER","clk_divider")
+
+global_config.get_all_dict("Durations")
+global_get_duration = global_config.get_int_dict_val
 
 class SeqInstruction:
     "Base class used for all intructions"
     duration = 0.0
     start_time = 0.0
-    cycle_time = 10e-3
-    dac_duration = 3 * cycle_time
-    dds_duration = 3 * cycle_time
+    cycle_time = 1 / global_reference_frequency * global_clk_divider
+    get_hardware_duration = global_get_duration
     is_last = False
     is_added = False
     sequence_var = []
+    name = "generic Instruction"
 
-    def add_insn(self, sequence_var, is_last=False):
+    def add_insn(self, sequence_var):
         "Adds the instructions to the sequence dictionary"
         if self.is_added:
             raise RuntimeError("Instruction can not be added twice")
@@ -37,6 +46,10 @@ class SeqInstruction:
     def __str__(self):
         return str(self.name) + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last)
+
+    def resolve_conflict(self, other_item):
+        "By default no conflict is resolved"
+        return False
 
 class TTL_Pulse(SeqInstruction):
     "generates a TTL pulse"
@@ -81,8 +94,8 @@ class RF_Pulse(SeqInstruction):
         transition_name = transition_obj.name
         # Missing: global configuration
         cycle_time = self.cycle_time
-        dac_switch_time = self.dac_duration
-        dds_switch_time = self.dds_duration
+        dac_switch_time = self.get_hardware_duration("dac_duration")
+        dds_switch_time = self.get_hardware_duration("dds_duration")
         #Switch the DDS on before the DAC
         dds_start_time = start_time
         dac_start_time = start_time + dds_switch_time
@@ -91,19 +104,18 @@ class RF_Pulse(SeqInstruction):
         dds_stop_time = dac_stop_time + dac_switch_time
 
         amplitude_off = 0
-        print "RF_Pulse not implemented yet :-("
-        print "Slope duration: " + str(slope_duration)
 
         #Let's check if we're using a shaped pulse or not ....
         if slope_duration < cycle_time :
-            dac_start_event = DAC_Event(dac_start_time, amplitude, address, is_last=False)
-            dac_stop_event = DAC_Event(dac_start_time, amplitude_off, address, is_last=False)
+            dac_start_event = DAC_Event(dac_start_time, amplitude, \
+                                            address, is_last=False)
+            dac_stop_event = DAC_Event(dac_start_time, amplitude_off, \
+                                           address, is_last=False)
         else:
-            dac_start_event = DAC_Shape_Event(dac_start_time, transition_obj, address, \
-                                                  rising=True, is_last=False)
-            dac_stop_event = DAC_Shape_Event(dac_stop_time, transition_obj, address, \
-                                                 rising=False, is_last=False)
-
+            dac_start_event = DAC_Shape_Event(dac_start_time, transition_obj, \
+                                                  address, rising=True, is_last=False)
+            dac_stop_event = DAC_Shape_Event(dac_stop_time, transition_obj, \
+                                                 address, rising=False, is_last=False)
 
         dds_start_event = DDS_Switch_Event(dds_start_time, address, transition_name,\
                                                    phi, is_last=False)
@@ -134,6 +146,14 @@ class TTL_Event(SeqInstruction):
     def handle_instruction(self, api):
         api.ttl_set_multiple(self.val_dict)
 
+    def resolve_conflict(self, other_item):
+        "We can combine two TTL Events"
+        if other_item.name != "TTL_Event":
+            return None
+        self.val_dict.update(other_item.val_dict)
+        self.device_key += other_item.device_key
+        return True
+
     def __str__(self):
         return str(self.name) + " start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
@@ -161,7 +181,8 @@ class DAC_Event(SeqInstruction):
 
 
 class DAC_Shape_Event(SeqInstruction):
-    def __init__(self, start_time, transition, dac_address, rising=True, is_last=False , step_nr=200):
+    "A simple shaped DAC pulse"
+    def __init__(self, start_time, transition, dac_address, rising=True, is_last=False , step_nr=100):
         self.start_time = start_time
         self.name = "DAC_Shape_Event"
         self.slope_duration = transition.slope_duration
@@ -176,9 +197,13 @@ class DAC_Shape_Event(SeqInstruction):
         except KeyError:
             raise RuntimeError("Error while getting slope function: "+str(transition.slope_type))
         self.duration = self.slope_duration
-
         self.step_nr = step_nr
-        self.wait_time = (self.slope_duration / self.step_nr * self.cycle_time) - self.dac_duration
+        #calculate the waiting time in between two steps
+        self.wait_time = (self.slope_duration / self.step_nr * self.cycle_time) - self.get_hardware_duration("dac_duration")
+        # Check if we need to decrease the step count
+        if self.wait_time < 0:
+            self.wait_time = 0
+            self.step_nr = int(self.slope_duration / self.get_hardware_duration("dac_duration"))
 
     def handle_instruction(self, api):
         for i in range(self.step_nr):
@@ -211,7 +236,7 @@ class DDS_Switch_Event(SeqInstruction):
             try:
                 real_index = api.dds_profile_list[self.index]
             except:
-                raise RuntimeError("Transition name not found: "+str(index))
+                raise RuntimeError("Transition name not found: "+str(self.index))
         dds_instance = api.dds_list[self.dds_address]
         api.switch_frequency(dds_instance, real_index, self.phase)
 

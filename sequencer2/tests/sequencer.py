@@ -188,6 +188,7 @@ class Test_Sequencer(unittest.TestCase):
 
 
   def test_finite_loop(self):
+    "Testing the finite loop construct"
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
     my_api.start_finite("finite1", 100)
@@ -199,6 +200,13 @@ class Test_Sequencer(unittest.TestCase):
     my_api.end_finite("finite1")
     my_sequencer.compile_sequence()
     my_sequencer.debug_sequence()
+    ldc_insn1 = my_sequencer.current_sequence[0]
+    bdec_insn1 = my_sequencer.current_sequence[13]
+    self.assertEquals(ldc_insn1.name,"load const")
+    self.assertEquals(ldc_insn1.value,100)
+    self.assertEquals(bdec_insn1.name,"bdec")
+    self.assertEquals(bdec_insn1.target_address,1)
+    self.assertEquals(bdec_insn1.register_address,ldc_insn1.register_address)
 
 #  def tearDown(self):
 

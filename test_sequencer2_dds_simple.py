@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-26 09:12:28 c704271"
+# Time-stamp: "2008-06-06 10:07:59 c704271"
 #  copyright  (c) Philipp Schindler 2008
 #  license    GPL (see file COPYING)
 
