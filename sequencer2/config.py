@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-06 09:53:23 c704271"
+# Time-stamp: "2008-06-11 10:50:25 c704271"
 
 #  file       config.py
 #  copyright  (c) Philipp Schindler 2008
@@ -18,17 +18,17 @@ class Config:
         self.item_dict = {}
         self.logger = logging.getLogger("server")
 
-    def get_str(self,section, option):
+    def get_str(self, section, option):
         """returns a string from option
         """
         return str(self.config.get(section, option))
 
-    def get_int(self,section, option):
+    def get_int(self, section, option):
         """returns an int from option
         """
         return self.config.getint(section, option)
 
-    def get_float(self,section, option):
+    def get_float(self, section, option):
         """returns an int from option
         """
         return self.config.getfloat(section, option)
@@ -42,14 +42,57 @@ class Config:
 
 
     def get_int_dict_val(self, key):
+        "Returns a value frrom the dictionary defined in get_all_dict"
         try:
             val = int(self.item_dict[key])
         except KeyError:
             self.logger.info("Cannot find duration information for key: "+str(key))
             val = 1
         return val
+
     def get_bool(self,section, option):
         """returns a bool from option
         """
         return self.config.getboolean(section, option)
+
+    def get_digital_channels(self, filename):
+        """ Extracts the channel names and numbers from thhe configuration
+        file written by QFP"""
+        try:
+            file = open(filename, 'r')
+        except IOError:
+            self.logger.error("error while openinng hardware settings file:" \
+                                  + str(filename) )
+            raise RuntimeError("error while openinng hardware settings file:" \
+                                  + str(filename) )
+
+        dictionary = {}
+        is_device = False
+        content = file.read()
+        array = content.split("\n")
+        for i in range(len(array)):
+            is_PB_device = array[i].find('.Device=PB')
+            is_invPB_device = array[i].find('.Device=!PB')
+            is_inverted = 0
+            if (is_invPB_device!=-1):
+                is_inverted = 1
+            if (is_PB_device!=-1) or (is_invPB_device!=-1):
+                to_test = [array[i-1], array[i+1]]
+                split1 = array[i].split(".")
+                ch_name = split1[0]
+                for item in to_test:
+                    split2 = item.split(".")
+                    if split2[0] == ch_name:
+                        split3 = split2[1].split("=")
+                        try:
+                            dictionary[split1[0]] = []
+                            dictionary[split1[0]].append(int(split3[1]))
+                            dictionary[split1[0]].append(is_inverted)
+                        except:
+                            self.logger.warn("warning: got a non int channel number"\
+                                                 +split2[1])
+
+        return dictionary
+
+
 # config.py ends here

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-09 13:22:05 c704271"
+# Time-stamp: "2008-06-11 14:25:55 c704271"
 
 #  file       ad9910.py
 #  copyright  (c) Philipp Schindler 2008
@@ -16,11 +16,13 @@ class ProfileRegister:
         ftw : frequency tuning word
         phow : phase offset word
         asf : amplitude scale factor
+        transition_name: name of transition for this register
     """
     def __init__(self, ftw=0, phow=0, asf=0):
         self.ftw = ftw
         self.phow = phow
         self.asf = asf
+        self.transition_name = None
 
 class AD9910:
     """base class dor AD9910
@@ -49,9 +51,10 @@ class AD9910:
         self.device_addr = device_addr
         self.ref_freq = float(ref_freq)
         self.prof_reg = []
-        prof_reg = ProfileRegister()
+        prof_reg_inst = ProfileRegister()
         for i in range(8):
-            self.prof_reg.append(copy.copy(prof_reg))
+            self.prof_reg.append(copy.copy(prof_reg_inst))
+
         # Set the bitmasks for the register
         self.reg_bitmask_dict = {}
         self.reg_bitmask_dict[self.CFR1] = [self.auto_clr]
@@ -102,7 +105,6 @@ class AD9910:
         asf_val = asf << 48
         addr_tuple = (self.PROF_START[0] + register_addr, self.PROF_START[1])
         self.reg_value_dict[addr_tuple] = freq_val | asf_val | phase_val
-        val = hex(freq_val | asf_val | phase_val)
 
     def get_fpga_ftw(self, register_addr):
         """Returns the tuning word for the FPGA phase register

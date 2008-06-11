@@ -1,13 +1,16 @@
 * Missing features:
 
+- More than 7 transitions
 - Amplitude calibration
-- DDS switching off
+- DIO confiuration
 - DDS sweeps
 - Error handling
 - Stack for subroutines (in VHDL ???)
 
 * Missing tests
 
+- Configuration for PCP internals
+- DDS switching off
 - Conflict handling
 - Pulse Shaping
 - TTL subsystem

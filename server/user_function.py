@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-10 13:36:41 c704271"
+# Time-stamp: "2008-06-11 16:05:07 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
+# pylint: disable-msg=W0603, W0602, W0122, W0702, F0401, W0401, W0614
 
 """
 user_function
@@ -84,50 +85,53 @@ from math import *
 from  sequencer2 import sequencer
 from  sequencer2 import api
 from  sequencer2 import ad9910
-from  sequencer2 import instructions
-from  sequencer2 import outputsystem
 from  sequencer2 import config
 
 import sequence_parser
-from sequence_handler import SequenceHandler
+from sequence_handler import SequenceHandler, TransitionListObject
 from include_handler import IncludeHandler
 
 #Yes we need that cruel import ;-)
 from instruction_handler import *
-
 ###############################################################################
 # HIGH LEVEL STUFF ------- DO NOT EDIT ---- USE INCLUDES INSTEAD
 ###############################################################################
 return_str = ""
-sequence_var = None
-transitions = None
+sequence_var = []
+transitions = TransitionListObject()
 
 def test_global(string1):
     "Just testing ..."
     global return_str
-#    print string1
     return_str += string1
 
 def ttl_pulse(device_key, duration, start_time=0.0, is_last=True):
-    """generates a sequential ttl pulse"""
+    """generates a sequential ttl pulse
+    device_key may be a string or a list of strings indicating
+    the used TTL channels"""
     global sequence_var
-    pulse1 = TTL_Pulse(start_time, duration, device_key, is_last)
+    pulse1 = TTLPulse(start_time, duration, device_key, is_last)
     sequence_var.append(pulse1.sequence_var)
 
-def rf_pulse(theta, phi, ion, transition_name, start_time=0.0, is_last=True, address=0):
-    "Generates a RF pulse"
+def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
+                 is_last=True, address=0):
+    """Generates an RF pulse
+    The transition_param may be either a string or a transition object.
+    If a string is given than the according transition object is extracted
+    from the data sent by QFP
+    """
     global sequence_var
-    global transitions
-    if str(transition_name) == transition_name:
-        try:
-            transition_obj = transitions[transition_name]
-        except:
-            raise RuntimeError("Transition name not found: "+str(transition_name))
+    print transitions
+
+    if str(transition_param) == transition_param:
+        transitions.current_transition = transition_param
+        transition_obj = transitions
 
     else:
-        transition_obj = transition_name
-    rf_pulse_insn = RF_Pulse(start_time, theta, phi, ion, transition_obj, \
+        transition_obj = transition_param
+    rf_pulse_insn = RFPulse(start_time, theta, phi, ion, transition_obj, \
                             is_last=is_last, address=address)
+
     sequence_var.append(rf_pulse_insn.sequence_var)
 
 def generate_triggers(my_api, trigger_value):
@@ -174,7 +178,8 @@ class userAPI(SequenceHandler):
     def init_sequence(self, initial_ttl=0x0):
         "generate triggers, frequency initialization and loop targets"
         generate_triggers(self.api, 0x1)
-        self.api.dds_profile_list = self.generate_frequency(self.api, self.chandler.transitions, self.api.dds_list)
+        self.api.dds_profile_list = self.generate_frequency(self.api, \
+                                                                self.api.dds_list)
         # Missing: triggering, frequency initialization
 
     def generate_sequence(self):

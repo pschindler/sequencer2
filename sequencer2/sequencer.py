@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-29 10:28:59 c704271"
+# Time-stamp: "2008-06-11 09:51:16 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -10,6 +10,7 @@
 import logging
 import instructions
 import copy
+import config
 
 class sequencer:
     def __init__(self):
@@ -18,11 +19,14 @@ class sequencer:
         self.word_list = []
         self.label_dict = {}
         self.sub_list = []
-        self.branch_delay_slots = 5
         self.is_subroutine = False
         self.logger = logging.getLogger("sequencer2")
         self.current_output = [0,0,0,0]
         self.bdec_register = []
+        self.config = config.Config()
+        self.branch_delay_slots = self.config.get_int("PCP", "branch_delay_slots")
+        self.max_sequence_length = self.config.get_int("PCP", "max_sequence_length")
+
 # This would collide with the subroutine handling :-(
 # So we remove it and hope for the best
 #        nop_insn = instructions.nop()
@@ -129,6 +133,9 @@ class sequencer:
                 self.logger.exception("error while handling jump: " \
                                           + str(jump_insn.target_name))
         #update current_sequence to make debugging possible
+        if len(sequence_list) > self.max_sequence_length - 1:
+            raise RuntimeError("Maximum sequence length exceeded: " + \
+                                   str(hex(len(sequence_list))))
         self.current_sequence = sequence_list
 
     def debug_sequence(self):

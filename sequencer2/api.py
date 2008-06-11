@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-02 12:40:47 c704271"
+# Time-stamp: "2008-06-11 12:21:51 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
+
 """
 API
 ===
@@ -14,14 +15,13 @@ API
   Important functions
   -------------------
 
-    Following functions are mos commonly used:
+    Following functions are most commonly used:
       - wait(wait_time)
-      - ttl_value(??)
       - dac_value(??)
+      - ttl_set_multiple(value_dict)
 
 """
 
-#from exceptions import *
 import math
 import copy
 import logging
@@ -29,6 +29,7 @@ import logging
 # sequencer2 classes:
 import outputsystem
 import instructions
+import config
 
 class api:
     """api.py the api commands for sequencer2
@@ -37,10 +38,13 @@ class api:
         """A simple initialization
         The LVDS bus opcodes are defined here
         """
-        self.sequencer = sequencer
-        self.cycle_time = 10.0
+        self.config = config.Config()
+        self.cycle_time = self.config.get_float("SERVER", "cycle_time")
+        self.branch_delay_slots = self.config.get_int("PCP", "branch_delay_slots")
 
+        self.sequencer = sequencer
         # The LVDS opcodes
+        # These may be defined in the configuration files ??
         self.addr_opcode = 0x1
         self.fifo_opcode = 0x2
         self.dds_profile_opcode = 0x3
@@ -49,9 +53,6 @@ class api:
         self.phase_load_opcode = 0xa
         self.phase_pulse_opcode = 0xb
         self.reset_opcode = 0x1f
-
-        # number of branch delay necessary:
-        self.branch_delay_slots = self.sequencer.branch_delay_slots
 
         self.logger = logging.getLogger("api")
         self.ttl_sys = outputsystem.OutputSystem()
@@ -121,6 +122,9 @@ class api:
         self.sequencer.add_insn(label_insn)
 
     def end_finite(self, label_name):
+        """At the einding of a finite loop
+        Adds a bdec instruction and fills the branch delay slots
+        """
         register_addr = len(self.sequencer.bdec_register) - 1
         if register_addr < 0:
             raise RuntimeError("Cannot pop from empty loop stack")
@@ -301,7 +305,7 @@ class api:
         """Writes the frequency into the DDS and initializes a phase register in the FPGA
         If a frequency is already initialized it is simply overwritten"""
         # UNTESTED
-        self.set_dds_frequency(dds_instance, freq_value, profile)
+        self.set_dds_freq(dds_instance, freq_value, profile)
         self.load_phase(dds_instance, profile)
 
     def switch_frequency(self, dds_instance, profile, phase_offset=0):
@@ -315,6 +319,8 @@ class api:
     # Functions for the TTL output system
     #################################################################
     def ttl_set_bit(self, key, value):
+        """Sets a single bit of the TTL outputs
+        """
         # UNTESTED
         output_state = self.sequencer.current_output
         (select, new_state) = self.ttl_sys.set_bit(key, value, output_state)
@@ -322,6 +328,9 @@ class api:
         self.ttl_value(new_state, select)
 
     def ttl_set_multiple(self, value_dict):
+        """Sets multiple pins of the TTL outputs simultanious
+        The values are given in the dictionary value_dict
+        """
         # save select is missing !!
         select_list=[]
         for  key in value_dict:

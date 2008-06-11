@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-10 11:03:57 c704271"
+# Time-stamp: "2008-06-11 16:11:09 c704271"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -12,6 +12,8 @@ functions in user_fucntion.py"""
 
 from transitions import Transitions
 from  sequencer2 import config
+
+import logging
 
 global_config = config.Config()
 global_reference_frequency = global_config.get_float("SERVER","reference_frequency")
@@ -51,7 +53,7 @@ class SeqInstruction:
         "By default no conflict is resolved"
         return False
 
-class TTL_Pulse(SeqInstruction):
+class TTLPulse(SeqInstruction):
     "generates a TTL pulse"
     def __init__(self, start_time, duration, device_key, is_last=True):
         stop_time = start_time + duration
@@ -71,16 +73,38 @@ class TTL_Pulse(SeqInstruction):
         self.is_last = is_last
         self.sequence_var = []
 
-        start_event = TTL_Event(start_time, device_key, value_on, is_last=False)
-        stop_event = TTL_Event(stop_time, device_key, value_off, is_last=is_last)
+        start_event = TTLEvent(start_time, device_key, value_on, is_last=False)
+        stop_event = TTLEvent(stop_time, device_key, value_off, is_last=is_last)
 
         self.sequence_var = start_event.add_insn(self.sequence_var)
         self.sequence_var = stop_event.add_insn(self.sequence_var)
 
-class RF_Pulse(SeqInstruction):
+class RFPulse(SeqInstruction):
     "Generates an RF pulse"
-    def __init__(self, start_time, theta, phi, ion, transition_obj, \
+    def __init__(self, start_time, theta, phi, ion, transitions, \
                      is_last=False, address=0):
+        # Missing: Modify DDSSwitch event to support different indeces for
+        #    the dds and the phase register
+        #
+        #    Add a set_dds_freq event if the transition is not in the dds
+        #    profile already
+        #
+        #    Modify duration if a set dds_freq event is needed
+        self.logger = logging.getLogger("server")
+        self.logger.debug("Switching frequency to: "+str(transitions))
+        current_dds_index = None
+        try:
+            transition_obj = transitions[transitions.current_transition]
+        except KeyError:
+            raise RuntimeError("Transition name not found: " + \
+                                   str(transitions.current_transition))
+
+        for dds_index, trans  in transitions.index_list.iteritems():
+            if trans == transition_obj:
+                current_dds_index = dds_index
+
+        if current_dds_index == None:
+            raise RuntimeError("Transition not in DDS registers")
         try:
             pulse_duration = transition_obj.t_rabi[ion] * theta
         except KeyError:
@@ -107,21 +131,20 @@ class RF_Pulse(SeqInstruction):
 
         #Let's check if we're using a shaped pulse or not ....
         if slope_duration < cycle_time :
-            dac_start_event = DAC_Event(dac_start_time, amplitude, \
+            dac_start_event = DACEvent(dac_start_time, amplitude, \
                                             address, is_last=False)
-            dac_stop_event = DAC_Event(dac_start_time, amplitude_off, \
+            dac_stop_event = DACEvent(dac_start_time, amplitude_off, \
                                            address, is_last=False)
         else:
-            dac_start_event = DAC_Shape_Event(dac_start_time, transition_obj, \
+            dac_start_event = DACShapeEvent(dac_start_time, transition_obj, \
                                                   address, rising=True, is_last=False)
-            dac_stop_event = DAC_Shape_Event(dac_stop_time, transition_obj, \
+            dac_stop_event = DACShapeEvent(dac_stop_time, transition_obj, \
                                                  address, rising=False, is_last=False)
 
-        dds_start_event = DDS_Switch_Event(dds_start_time, address, transition_name,\
-                                                   phi, is_last=False)
-        #The DDS stop event is not working !!!!!
-        ############################################################
-        dds_stop_event = DDS_Switch_Event(dds_stop_time, address, transition_name,\
+        dds_start_event = DDSSwitchEvent(dds_start_time, address, transition_name, \
+                                                   phi,  is_last=False)
+        #The DDS stop event switches to a zero frequency
+        dds_stop_event = DDSSwitchEvent(dds_stop_time, address, "NULL", \
                                                    phi, is_last=is_last)
         # Add the events to the sequence
         self.sequence_var = dac_start_event.add_insn(self.sequence_var)
@@ -129,7 +152,7 @@ class RF_Pulse(SeqInstruction):
         self.sequence_var = dds_start_event.add_insn(self.sequence_var)
         self.sequence_var = dds_stop_event.add_insn(self.sequence_var)
 
-class TTL_Event(SeqInstruction):
+class TTLEvent(SeqInstruction):
     "Generates a ttl high or low event"
     def __init__(self, start_time, device_key, value, is_last=True):
         self.val_dict = {}
@@ -138,7 +161,7 @@ class TTL_Event(SeqInstruction):
             self.val_dict[device_key[index]] = value[index]
         self.start_time = start_time
         self.device_key = device_key
-        self.name = "TTL_Event"
+        self.name = "TTLEvent"
         self.duration = self.cycle_time
         self.is_last = is_last
         self.value = value
@@ -148,7 +171,7 @@ class TTL_Event(SeqInstruction):
 
     def resolve_conflict(self, other_item):
         "We can combine two TTL Events"
-        if other_item.name != "TTL_Event":
+        if other_item.name != "TTLEvent":
             return None
         self.val_dict.update(other_item.val_dict)
         self.device_key += other_item.device_key
@@ -160,11 +183,11 @@ class TTL_Event(SeqInstruction):
             + " | key: " +str(self.val_dict)
 
 
-class DAC_Event(SeqInstruction):
+class DACEvent(SeqInstruction):
     "Generates a DAC event"
     def __init__(self, start_time, value, address, is_last=True):
         self.start_time = start_time
-        self.name = "DAC_Event"
+        self.name = "DACEvent"
         self.duration = self.cycle_time * 3.0
         self.is_last = is_last
         self.value = value
@@ -180,7 +203,7 @@ class DAC_Event(SeqInstruction):
 
 
 
-class DAC_Shape_Event(SeqInstruction):
+class DACShapeEvent(SeqInstruction):
     "A simple shaped DAC pulse"
     def __init__(self, start_time, transition, dac_address, rising=True, is_last=False , step_nr=100):
         self.start_time = start_time
@@ -218,7 +241,7 @@ class DAC_Shape_Event(SeqInstruction):
             + " | slope_dur: "+str(self.slope_duration)
 
 
-class DDS_Switch_Event(SeqInstruction):
+class DDSSwitchEvent(SeqInstruction):
     "Generates a DDS freq switching event"
     def __init__(self, start_time, dds_address, index, phase=0, is_last=False):
         self.start_time = start_time
