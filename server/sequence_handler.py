@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-11 16:11:52 c704271"
+# Time-stamp: "2008-06-12 15:11:37 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -118,7 +118,7 @@ class SequenceHandler(object):
         If items have the same start time they are added to the conflict_array
         This conflict_array is emptied if an item with a different start time occurs
 
-        Maybe better data structure: use dic for conflict_array
+        Maybe better data structure: use dict for conflict_array
         """
         has_conflict = False
         new_array = []
@@ -179,15 +179,15 @@ class SequenceHandler(object):
                 for dds_instance in  dds_list:
                     self.chandler.transitions.index_list[index] = trans
                     api.set_dds_freq(dds_instance, frequency, index)
+            else:
+                raise RuntimeError("Cannot handle more than 7 transitions - YET")
             api.load_phase(dds_instance, index)
             dds_profile_list[name] = index
             debug_str = "Transition: " +  str(name) + " | freq: "  \
                 +  str(frequency) + " | index: "+ str(index)
             self.logger.debug(debug_str)
             index += 1
-            if index > 7:
-                raise RuntimeError("Cannot handle more than 7 transitions - YET")
-        print self.chandler.transitions
+
         return dds_profile_list
 
 

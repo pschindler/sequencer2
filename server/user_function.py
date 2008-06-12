@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-11 16:05:07 c704271"
+# Time-stamp: "2008-06-12 15:12:33 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -121,8 +121,6 @@ def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
     from the data sent by QFP
     """
     global sequence_var
-    print transitions
-
     if str(transition_param) == transition_param:
         transitions.current_transition = transition_param
         transition_obj = transitions

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-11 16:11:09 c704271"
+# Time-stamp: "2008-06-11 16:17:29 c704271"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -90,6 +90,8 @@ class RFPulse(SeqInstruction):
         #    profile already
         #
         #    Modify duration if a set dds_freq event is needed
+        #    BUG: The index_list should depend also on the DDS instance !!!
+
         self.logger = logging.getLogger("server")
         self.logger.debug("Switching frequency to: "+str(transitions))
         current_dds_index = None

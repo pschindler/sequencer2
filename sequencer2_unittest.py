@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-05 10:19:03 c704271"
+# Time-stamp: "2008-06-12 15:06:15 c704271"
 
 #  file       test_log.py
 #  copyright  (c) Philipp Schindler 2008
@@ -11,7 +11,7 @@ import sequencer2.tests
 import server.tests
 from sequencer2 import ptplog
 
-logger=ptplog.ptplog(level=logging.DEBUG)
+logger=ptplog.ptplog(level=logging.INFO)
 
 # Run tests
 sequencer2.tests.run()
