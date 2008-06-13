@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-12 15:12:33 c704271"
+# Time-stamp: "14-Jun-2008 00:32:40 viellieb"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -95,6 +95,8 @@ from include_handler import IncludeHandler
 from instruction_handler import *
 ###############################################################################
 # HIGH LEVEL STUFF ------- DO NOT EDIT ---- USE INCLUDES INSTEAD
+#
+# DO NOT ADD NEW FUNCTIONS HERE  ---- USE INCLUDES INSTEAD
 ###############################################################################
 return_str = ""
 sequence_var = []
@@ -147,7 +149,7 @@ def generate_triggers(my_api, trigger_value):
 
 class userAPI(SequenceHandler):
     """This class is instanciated and used by main_program.py"""
-    def __init__(self, chandler, dds_count=1):
+    def __init__(self, chandler, dds_count=1, ttl_dict=None):
         # The command handler
         self.chandler = chandler
         # The sequencer and the API

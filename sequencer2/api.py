@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-11 12:21:51 c704271"
+# Time-stamp: "14-Jun-2008 00:11:14 viellieb"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -34,7 +34,7 @@ import config
 class api:
     """api.py the api commands for sequencer2
     """
-    def __init__(self, sequencer):
+    def __init__(self, sequencer, ttl_dict=None):
         """A simple initialization
         The LVDS bus opcodes are defined here
         """
@@ -55,7 +55,7 @@ class api:
         self.reset_opcode = 0x1f
 
         self.logger = logging.getLogger("api")
-        self.ttl_sys = outputsystem.OutputSystem()
+        self.ttl_sys = outputsystem.OutputSystem(ttl_dict)
 
 
     #################################################################

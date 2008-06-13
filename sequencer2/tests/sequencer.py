@@ -5,7 +5,7 @@
 import unittest
 import time
 import logging
-import psyco
+#import psyco
 from  sequencer2 import sequencer
 from  sequencer2 import api
 from  sequencer2 import instructions

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-09 13:41:47 c704271"
+# Time-stamp: "14-Jun-2008 00:35:41 viellieb"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -66,7 +66,9 @@ class MainProgram:
         self.setup_server()
         self.chandler = handle_commands.CommandHandler()
         self.variable_dict = {}
-
+        ttl_conf_file = self.config.get_str("SERVER","DIO_configuration_file")
+        self.dds_count = self.config.get_int("SERVER","DDS_count")
+        self.ttl_dict = self.config.get_digital_channels(ttl_conf_file)
 
     def setup_server(self):
         "Reads the configurations and configures the server"
@@ -95,7 +97,8 @@ class MainProgram:
             return_var.return_string = generate_str
             return return_var
         # initialize API
-        user_api = user_function.userAPI(self.chandler)
+        user_api = user_function.userAPI(self.chandler, ttl_dict=self.ttl_dict, \
+                                         dds_count = self.dds_count)
         # generate sequence  before loop trigger
         # initialize frequencies
         # Start looping and triggers

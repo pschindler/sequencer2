@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-11 10:50:25 c704271"
+# Time-stamp: "14-Jun-2008 00:30:56 viellieb"
 
 #  file       config.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
 
+from outputsystem import TTLChannel
 import ConfigParser
 import logging
 
@@ -73,10 +74,11 @@ class Config:
         for i in range(len(array)):
             is_PB_device = array[i].find('.Device=PB')
             is_invPB_device = array[i].find('.Device=!PB')
-            is_inverted = 0
-            if (is_invPB_device!=-1):
-                is_inverted = 1
-            if (is_PB_device!=-1) or (is_invPB_device!=-1):
+            is_inverted = False
+            if (is_invPB_device != -1):
+                is_inverted = True
+                raise RuntimeError("No inverted digital channels supported yet")
+            if (is_PB_device != -1) or (is_invPB_device!=-1):
                 to_test = [array[i-1], array[i+1]]
                 split1 = array[i].split(".")
                 ch_name = split1[0]
@@ -85,10 +87,15 @@ class Config:
                     if split2[0] == ch_name:
                         split3 = split2[1].split("=")
                         try:
-                            dictionary[split1[0]] = []
-                            dictionary[split1[0]].append(int(split3[1]))
-                            dictionary[split1[0]].append(is_inverted)
-                        except:
+                            if int(split3[1]) < 15:
+                                select = 2
+                            else:
+                                select = 3
+                            dictionary[split1[0]] = TTLChannel(split1[0], \
+                                                               int(split3[1]), select, is_inverted)
+                            self.logger.debug(str(dictionary[split1[0]]))
+
+                        except SyntaxError:
                             self.logger.warn("warning: got a non int channel number"\
                                                  +split2[1])
 
