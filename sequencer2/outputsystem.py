@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "14-Jun-2008 00:26:01 viellieb"
+# Time-stamp: "14-Jun-2008 14:08:05 viellieb"
 
 #  file       output_system.py
 #  copyright  (c) Philipp Schindler 2008
@@ -31,8 +31,9 @@ class OutputSystem:
 
     def set_bit(self, key, value, output_status):
         "sets a single bit"
-        # Missing: inverted TTL channel
         channel_var = self.ttl_dict[key]
+        if channel_var.is_inverted:
+            value = abs(value - 1)
         current_state = output_status[channel_var.select]
         inverted_mask = ~(1 << channel_var.bit_nr)
         # Build new state

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-12 15:16:17 c704271"
+# Time-stamp: "14-Jun-2008 15:37:29 viellieb"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -10,7 +10,13 @@ import unittest
 import time
 import logging
 
+
+from sequencer2 import sequencer
+from sequencer2 import api
+
 from server import main_program
+from server import instruction_handler
+from server import sequence_handler
 from server import handle_commands
 from server import user_function
 
@@ -42,6 +48,17 @@ class TestUserFunction(unittest.TestCase):
         cmd_str = generate_cmd_str("PMTreadout.py", nr_of_car=9)
         my_main_program = main_program.MainProgram()
         my_main_program.execute_program(cmd_str)
+
+    def test_pulse_shaping(self):
+        "Test if the shaping works at all"
+        trans_obj = sequence_handler.transition("1", 0, 2, amplitude=-3, \
+                                                slope_duration=10.0, slope_type="sine")
+        my_sequencer=sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+        ihandler = instruction_handler.DACShapeEvent(0,trans_obj,1, step_nr=10)
+        ihandler.handle_instruction(my_api)
+        my_sequencer.debug_sequence()
+
 
 #------------------------------------------------------------------------------
 # Collect all test suites for running

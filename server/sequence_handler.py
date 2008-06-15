@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-12 15:11:37 c704271"
+# Time-stamp: "14-Jun-2008 15:22:55 viellieb"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -218,7 +218,7 @@ class transition:
     '''class for characterizing an atomic transition
     This definition may change'''
     def __init__(self, transition_name, t_rabi,
-                 frequency, sweeprange=0, amplitude=1, slope_type="None",
+                 frequency, sweeprange=0, amplitude=0, slope_type="None",
                  slope_duration=0, ion_list=None, amplitude2=-1, frequency2=0,
                  port=0, multiplier=.5, offset=0):
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-11 16:17:29 c704271"
+# Time-stamp: "14-Jun-2008 15:37:50 viellieb"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -210,7 +210,7 @@ class DACShapeEvent(SeqInstruction):
     def __init__(self, start_time, transition, dac_address, rising=True, is_last=False , step_nr=100):
         self.start_time = start_time
         self.name = "DAC_Shape_Event"
-        self.slope_duration = transition.slope_duration
+        self.slope_duration = float(transition.slope_duration)
         self.amplitude = transition.amplitude
         self.is_rising = rising
         self.is_last = is_last
@@ -224,7 +224,10 @@ class DACShapeEvent(SeqInstruction):
         self.duration = self.slope_duration
         self.step_nr = step_nr
         #calculate the waiting time in between two steps
-        self.wait_time = (self.slope_duration / self.step_nr * self.cycle_time) - self.get_hardware_duration("dac_duration")
+        self.wait_time = self.slope_duration / float(self.step_nr) \
+                         - self.get_hardware_duration("dac_duration") * self.cycle_time
+        print self.slope_duration
+        print self.wait_time
         # Check if we need to decrease the step count
         if self.wait_time < 0:
             self.wait_time = 0
@@ -233,8 +236,10 @@ class DACShapeEvent(SeqInstruction):
     def handle_instruction(self, api):
         for i in range(self.step_nr):
             x = float(i)/float(self.step_nr)
-            dac_value = self.shape_func(x, self.is_rising)
+            dac_value = self.shape_func(x, self.is_rising) + self.amplitude
             api.dac_value(self.dac_address, dac_value)
+            if self.wait_time > 0:
+                api.wait(self.wait_time)
 
     def __str__(self):
         return str(self.name) + " start: " + str(self.start_time) \

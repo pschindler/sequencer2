@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "14-Jun-2008 00:11:14 viellieb"
+# Time-stamp: "14-Jun-2008 14:50:15 viellieb"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -57,7 +57,7 @@ class api:
         self.logger = logging.getLogger("api")
         self.ttl_sys = outputsystem.OutputSystem(ttl_dict)
 
-
+        self.recalibration = self.config.recalibration
     #################################################################
     #   The general PCP instructions
     #################################################################
@@ -214,7 +214,7 @@ class api:
     def dac_value(self, address, val):
         """Sets the dac on the DDS board
         """
-        val = int(val)
+        val = self.recalibration(val)
         self.lvds_cmd(self.dac_opcode, address, val)
 
     def reset_fifo(self, dds_instance):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "14-Jun-2008 00:30:56 viellieb"
+# Time-stamp: "14-Jun-2008 14:56:54 viellieb"
 
 #  file       config.py
 #  copyright  (c) Philipp Schindler 2008
@@ -77,7 +77,7 @@ class Config:
             is_inverted = False
             if (is_invPB_device != -1):
                 is_inverted = True
-                raise RuntimeError("No inverted digital channels supported yet")
+#                raise RuntimeError("No inverted digital channels supported yet")
             if (is_PB_device != -1) or (is_invPB_device!=-1):
                 to_test = [array[i-1], array[i+1]]
                 split1 = array[i].split(".")
@@ -96,10 +96,24 @@ class Config:
                             self.logger.debug(str(dictionary[split1[0]]))
 
                         except SyntaxError:
-                            self.logger.warn("warning: got a non int channel number"\
+                            self.logger.warn("got a non int channel number"\
                                                  +split2[1])
 
         return dictionary
+
+
+    def recalibration(self, x):
+        """ calibration fot the DAC"""
+        max_dac_value = 15000
+        min_dac_value = 500
+        if x > 0:
+            self.logger.warn("Got a DAC amplitude bigger than 0dB: "+str(x))
+            x = 0
+        value = int((x + 50) * max_dac_value / 50.0)
+        if value < min_dac_value:
+            value = min_dac_value
+        return value
+
 
 
 # config.py ends here

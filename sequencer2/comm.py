@@ -39,7 +39,7 @@ class PTPComm:
         else:
             self.debug = False
         if self.nonet:
-          self.logger.info("Running in nonet mode")
+          self.logger.warn("Running in nonet mode")
 
         try:
             self.config = config.Config()

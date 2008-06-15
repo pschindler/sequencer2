@@ -1,12 +1,60 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-11 14:25:55 c704271"
+# Time-stamp: "14-Jun-2008 14:48:18 viellieb"
 
 #  file       ad9910.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
 """Class for the registers of the AD9910 DDS
-Register names are described in the AD9910 datasheet.
+
+Furhter information on the DDS functionality may be
+found in the AD9910 datasheet:
+
+L{http://www,analog.com/dds}
+
+
+Important DDS registers:
+------------------------
+
+  0x00  Control Register 1
+    - Autoclr Phase
+
+  0x01  Control Register 2
+    - PDCLK enable
+    - Parallel data port enable
+    - Parallel data port gain
+
+  0x02  Control Register 3
+    - REFCLK divider bypass
+    - REFCLK divider reset
+
+  0x07 Frequency Tuning Word
+
+  0x08 Phase Offset Word
+
+  0x0E Single Tone Profile 0
+    ...
+    ...
+  0x15 Single Tone Profile 7
+
+  0x16 RAM
+
+Initializing the DDS registers:
+-------------------------------
+
+  The DDS registers are initialized with the method init_device()
+
+  Standard values are:
+  >>>#CFR1
+     self.auto_clr.set_value(1)
+     #CFR2
+     self.para_en.set_value(1)
+     self.para_hold_last.set_value(1)
+     self.para_gain.set_value(0x0)
+     #CFR3
+     self.divider_bypass.set_value(1)
+     self.divider_reset.set_value(1)
+
 """
 import copy
 from sequencer2.bitmask import Bitmask
