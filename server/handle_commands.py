@@ -12,8 +12,10 @@ class CommandHandler:
         self.transitions = {}
 
     def get_variables(self, var_string):
-        self.variables={}
-        splitted_list=[]
+        self.dac_ramps = {}
+        self.dac_voltarrays = {}
+        self.variables = {}
+        splitted_list = []
 
         frame=var_string.split(";")
 
@@ -32,10 +34,12 @@ class CommandHandler:
 
     def get_command_dict(self):
         command_dict={}
+
         # The commands understood by the server
         command_dict["NAME"] = self.get_name
         command_dict["CYCLES"] = self.get_cycles
         command_dict["TRIGGER"] = self.get_trigger
+
         #Some boring ordinary variables
         command_dict["FLOAT"] = self.get_vars
         command_dict["INT"] = self.get_vars
@@ -54,11 +58,16 @@ class CommandHandler:
         command_dict["FREQ2"] = self.get_transition
         command_dict["AMPL2"] = self.get_transition
 
+        # The DAC commands:
+        command_dict["DAC"] = self.get_dac
+        command_dict["RAMP"] = self.get_dac
+
         #return the dict to the handler !
         return command_dict
 
     def get_name(self, splitted):
         self.pulse_program_name = splitted[1]
+
 
     def get_cycles(self, splitted):
         self.cycles = int(splitted[1])
@@ -82,6 +91,14 @@ class CommandHandler:
             self.is_triggered = True
         else:
             self.is_triggered = False
+
+    def get_dac(self, splitted):
+        if (splitted[0]=="DAC"):
+            num_array = get_array(splitted, start_split = 2)
+            self.dac_voltarrays[splitted[1]] = numarray
+        elif (splitted[0]=="RAMP"):
+            self.dac_ramps.append(self.get_dictionary(splitted))
+
 
     def get_transition(self, splitted):
         global last_transition
@@ -132,3 +149,16 @@ class CommandHandler:
         except:
             self.logger.warn("Error while getting dictionary"+str(splitted))
         return this_dict
+
+
+    def get_array(self, splitted, start_split=1):
+        array_string = "this_array=["
+        for i in range(start_split,len(splitted)):
+            array_string += splitted[i]+" , "
+        array_string += "]"
+        try:
+            exec(array_string)
+        except:
+            self.logger.warn("Error while getting array"+str(splitted))
+        return this_array
+        

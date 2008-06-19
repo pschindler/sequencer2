@@ -46,6 +46,7 @@ from  sequencer2 import comm
 import server
 import handle_commands
 import user_function
+import dac_function #DAC
 """This file defines the main_program class for the sequencer2
 """
 
@@ -62,9 +63,10 @@ class MainProgram:
     def __init__(self):
         "sets up the configuration and the logger"
         self.logger = logging.getLogger("server")
-        self.config=config.Config()
+        self.config = config.Config()
         self.setup_server()
         self.chandler = handle_commands.CommandHandler()
+        self.setup_dac() #DAC
 
     def setup_server(self):
         "Reads the configurations and configures the server"
@@ -80,6 +82,16 @@ class MainProgram:
         except:
             self.logger.exception("Error in server main loop")
 
+#DAC_Control for segtrappers
+    def setup_dac(self):
+        "inits and configures the dac_controls"
+        self.segfalle = self.config.get_bool("DACCONTROL","segfalle")
+        dac_numcards = self.config.get_int("DACCONTROL","num_cards")
+        self.dac_api = dac_funtion.dac_API(dac_numcards)
+#FALSCHER ORT!!!        self.set_ramp = self.dac_control.set_ramp
+#End of DAC_Control
+
+
     def execute_program(self, command_string):
         """This method is called by the main loop of the server
         The argument passed to this method is the command string sent from LabView
@@ -92,6 +104,16 @@ class MainProgram:
             generate_str = "Error while interpreting command string"
             return_var.return_string = generate_str
             return return_var
+
+#Here DACs will be handled, have to create mz own "API"-file.... :-(:
+        if self.segfalle:
+            self.dac_api.set_dac(self.chandler) #DAC
+
+            "if self.dac_update:
+                generate_str = "OK, DACs updated"
+                return_var.return_string = generate_str
+                return return_var "
+        
         # initialize API
         user_api = user_function.userAPI(self.chandler)
         # generate sequence  before loop trigger
@@ -100,7 +122,6 @@ class MainProgram:
         try:
             user_api.init_sequence()
         except:
-
             self.logger.exception("Error while initializing sequence")
             generate_str = "Error while initializing sequence"
             return_var.return_string = generate_str
