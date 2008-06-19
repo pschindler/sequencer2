@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "14-Jun-2008 15:37:50 viellieb"
+# Time-stamp: "2008-06-16 12:57:32 c704271"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -226,8 +226,6 @@ class DACShapeEvent(SeqInstruction):
         #calculate the waiting time in between two steps
         self.wait_time = self.slope_duration / float(self.step_nr) \
                          - self.get_hardware_duration("dac_duration") * self.cycle_time
-        print self.slope_duration
-        print self.wait_time
         # Check if we need to decrease the step count
         if self.wait_time < 0:
             self.wait_time = 0

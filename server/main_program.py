@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "14-Jun-2008 00:35:41 viellieb"
+# Time-stamp: "2008-06-16 14:29:01 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -96,6 +96,7 @@ class MainProgram:
             generate_str = "Error while interpreting command string"
             return_var.return_string = generate_str
             return return_var
+        # Hier ist Platz für MAX
         # initialize API
         user_api = user_function.userAPI(self.chandler, ttl_dict=self.ttl_dict, \
                                          dds_count = self.dds_count)

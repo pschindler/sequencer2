@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "14-Jun-2008 14:08:05 viellieb"
+# Time-stamp: "2008-06-16 12:54:21 c704271"
 
 #  file       output_system.py
 #  copyright  (c) Philipp Schindler 2008
@@ -26,6 +26,7 @@ class OutputSystem:
             for bit_nr in range(16):
                 ttl_dict[str(bit_nr)] = TTLChannel(str(bit_nr),bit_nr,2)
                 ttl_dict[str(bit_nr+16)] = TTLChannel(str(bit_nr+16),bit_nr,3)
+            ttl_dict["QFP_Trig"] = TTLChannel("QFP_Trig",15,2)
 
         self.ttl_dict = ttl_dict
 

@@ -13,7 +13,7 @@ class CommandHandler:
         self.variables = {}
         self.init_transitions()
         self.pulse_program_name = None
-        self.cycles = None
+        self.cycles = 1
         self.last_transition = None
         self.transition = None
         self.default_transition = None

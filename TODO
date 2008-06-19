@@ -1,9 +1,13 @@
-* Missing features:
+* Missing features - Important:
 
+- Line Trigger
 - More than 7 transitions
 - Simultanious RF pulses
+
+* Missing features - Not that important
+
 - Change sequence list to custom dict
-- Add a interactive include tester
+- Add an interactive include tester
 - Logging to files
 - DDS sweeps
 - Error handling
@@ -11,6 +15,8 @@
 
 * Missing unitttests
 
+- Cycle Count
+- Trigger for QFP
 - Amplitude calibration
 - Amplitude calibration for shapes
 - DIO confiuration

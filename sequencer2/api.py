@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "14-Jun-2008 14:50:15 viellieb"
+# Time-stamp: "2008-06-16 13:10:31 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -86,11 +86,6 @@ class api:
         """
         label_insn = instructions.label(label_name)
         self.sequencer.add_insn(label_insn)
-
-    def start_finite_loop(self, loop_count):
-        "inserts a ldc instruction and a label"
-        ldc_insn = instructions.ldc(loop_count)
-        self.sequencer.add_insn(ldc_insn)
 
     def jump(self, target_name):
         """jumps to label

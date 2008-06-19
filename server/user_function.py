@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "14-Jun-2008 00:32:40 viellieb"
+# Time-stamp: "2008-06-16 13:11:32 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -134,14 +134,21 @@ def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
 
     sequence_var.append(rf_pulse_insn.sequence_var)
 
-def generate_triggers(my_api, trigger_value):
-    "Generates the triggers for QFP"
+def generate_triggers(my_api, trigger_value, ttl_trigger_channel, loop_count=1):
+    "Generates the triggers for QFP - No line trigger supported YET"
     # Missing: Line trigger, ttl signal for QFP
+    my_api.ttl_set_bit(ttl_trigger_channel, 1)
     my_api.label("wait_label_1")
     my_api.jump_trigger("wait_label_2", trigger_value)
     my_api.jump("wait_label_1")
     my_api.label("wait_label_2")
-    my_api.label("finite_label")
+    my_api.ttl_set_bit(ttl_trigger_channel, 0)
+    my_api.start_finite("finite_label", loop_count)
+
+def end_of_sequence(my_api, ttl_trigger_channel):
+    """Sets ttl_trigger channel to high at the end of the sequence"""
+    my_api.end_finite("finite_label")
+    my_api.ttl_set_bit(ttl_trigger_channel, 1)
 
 ################################################################################
 # LOW LEVEL STUFF ------- DO NOT EDIT ---- YOU DON'T NEED TO
@@ -174,10 +181,12 @@ class userAPI(SequenceHandler):
 
         self.pulse_program_name = ""
         self.final_array = []
+        self.busy_ttl_channel = self.config.get_str("SERVER","busy_ttl_channel")
+        self.qfp_trigger_value = self.config.get_int("SERVER","qfp_trigger_value")
 
     def init_sequence(self, initial_ttl=0x0):
         "generate triggers, frequency initialization and loop targets"
-        generate_triggers(self.api, 0x1)
+        generate_triggers(self.api, 0x1, self.busy_ttl_channel, self.chandler.cycles)
         self.api.dds_profile_list = self.generate_frequency(self.api, \
                                                                 self.api.dds_list)
         # Missing: triggering, frequency initialization
@@ -230,7 +239,7 @@ class userAPI(SequenceHandler):
                 self.api.wait(wait_time)
             instruction.handle_instruction(self.api)
             last_stop_time = instruction.start_time + instruction.duration
-
+        end_of_sequence(self.api, self.busy_ttl_channel)
         self.sequencer.compile_sequence()
         if self.logger.level < 9:
             self.sequencer.debug_sequence()
