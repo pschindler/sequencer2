@@ -10,7 +10,7 @@ from dac_control import DacControl
 class dac_API(DacControl):
 
     def __init__(self, num_cards):
-        self.init_dac(numcards)
+        self.init_dac(num_cards)
         #und was halt sonst noch alles gemacht werden muss.....
 
     def set_dac(self, chandler):
@@ -40,7 +40,7 @@ class dac_API(DacControl):
         else:
             if self.dac_ramps:
 #Rampen
-            Update_only = False
+                Update_only = False
         return Update_only
         
 

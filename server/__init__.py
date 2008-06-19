@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-30 13:53:49 c704271"
+# Time-stamp: "2008-06-03 14:24:17 c704271"
 
 #  file       __init__.py
 #  copyright  (c) Philipp Schindler 2008
@@ -30,6 +30,8 @@
     L{server.user_function}
 
     Documentation about the main loop of the server are found in L{server.main_program}
+
+    Documentation regarding the compiler can be found in L{sequencer2}
 
   Configuration
   -------------

@@ -1,12 +1,60 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-09 13:22:05 c704271"
+# Time-stamp: "14-Jun-2008 14:48:18 viellieb"
 
 #  file       ad9910.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
 """Class for the registers of the AD9910 DDS
-Register names are described in the AD9910 datasheet.
+
+Furhter information on the DDS functionality may be
+found in the AD9910 datasheet:
+
+L{http://www,analog.com/dds}
+
+
+Important DDS registers:
+------------------------
+
+  0x00  Control Register 1
+    - Autoclr Phase
+
+  0x01  Control Register 2
+    - PDCLK enable
+    - Parallel data port enable
+    - Parallel data port gain
+
+  0x02  Control Register 3
+    - REFCLK divider bypass
+    - REFCLK divider reset
+
+  0x07 Frequency Tuning Word
+
+  0x08 Phase Offset Word
+
+  0x0E Single Tone Profile 0
+    ...
+    ...
+  0x15 Single Tone Profile 7
+
+  0x16 RAM
+
+Initializing the DDS registers:
+-------------------------------
+
+  The DDS registers are initialized with the method init_device()
+
+  Standard values are:
+  >>>#CFR1
+     self.auto_clr.set_value(1)
+     #CFR2
+     self.para_en.set_value(1)
+     self.para_hold_last.set_value(1)
+     self.para_gain.set_value(0x0)
+     #CFR3
+     self.divider_bypass.set_value(1)
+     self.divider_reset.set_value(1)
+
 """
 import copy
 from sequencer2.bitmask import Bitmask
@@ -16,11 +64,13 @@ class ProfileRegister:
         ftw : frequency tuning word
         phow : phase offset word
         asf : amplitude scale factor
+        transition_name: name of transition for this register
     """
     def __init__(self, ftw=0, phow=0, asf=0):
         self.ftw = ftw
         self.phow = phow
         self.asf = asf
+        self.transition_name = None
 
 class AD9910:
     """base class dor AD9910
@@ -49,9 +99,10 @@ class AD9910:
         self.device_addr = device_addr
         self.ref_freq = float(ref_freq)
         self.prof_reg = []
-        prof_reg = ProfileRegister()
+        prof_reg_inst = ProfileRegister()
         for i in range(8):
-            self.prof_reg.append(copy.copy(prof_reg))
+            self.prof_reg.append(copy.copy(prof_reg_inst))
+
         # Set the bitmasks for the register
         self.reg_bitmask_dict = {}
         self.reg_bitmask_dict[self.CFR1] = [self.auto_clr]
@@ -102,7 +153,6 @@ class AD9910:
         asf_val = asf << 48
         addr_tuple = (self.PROF_START[0] + register_addr, self.PROF_START[1])
         self.reg_value_dict[addr_tuple] = freq_val | asf_val | phase_val
-        val = hex(freq_val | asf_val | phase_val)
 
     def get_fpga_ftw(self, register_addr):
         """Returns the tuning word for the FPGA phase register

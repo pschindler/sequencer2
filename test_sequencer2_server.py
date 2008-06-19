@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-29 12:42:38 c704271"
+# Time-stamp: "2008-06-12 15:06:07 c704271"
 
 #  file       test_sequencer2_server.py
 #  copyright  (c) Philipp Schindler 2008

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-30 13:48:50 c704271"
+# Time-stamp: "2008-06-16 14:29:01 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -41,12 +41,11 @@
 import logging
 
 from sequencer2 import config
-from  sequencer2 import comm
 
 import server
 import handle_commands
 import user_function
-import dac_function #DAC
+#import dac_function #DAC
 """This file defines the main_program class for the sequencer2
 """
 
@@ -64,9 +63,15 @@ class MainProgram:
         "sets up the configuration and the logger"
         self.logger = logging.getLogger("server")
         self.config = config.Config()
+        self.server = None
         self.setup_server()
         self.chandler = handle_commands.CommandHandler()
-        self.setup_dac() #DAC
+        self.variable_dict = {}
+        ttl_conf_file = self.config.get_str("SERVER","DIO_configuration_file")
+        self.dds_count = self.config.get_int("SERVER","DDS_count")
+        self.ttl_dict = self.config.get_digital_channels(ttl_conf_file)
+#        self.setup_dac() #DAC
+
 
     def setup_server(self):
         "Reads the configurations and configures the server"
@@ -83,11 +88,11 @@ class MainProgram:
             self.logger.exception("Error in server main loop")
 
 #DAC_Control for segtrappers
-    def setup_dac(self):
-        "inits and configures the dac_controls"
-        self.segfalle = self.config.get_bool("DACCONTROL","segfalle")
-        dac_numcards = self.config.get_int("DACCONTROL","num_cards")
-        self.dac_api = dac_funtion.dac_API(dac_numcards)
+#    def setup_dac(self):
+#        "inits and configures the dac_controls"
+#        self.segfalle = self.config.get_bool("DACCONTROL","segfalle")
+#        dac_numcards = self.config.get_int("DACCONTROL","num_cards")
+#        self.dac_api = dac_funtion.dac_API(dac_numcards)
 #FALSCHER ORT!!!        self.set_ramp = self.dac_control.set_ramp
 #End of DAC_Control
 
@@ -99,23 +104,24 @@ class MainProgram:
         return_var = ReturnClass()
         try:
             self.variable_dict = self.chandler.get_variables(command_string)
-        except ValueError, KeyError:
+        except ValueError:
             self.logger.exception("Error while interpreting command string")
             generate_str = "Error while interpreting command string"
             return_var.return_string = generate_str
             return return_var
 
 #Here DACs will be handled, have to create mz own "API"-file.... :-(:
-        if self.segfalle:
-            self.dac_api.set_dac(self.chandler) #DAC
+#        if self.segfalle:
+#            self.dac_api.set_dac(self.chandler) #DAC
 
-            "if self.dac_update:
+            """if self.dac_update:
                 generate_str = "OK, DACs updated"
                 return_var.return_string = generate_str
-                return return_var "
+                    return return_va """
         
         # initialize API
-        user_api = user_function.userAPI(self.chandler)
+        user_api = user_function.userAPI(self.chandler, ttl_dict=self.ttl_dict, \
+                                         dds_count = self.dds_count)
         # generate sequence  before loop trigger
         # initialize frequencies
         # Start looping and triggers
@@ -139,6 +145,8 @@ class MainProgram:
         # Compile sequence
         try:
             user_api.compile_sequence()
+            sequence_length = len(user_api.sequencer.current_sequence)
+            self.logger.info("sequence length: "+str(hex(sequence_length)))
         except:
             self.logger.exception("Error while compiling sequence")
             generate_str = "Error while compiling sequence"
