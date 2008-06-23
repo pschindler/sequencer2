@@ -75,3 +75,5 @@ SbCool7.ch=4
 19.ch=26
 20.Device=PB
 20.ch=27
+QFP_Trig.Device=PB
+QFP_Trig.ch=27
