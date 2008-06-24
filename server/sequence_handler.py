@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "14-Jun-2008 15:22:55 viellieb"
+# Time-stamp: "2008-06-24 09:58:35 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -202,16 +202,14 @@ class SequenceHandler(object):
         "sets a variable from a command string"
         try:
             var_val = self.chandler.variables[var_name]
-            cmd_str = str(var_name) + " = " + str(var_val)
+            cmd_str = "var_obj = " + str(var_val)
             exec cmd_str
-
-        except KeyError:
+        except:
             # We return the default_val if an unknown variable was asked for.
             self.logger.warn("Variable not found in comand string: " \
                              +str(var_name))
-            cmd_str = str(var_name) + "=" +str(default_val)
-            exec cmd_str
-
+            var_obj = default_val
+        return var_obj
 
 # The transition main class
 class transition:
