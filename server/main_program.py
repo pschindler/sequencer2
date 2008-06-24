@@ -92,7 +92,7 @@ class MainProgram:
         "inits and configures the dac_controls"
         self.segfalle = self.config.get_bool("DACCONTROL","segfalle")
         dac_numcards = self.config.get_int("DACCONTROL","num_cards")
-        self.dac_api = dac_funtion.dac_API(dac_numcards)
+   #     self.dac_api = dac_funtion.dac_API(dac_numcards)
 #End of DAC_Control
 
 
@@ -110,12 +110,12 @@ class MainProgram:
             return return_var
 
 #Here DACs will be handled, have to create my own "API"-file.... :-(:
-        if self.segfalle:
-            self.dac_api.set_dac(self.chandler) #DAC, if only static, then dac_update=True
-            if self.dac_update:
-                generate_str = "OK, DACs updated"
-                return_var.return_string = generate_str
-                return return_var
+    #    if self.segfalle:
+    #        self.dac_api.set_dac(self.chandler) #DAC, if only static, then dac_update=True
+     #       if self.dac_update:
+      #          generate_str = "OK, DACs updated"
+       #         return_var.return_string = generate_str
+        #        return return_var
         
         # initialize API
         user_api = user_function.userAPI(self.chandler, ttl_dict=self.ttl_dict, \
