@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-16 13:11:32 c704271"
+# Time-stamp: "2008-06-23 15:12:14 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -93,11 +93,13 @@ from include_handler import IncludeHandler
 
 #Yes we need that cruel import ;-)
 from instruction_handler import *
+
 ###############################################################################
 # HIGH LEVEL STUFF ------- DO NOT EDIT ---- USE INCLUDES INSTEAD
 #
 # DO NOT ADD NEW FUNCTIONS HERE  ---- USE INCLUDES INSTEAD
 ###############################################################################
+
 return_str = ""
 sequence_var = []
 transitions = TransitionListObject()
@@ -134,9 +136,10 @@ def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
 
     sequence_var.append(rf_pulse_insn.sequence_var)
 
-def generate_triggers(my_api, trigger_value, ttl_trigger_channel, loop_count=1):
+def generate_triggers(my_api, trigger_value, ttl_trigger_channel, \
+                          line_trigger_channel=None, loop_count=1):
     "Generates the triggers for QFP - No line trigger supported YET"
-    # Missing: Line trigger, ttl signal for QFP
+    # Missing: Edge detection ??
     my_api.ttl_set_bit(ttl_trigger_channel, 1)
     my_api.label("wait_label_1")
     my_api.jump_trigger("wait_label_2", trigger_value)
@@ -144,6 +147,15 @@ def generate_triggers(my_api, trigger_value, ttl_trigger_channel, loop_count=1):
     my_api.label("wait_label_2")
     my_api.ttl_set_bit(ttl_trigger_channel, 0)
     my_api.start_finite("finite_label", loop_count)
+
+    if line_trigger_channel != None:
+        line_trig_val = trigger_value | line_trigger_channel
+        my_api.label("line_wait_label_1")
+        # We branch without taking care of the QFP Trigger value
+        my_api.jump_trigger("line_wait_label_2", line_trig_val)
+        my_api.jump_trigger("line_wait_label_2", line_trigger_channel)
+        my_api.jump("line_wait_label_1")
+        my_api.label("line_wait_label_2")
 
 def end_of_sequence(my_api, ttl_trigger_channel):
     """Sets ttl_trigger channel to high at the end of the sequence"""
@@ -161,7 +173,7 @@ class userAPI(SequenceHandler):
         self.chandler = chandler
         # The sequencer and the API
         self.sequencer = sequencer.sequencer()
-        self.api = api.api(self.sequencer)
+        self.api = api.api(self.sequencer, ttl_dict)
         # Load the configuration
         self.config = config.Config()
         self.logger = logging.getLogger("server")
@@ -183,10 +195,18 @@ class userAPI(SequenceHandler):
         self.final_array = []
         self.busy_ttl_channel = self.config.get_str("SERVER","busy_ttl_channel")
         self.qfp_trigger_value = self.config.get_int("SERVER","qfp_trigger_value")
+        self.line_trigger_value = self.config.get_int("SERVER","line_trigger_value")
 
     def init_sequence(self, initial_ttl=0x0):
         "generate triggers, frequency initialization and loop targets"
-        generate_triggers(self.api, 0x1, self.busy_ttl_channel, self.chandler.cycles)
+        if initial_ttl != 0:
+            raise RuntimeError("Initial TTL not supported YET")
+        if self.chandler.is_triggered:
+            line_trigger_val = self.line_trigger_value
+        else:
+            line_trigger_val = None
+        generate_triggers(self.api, 0x1, self.busy_ttl_channel, \
+                              line_trigger_val,  self.chandler.cycles)
         self.api.dds_profile_list = self.generate_frequency(self.api, \
                                                                 self.api.dds_list)
         # Missing: triggering, frequency initialization

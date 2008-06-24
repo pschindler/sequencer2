@@ -1,6 +1,5 @@
 * Missing features - Important:
 
-- Line Trigger
 - More than 7 transitions
 - Simultanious RF pulses
 
@@ -15,19 +14,20 @@
 
 * Missing unitttests
 
+- DIO confiuration
+- Line Trigger
 - Cycle Count
 - Trigger for QFP
-- Amplitude calibration
-- Amplitude calibration for shapes
-- DIO confiuration
 - Configuration for PCP internals
 - DDS switching off
 - Conflict handling
 - Pulse Shaping
-- finite loops (bdec,ldc)
 
 * Missing tests on hardware
 
+- Amplitude calibration
+- Amplitude calibration for shapes
+- finite loops (bdec,ldc)
 - Inverted TTLs
 - TTL subsystem
 - Additional label/subroutine/loop testing

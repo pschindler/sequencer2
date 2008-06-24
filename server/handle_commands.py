@@ -17,6 +17,7 @@ class CommandHandler:
         self.last_transition = None
         self.transition = None
         self.default_transition = None
+        self.is_triggered = False
 
     def get_variables(self, var_string):
         self.dac_ramps = {}
@@ -33,7 +34,8 @@ class CommandHandler:
                 self.command_dict[splitted[0]](splitted)
 
             except KeyError:
-                self.logger.warn("error: cannot identify command"+str(splitted))
+                if len(str(splitted)) > 4 :
+                    self.logger.warn("error: cannot identify command"+str(splitted))
 
             except SyntaxError:
                 self.logger.warn("error while executing command"+str(splitted))
@@ -174,10 +176,10 @@ class CommandHandler:
         except:
             self.logger.warn("Error while getting array"+str(splitted))
         return this_array
-          
+
     def init_transitions(self):
         "Generates a transition with frequency 0 for switching off the DDS"
         trans_obj = transition("NULL", 0, 0)
         self.transitions["NULL"] = trans_obj
-  
-        
+
+
