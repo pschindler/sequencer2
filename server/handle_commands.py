@@ -107,7 +107,7 @@ class CommandHandler:
     def get_dac(self, splitted):
         if (splitted[0]=="DAC"):
             num_array = get_array(splitted, start_split = 2)
-            self.dac_voltarrays[splitted[1]] = numarray
+            self.dac_voltarrays[splitted[1]] = num_array
         elif (splitted[0]=="RAMP"):
             self.dac_ramps.append(self.get_dictionary(splitted))
 

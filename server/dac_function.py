@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-17 11:06:07 c704271"
+# Time-stamp: "2008-06-17 11:06:07 c704282"
 
 #  file       dac_function.py
 #  copyright  (c) Max Harlander 2008
@@ -10,13 +10,23 @@ from dac_control import DacControl
 class dac_API(DacControl):
 
     def __init__(self, num_cards):
-        self.init_dac(num_cards)
-        #und was halt sonst noch alles gemacht werden muss.....
+#        DacControl.__init__(self)
+        self.init_module(num_cards)
+
+        #additional things, not being handled in baseclass
+        Update_only = False
 
     def set_dac(self, chandler):
         """get params sent by QFP and set DACs accordingly
         """
+        Update_only = False
         self.chandler = chandler
+        if self.chandler.dac_voltarrays:
+            #Just a static update
+            self.dac_voltarrays = self.chandler.dac_voltarrays
+            for volts in self.dac_voltarrays.items()
+                self.update(volts[0],volts[1])
+            Update_only = True
 
         self.pulse_program_name = self.chandler.pulse_program_name
         filename = self.seq_directory + self.pulse_program_name
@@ -32,51 +42,59 @@ class dac_API(DacControl):
         exec(ramp_str)
 
 #und nu entweder nur n update oder solln wa doch rampen machen!
-        self.dac_voltarrays = self.chandler.dac_voltarrays
         self.dac_ramps = self.chandler.dac_ramps
-        if self.dac_voltarrays:
-            Update_only = True
 #nu mach mer Einfach n Update
         else:
             if self.dac_ramps:
 #Rampen
-                Update_only = False
         return Update_only
         
 
-    def update(self, dac_device, dac_array):
-        """Main controlprogram for Electrodes
-        """
-        for i in self.card_dict:
-            if (dac_device[i] == True):
-                #                self.timing=dac_timing[i]
-#               print "dac filename: "+str(dac_filename)
-#                if (dac_filename[i] == False ):
-                self.array=dac_array[i]
-#                   print "self.array gesetzt"
-#                else:
-#                    self.filename=dac_filename[i]
 
-#                if (self.timing == 0):
-                    #make and start simple static update task(i)
-                self.clear_data(i)
-                self.stop_card(i)
-                self.set_static(i)
-                self.start_static_task(i)
-#                elif (self.timing == 1):
-                    #make and start triggered task(i)
-#                    self.clear_data(i)
-#                    params=(1,1000000)
-#                    self.set_task_parameters(params, i)
-#                    self.append_from_file(i)
-#                    self.start_triggered_task(i)
-#                elif (self.timing > 1):
-                    #make and start retriggerable clock task(i) with samplerate self.timing
-#                    self.clear_data(i)
-#                    params=(1,self.timing)
-#                    self.set_task_parameters(params, i)
-#                    self.append_from_file(i)
-#                    self.start_timed_task(i)
+    def update(self, dac_device, dac_array):
+        """Update the static voltageoutput on all channels of the given dac_card
+        """
+        self.clear_data(dac_device)
+        self.stop_card(dac_device)
+        self.set_static(dac_device, dac_array)
+        self.start_static_task(dac_device)
+
+
+    def set_ramp(self, rampdict):
+        """sets the ramp_dict from a command string and appends it 
+        """
+        try:
+         #   dac_rampdict = self.chandler.variables[var_name]
+          #  cmd_str = str(var_name) + " = " + str(var_val)
+           # exec cmd_str
+
+        except KeyError:
+            # We return the default_val if an unknown variable was asked for.
+            self.logger.warn("Variable not found in comand string: " \
+                             +str(var_name))
+            cmd_str = str(var_name) + " = " +str(default_val)
+            exec cmd_str
+
+#Needed to get the Rampvariables like ON/OFF or so? Mazbe I can implement it a bit different!?
+    def set_variable(self, var_type, var_name, default_val, \
+                         min_val=None, max_val=None):
+        "sets a variable from a command string"
+        try:
+            var_val = self.chandler.variables[var_name]
+            cmd_str = str(var_name) + " = " + str(var_val)
+            exec cmd_str
+
+        except KeyError:
+            # We return the default_val if an unknown variable was asked for.
+            self.logger.warn("Variable not found in comand string: " \
+                             +str(var_name))
+            cmd_str = str(var_name) + " = " +str(default_val)
+            exec cmd_str
+
+#Der alte Muell, den man nochma brauchen koennt>
+
+
+
 
 
 

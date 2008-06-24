@@ -19,7 +19,12 @@ import nidaq                   #real Nidaq-module
 class DacControl:
     """Baseclass for dac_function to control the Nidaq-cards
     """
-    def init_dac(self, num_cards=1):
+
+    def __init__(self, num_cards):
+        self.init_module(num_cards)
+        #und was halt sonst noch alles gemacht werden muss.....
+
+    def init_module(self, num_cards=1):
         """init the NIDAQ objects and local variables
         """
         self.card_dict = {}
@@ -27,10 +32,10 @@ class DacControl:
             self.card_dict[i] = nidaq.Nidaq(i)
 
     #Static update methods:
-    def set_static(self, device):
+    def set_static(self, device, dac_array):
         """Load given array into card "device", use _start_static_task to update
         """
-        self.card_dict[device].set_static(self.array)
+        self.card_dict[device].set_static(dac_array)
 
     def start_static_task(self, device):
         """Start static update task, in means of update voltages
@@ -55,11 +60,6 @@ class DacControl:
         self.card_dict[device].start_timed_task()
 
     #Control methods:
-    def set_task_parameters(self, params, device):
-        """Sets continous mode on/off and samples per second
-        """
-        self.card_dict[device].set_task_parameters(params)
-
     def clear_data(self, device):
         """clear the card device
         """
@@ -70,10 +70,10 @@ class DacControl:
         """
         self.card_dict[device].stop_card()
 
-    def calc_ramp(self, device):
-        """deletes all tasks written to device
+    def set_task_parameters(self, params, device):
+        """Sets continous mode on/off and samples per second
         """
-        self.card_dict[device].calc_ramp(self.duration, self.interval, self.start, self.stop, self.shape)
+        self.card_dict[device].set_task_parameters(params)
 
     def clear_all(self):
         """Clears and deletes the task set on device
@@ -81,4 +81,11 @@ class DacControl:
         for i in self.card_dict:
             self.clear_data(i)
             self.stop_card(i)
+
+
+
+    def calc_ramp(self, device):
+        """deletes all tasks written to device
+        """
+        self.card_dict[device].calc_ramp(self.duration, self.interval, self.start, self.stop, self.shape)
 

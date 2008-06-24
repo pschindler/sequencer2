@@ -209,7 +209,7 @@ class SequenceHandler(object):
             # We return the default_val if an unknown variable was asked for.
             self.logger.warn("Variable not found in comand string: " \
                              +str(var_name))
-            cmd_str = str(var_name) + "=" +str(default_val)
+            cmd_str = str(var_name) + " = " +str(default_val)
             exec cmd_str
 
 

@@ -13,6 +13,7 @@
 import logging
 
 def parse_sequence(sequence_string):
+  "parses the sequencefile for the RAMP tag and creates the code toset it up"
   logger = logging.getLogger("server")
   current_tag=""
   sequence_dict={}
@@ -32,13 +33,14 @@ def parse_sequence(sequence_string):
       except KeyError:
         sequence_dict[current_tag]=line+"\n"
     got_new_tag=False
-  name_list=["<RAMP>"]
+  name_list=["<VARIABLES>","<RAMP>"]
   return_string=""
   for item in name_list:
     try:
       return_string+=sequence_dict[item]
     except KeyError:
       logger.info("error while getting tag: "+str(item))
+  return_string += "setup_ramps()\n"
 
   return return_string
 

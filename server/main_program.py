@@ -70,7 +70,7 @@ class MainProgram:
         ttl_conf_file = self.config.get_str("SERVER","DIO_configuration_file")
         self.dds_count = self.config.get_int("SERVER","DDS_count")
         self.ttl_dict = self.config.get_digital_channels(ttl_conf_file)
-#        self.setup_dac() #DAC
+        self.setup_dac() #DAC
 
 
     def setup_server(self):
@@ -88,12 +88,11 @@ class MainProgram:
             self.logger.exception("Error in server main loop")
 
 #DAC_Control for segtrappers
-#    def setup_dac(self):
-#        "inits and configures the dac_controls"
-#        self.segfalle = self.config.get_bool("DACCONTROL","segfalle")
-#        dac_numcards = self.config.get_int("DACCONTROL","num_cards")
-#        self.dac_api = dac_funtion.dac_API(dac_numcards)
-#FALSCHER ORT!!!        self.set_ramp = self.dac_control.set_ramp
+    def setup_dac(self):
+        "inits and configures the dac_controls"
+        self.segfalle = self.config.get_bool("DACCONTROL","segfalle")
+        dac_numcards = self.config.get_int("DACCONTROL","num_cards")
+        self.dac_api = dac_funtion.dac_API(dac_numcards)
 #End of DAC_Control
 
 
@@ -110,14 +109,13 @@ class MainProgram:
             return_var.return_string = generate_str
             return return_var
 
-#Here DACs will be handled, have to create mz own "API"-file.... :-(:
-#        if self.segfalle:
-#            self.dac_api.set_dac(self.chandler) #DAC
-
-            """if self.dac_update:
+#Here DACs will be handled, have to create my own "API"-file.... :-(:
+        if self.segfalle:
+            self.dac_api.set_dac(self.chandler) #DAC, if only static, then dac_update=True
+            if self.dac_update:
                 generate_str = "OK, DACs updated"
                 return_var.return_string = generate_str
-                    return return_va """
+                return return_var
         
         # initialize API
         user_api = user_function.userAPI(self.chandler, ttl_dict=self.ttl_dict, \
