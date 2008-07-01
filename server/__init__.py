@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-03 14:24:17 c704271"
+# Time-stamp: "2008-06-24 13:14:48 c704271"
 
 #  file       __init__.py
 #  copyright  (c) Philipp Schindler 2008
@@ -12,6 +12,7 @@
 
   It depends on the sequencer2 module
 
+  G{packagetree}
 
   Basic usage:
   ------------
@@ -26,7 +27,8 @@
   Documentation
   -------------
 
-    Documentation on the include files may be found in the user_function module documentation:
+    Documentation on the include files may be found in the user_function
+    module documentation:
     L{server.user_function}
 
     Documentation about the main loop of the server are found in L{server.main_program}
@@ -53,6 +55,11 @@
     include_dir = PulseSequences/includes2/
     nonet = True
     reference_frequency = 800.0
+
+  The import relations
+  --------------------
+
+  G{importgraph user_function}
 
   Testing
   -------

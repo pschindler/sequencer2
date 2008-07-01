@@ -9,8 +9,10 @@
 - Add an interactive include tester
 - Logging to files
 - DDS sweeps
+- Shape handling in the DDS RAM.
 - Error handling
 - Stack for subroutines (in VHDL ???)
+- QFP variable type handling (bool, int)
 
 * Missing unitttests
 
@@ -25,6 +27,7 @@
 
 * Missing tests on hardware
 
+- QFP Variable handling
 - Amplitude calibration
 - Amplitude calibration for shapes
 - finite loops (bdec,ldc)

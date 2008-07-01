@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-11 09:51:16 c704271"
+# Time-stamp: "2008-06-25 15:50:51 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -138,7 +138,7 @@ class sequencer:
                                    str(hex(len(sequence_list))))
         self.current_sequence = sequence_list
 
-    def debug_sequence(self):
+    def debug_sequence(self, force=False):
         """Prints out the current instruction list
 
         """
@@ -148,6 +148,8 @@ class sequencer:
         for insn in self.current_sequence:
             insn_str += str(insn) + "\n"
         self.logger.debug(insn_str)
+        if force:
+            print insn_str
 
 ## sequencer.py
 ## Login : <viellieb@ohm>

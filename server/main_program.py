@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-16 14:29:01 c704271"
+# Time-stamp: "2008-06-24 16:33:49 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -54,6 +54,12 @@ class ReturnClass:
     def __init__(self):
         self.error_string = ""
         self.return_string = ""
+        self.is_error = False
+
+    def error(self, error_string="Undefined Error"):
+        self.is_error = True
+        self.error_string = error_string
+        self.return_string = error_string
 
 class MainProgram:
     """The MainProgram class
@@ -106,6 +112,7 @@ class MainProgram:
         except ValueError:
             self.logger.exception("Error while interpreting command string")
             generate_str = "Error while interpreting command string"
+            return_var.is_error = True
             return_var.return_string = generate_str
             return return_var
 
@@ -116,7 +123,7 @@ class MainProgram:
       #          generate_str = "OK, DACs updated"
        #         return_var.return_string = generate_str
         #        return return_var
-        
+
         # initialize API
         user_api = user_function.userAPI(self.chandler, ttl_dict=self.ttl_dict, \
                                          dds_count = self.dds_count)
@@ -127,16 +134,14 @@ class MainProgram:
             user_api.init_sequence()
         except:
             self.logger.exception("Error while initializing sequence")
-            generate_str = "Error while initializing sequence"
-            return_var.return_string = generate_str
+            return_var.error("Error while initializing sequence")
             return return_var
         # Generate sequence
         try:
             generate_str = user_api.generate_sequence()
         except:
             self.logger.exception("Error while generating sequence")
-            generate_str = "Error while generating sequence"
-            return_var.return_string = generate_str
+            return_var.error("Error while generating sequence")
             return return_var
         # end loops and generate IOs for LabView
         user_api.end_sequence()
@@ -147,8 +152,7 @@ class MainProgram:
             self.logger.info("sequence length: "+str(hex(sequence_length)))
         except:
             self.logger.exception("Error while compiling sequence")
-            generate_str = "Error while compiling sequence"
-            return_var.return_string = generate_str
+            return_var.error("Error while compiling sequence")
             return return_var
 
         #Send sequence to Box
@@ -156,8 +160,7 @@ class MainProgram:
             user_api.send_sequence()
         except:
             self.logger.exception("Error while sending sequence")
-            generate_str = "Error while sending sequence"
-
+            return_var.error("Error while sending sequence")
         del(user_api)
         return_var.return_string = generate_str
         return return_var

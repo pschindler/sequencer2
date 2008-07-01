@@ -30,6 +30,7 @@ Cycles 1
 </PARAMS OVERRIDE>
 
 <SEQUENCE>
+print det_time
 test_global("Juhu")
 test_include("123")
 for i in range(1):

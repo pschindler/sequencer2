@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-24 09:58:35 c704271"
+# Time-stamp: "2008-06-25 15:23:48 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -119,6 +119,7 @@ class SequenceHandler(object):
         This conflict_array is emptied if an item with a different start time occurs
 
         Maybe better data structure: use dict for conflict_array
+        Missing: Check if all instructions are still there !!??
         """
         has_conflict = False
         new_array = []
@@ -155,6 +156,7 @@ class SequenceHandler(object):
                     new_array.append(this_item)
                 else:
                     has_conflict = False
+        new_array.append(next_item)
         return new_array
 
     def send_sequence(self):

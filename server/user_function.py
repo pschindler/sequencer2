@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-23 15:12:14 c704271"
+# Time-stamp: "2008-06-25 15:54:35 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -99,7 +99,8 @@ from instruction_handler import *
 #
 # DO NOT ADD NEW FUNCTIONS HERE  ---- USE INCLUDES INSTEAD
 ###############################################################################
-
+# DO NOT remove the line below - This is needed by the ipython debugger
+#--1
 return_str = ""
 sequence_var = []
 transitions = TransitionListObject()
@@ -162,6 +163,8 @@ def end_of_sequence(my_api, ttl_trigger_channel):
     my_api.end_finite("finite_label")
     my_api.ttl_set_bit(ttl_trigger_channel, 1)
 
+# DO NOT remove the line below - This is needed by the ipython debugger
+#--1
 ################################################################################
 # LOW LEVEL STUFF ------- DO NOT EDIT ---- YOU DON'T NEED TO
 ###############################################################################
@@ -196,6 +199,8 @@ class userAPI(SequenceHandler):
         self.busy_ttl_channel = self.config.get_str("SERVER","busy_ttl_channel")
         self.qfp_trigger_value = self.config.get_int("SERVER","qfp_trigger_value")
         self.line_trigger_value = self.config.get_int("SERVER","line_trigger_value")
+
+        self.sequence_parser = sequence_parser.parse_sequence
 
     def init_sequence(self, initial_ttl=0x0):
         "generate triggers, frequency initialization and loop targets"
@@ -235,7 +240,7 @@ class userAPI(SequenceHandler):
         except:
             raise RuntimeError("Error while loading sequence:" +str(filename))
         #Parse sequence
-        seq_str = sequence_parser.parse_sequence(sequence_string)
+        seq_str = self.sequence_parser(sequence_string)
         self.logger.debug(seq_str)
         # Generate dictionary for sorting the files
         global sequence_var
@@ -244,6 +249,8 @@ class userAPI(SequenceHandler):
         transitions = self.chandler.transitions
         #Execute sequence
         exec(seq_str)
+        if sequence_var == []:
+            raise RuntimeError("Cannot generate an empty sequence")
         # Here all the magic of sequence creation is done
         # see sequence_handler.py for details
         self.final_array = self.get_sequence_array(sequence_var)
@@ -251,7 +258,6 @@ class userAPI(SequenceHandler):
 
     def compile_sequence(self):
         "Generates the bytecode for the sequence"
-        # Missing: conflict management
         last_stop_time = 0.0
         for instruction in self.final_array:
             wait_time = instruction.start_time - last_stop_time
@@ -260,6 +266,7 @@ class userAPI(SequenceHandler):
             instruction.handle_instruction(self.api)
             last_stop_time = instruction.start_time + instruction.duration
         end_of_sequence(self.api, self.busy_ttl_channel)
+
         self.sequencer.compile_sequence()
         if self.logger.level < 9:
             self.sequencer.debug_sequence()
@@ -267,7 +274,5 @@ class userAPI(SequenceHandler):
     def end_sequence(self):
         "adds triggers and loop events"
         #Missing everything
-        return None
-
-
+        pass
 # user_function.py ends here

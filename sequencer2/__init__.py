@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-30 13:43:18 c704271"
+# Time-stamp: "2008-06-24 12:41:09 c704271"
 
 #  file       __init__.py
 #  copyright  (c) Philipp Schindler 2008
@@ -25,6 +25,7 @@ sequencer2
     - ptplog: Congiuration of the python logging framework
     - config: general configuration
 
+    G{packagetree}
 
   Basic usage
   -----------
