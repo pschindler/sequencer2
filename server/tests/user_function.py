@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-24 16:36:49 c704271"
+# Time-stamp: "04-Jul-2008 19:25:59 viellieb"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -64,6 +64,13 @@ class TestUserFunction(unittest.TestCase):
         ihandler.handle_instruction(my_api)
         my_sequencer.debug_sequence()
 
+    def test_bichro_pulse(self):
+        "Test the bichromatic pulse"
+        cmd_str = generate_cmd_str("test_bichro_sequence.py", nr_of_car=5)
+        my_main_program = main_program.MainProgram()
+        return_var = my_main_program.execute_program(cmd_str)
+        if return_var.is_error:
+            self.fail(return_var.return_string)
 
 #------------------------------------------------------------------------------
 # Collect all test suites for running

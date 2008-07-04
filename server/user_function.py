@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-25 15:54:35 c704271"
+# Time-stamp: "04-Jul-2008 20:45:22 viellieb"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -127,7 +127,8 @@ def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
     """
     global sequence_var
     if str(transition_param) == transition_param:
-        transitions.current_transition = transition_param
+        transitions.make_current("NULL")
+        transitions.make_current(transition_param)
         transition_obj = transitions
 
     else:
@@ -136,6 +137,30 @@ def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
                             is_last=is_last, address=address)
 
     sequence_var.append(rf_pulse_insn.sequence_var)
+
+def rf_bichro_pulse(theta, phi, ion, transition_param, transition2_param, \
+                    start_time=0.0, is_last=True, address=0, address2=1):
+    """Generates a bichromatic RF pulse
+    The second frequency has to be given as a separate transition object.
+    The shape is controlled by the 1st transition.
+    The transition_params must be a string !!!
+    No direct transition variables allowed !!!
+    """
+    global sequence_var
+    if str(transition_param) == transition_param:
+        transitions.make_current("NULL")
+        transitions.make_current(transition_param, transition2_param)
+        transition_obj = transitions
+
+    else:
+        raise RuntimeError("Bichro Pulse does not support direct transitions")
+    rf_bichro_pulse_insn = RFBichroPulse(start_time, theta, phi, ion, transition_obj, \
+                                         is_last=is_last, address=address, address2=address2)
+
+    sequence_var.append(rf_bichro_pulse_insn.sequence_var)
+#################################################################
+# Initialization and ending of the sequence
+################################################################
 
 def generate_triggers(my_api, trigger_value, ttl_trigger_channel, \
                           line_trigger_channel=None, loop_count=1):
@@ -249,6 +274,7 @@ class userAPI(SequenceHandler):
         transitions = self.chandler.transitions
         #Execute sequence
         exec(seq_str)
+        transitions.make_current("NULL")
         if sequence_var == []:
             raise RuntimeError("Cannot generate an empty sequence")
         # Here all the magic of sequence creation is done
@@ -258,6 +284,7 @@ class userAPI(SequenceHandler):
 
     def compile_sequence(self):
         "Generates the bytecode for the sequence"
+        self.init_sequence()
         last_stop_time = 0.0
         for instruction in self.final_array:
             wait_time = instruction.start_time - last_stop_time

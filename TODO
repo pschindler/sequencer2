@@ -1,7 +1,12 @@
 * Missing features - Important:
 
 - More than 7 transitions
-- Simultanious RF pulses
+
+* Possible Bugs:
+
+- NULL transition not added to index list
+- Trigger sequence at the beginning. No edge detection
+- Pulse number after conflict handling
 
 * Missing features - Not that important
 
@@ -16,6 +21,7 @@
 
 * Missing unitttests
 
+- Simultanious RF pulses
 - DIO confiuration
 - Line Trigger
 - Cycle Count
@@ -42,7 +48,6 @@
 
 * Description of missing features
 
-
 - More than 7 transitions:
 
 At the moment there are only 8 different frequencies possible. At the moment
@@ -51,9 +56,14 @@ A possible solution would be to initialize the frequencies after the sequence
 was parsed and initialized only the ued frequencies. This would require a major
 rewrite of the main program structure
 
+- Possible workaround :
 
-- Simultanious pulses:
+Save the used frequencies in a global list. (extend sequence_var or use transitions)
 
-The rf_pulse may be edited to support two RF frequencies at the same time.
-Alternatively an additional pulse may be used (rf_pulse_dual)
+Start the init_freq part and therefore also the trigger part after the
+generate_sequence execution
+Take care that the "NULL" transition is always initialized
 
+initialize only the used frequencies.
+
+But what to do with the indeces ??

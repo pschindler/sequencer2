@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-24 16:33:49 c704271"
+# Time-stamp: "04-Jul-2008 20:32:01 viellieb"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -130,12 +130,12 @@ class MainProgram:
         # generate sequence  before loop trigger
         # initialize frequencies
         # Start looping and triggers
-        try:
-            user_api.init_sequence()
-        except:
-            self.logger.exception("Error while initializing sequence")
-            return_var.error("Error while initializing sequence")
-            return return_var
+##         try:
+##             user_api.init_sequence()
+##         except:
+##             self.logger.exception("Error while initializing sequence")
+##             return_var.error("Error while initializing sequence")
+##             return return_var
         # Generate sequence
         try:
             generate_str = user_api.generate_sequence()

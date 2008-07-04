@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-16 12:57:32 c704271"
+# Time-stamp: "04-Jul-2008 20:27:49 viellieb"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -20,7 +20,7 @@ global_reference_frequency = global_config.get_float("SERVER","reference_frequen
 global_clk_divider = global_config.get_float("SERVER","clk_divider")
 
 global_config.get_all_dict("Durations")
-global_get_duration = global_config.get_int_dict_val
+global_get_duration = global_config.get_float_dict_val
 
 class SeqInstruction:
     "Base class used for all intructions"
@@ -94,19 +94,19 @@ class RFPulse(SeqInstruction):
 
         self.logger = logging.getLogger("server")
         self.logger.debug("Switching frequency to: "+str(transitions))
-        current_dds_index = None
+#        current_dds_index = None
         try:
             transition_obj = transitions[transitions.current_transition]
         except KeyError:
             raise RuntimeError("Transition name not found: " + \
                                    str(transitions.current_transition))
 
-        for dds_index, trans  in transitions.index_list.iteritems():
-            if trans == transition_obj:
-                current_dds_index = dds_index
+#        for dds_index, trans  in transitions.index_list.iteritems():
+#            if trans == transition_obj:
+#                current_dds_index = dds_index
 
-        if current_dds_index == None:
-            raise RuntimeError("Transition not in DDS registers")
+#        if current_dds_index == None:
+#            raise RuntimeError("Transition not in DDS registers")
         try:
             pulse_duration = transition_obj.t_rabi[ion] * theta
         except KeyError:
@@ -153,6 +153,91 @@ class RFPulse(SeqInstruction):
         self.sequence_var = dac_stop_event.add_insn(self.sequence_var)
         self.sequence_var = dds_start_event.add_insn(self.sequence_var)
         self.sequence_var = dds_stop_event.add_insn(self.sequence_var)
+
+
+class RFBichroPulse(SeqInstruction):
+    "Generates an RF pulse"
+    def __init__(self, start_time, theta, phi, ion, transitions, \
+                 is_last=False, address=0, address2=1):
+        # Missing: Modify DDSSwitch event to support different indeces for
+        #    the dds and the phase register
+        #
+        #    Add a set_dds_freq event if the transition is not in the dds
+        #    profile already
+        #
+        #    Modify duration if a set dds_freq event is needed
+        #    BUG: The index_list should depend also on the DDS instance !!!
+
+        self.logger = logging.getLogger("server")
+        self.logger.debug("Switching frequency to: "+str(transitions))
+#        current_dds_index = None
+        try:
+            transition_obj = transitions[transitions.current_transition]
+            transition_obj2 = transitions[transitions.transition2_name]
+        except KeyError:
+            raise RuntimeError("Bichro Pulse Transition name not found: " + \
+                                   str(transitions.current_transition))
+
+#        for dds_index, trans  in transitions.index_list.iteritems():
+#            if trans == transition_obj:
+#                current_dds_index = dds_index
+
+#        if current_dds_index == None:
+#            raise RuntimeError("Transition not in DDS registers")
+        try:
+            pulse_duration = transition_obj.t_rabi[ion] * theta
+        except KeyError:
+            raise RuntimeError("Error while getting Rabi frequency for ion "+str(ion))
+
+        amplitude = transition_obj.amplitude
+        if transition_obj.slope_type != "None":
+            slope_duration = transition_obj.slope_duration
+        else:
+            slope_duration = 0
+        transition_name = transition_obj.name
+        transition2_name = transition_obj2.name
+        # Missing: global configuration
+        cycle_time = self.cycle_time
+        dac_switch_time = self.get_hardware_duration("dac_duration")
+        dds_switch_time = self.get_hardware_duration("dds_duration")
+        #Switch the DDS on before the DAC
+        dds_start_time = start_time
+        dds_start_time2 = start_time + dds_switch_time
+        dac_start_time = start_time + 2 * dds_switch_time
+        #Switch the DAC of berfore the DDS
+        dac_stop_time = dds_start_time + pulse_duration - slope_duration
+        dds_stop_time = dac_stop_time + dac_switch_time
+        dds_stop_time2 = dac_stop_time + dac_switch_time + dds_switch_time
+        amplitude_off = 0
+
+        #Let's check if we're using a shaped pulse or not ....
+        if slope_duration < cycle_time :
+            dac_start_event = DACEvent(dac_start_time, amplitude, \
+                                            address, is_last=False)
+            dac_stop_event = DACEvent(dac_start_time, amplitude_off, \
+                                           address, is_last=False)
+        else:
+            dac_start_event = DACShapeEvent(dac_start_time, transition_obj, \
+                                                  address, rising=True, is_last=False)
+            dac_stop_event = DACShapeEvent(dac_stop_time, transition_obj, \
+                                                 address, rising=False, is_last=False)
+
+        dds_start_event = DDSSwitchEvent(dds_start_time, address, transition_name, \
+                                                   phi,  is_last=False)
+        dds_start_event2 = DDSSwitchEvent(dds_start_time2, address2, transition2_name, \
+                                                   phi,  is_last=False)
+        #The DDS stop event switches to a zero frequency
+        dds_stop_event = DDSSwitchEvent(dds_stop_time, address, "NULL", \
+                                        phi, is_last=False)
+        dds_stop_event2 = DDSSwitchEvent(dds_stop_time2, address2, "NULL", \
+                                         phi, is_last=is_last)
+        # Add the events to the sequence
+        self.sequence_var = dac_start_event.add_insn(self.sequence_var)
+        self.sequence_var = dac_stop_event.add_insn(self.sequence_var)
+        self.sequence_var = dds_start_event.add_insn(self.sequence_var)
+        self.sequence_var = dds_stop_event.add_insn(self.sequence_var)
+        self.sequence_var = dds_start_event2.add_insn(self.sequence_var)
+        self.sequence_var = dds_stop_event2.add_insn(self.sequence_var)
 
 class TTLEvent(SeqInstruction):
     "Generates a ttl high or low event"
@@ -265,13 +350,16 @@ class DDSSwitchEvent(SeqInstruction):
                 real_index = api.dds_profile_list[self.index]
             except:
                 raise RuntimeError("Transition name not found: "+str(self.index))
-        dds_instance = api.dds_list[self.dds_address]
+
+        try:
+            dds_instance = api.dds_list[self.dds_address]
+        except IndexError:
+            raise RuntimeError("No DDS known with address: "+str(self.dds_address))
         api.switch_frequency(dds_instance, real_index, self.phase)
 
     def __str__(self):
         return str(self.name) + " start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | dds_addr: "+str(self.dds_address) + " | index: "+str(self.index)
-
 
 # instruction_handler.py ends here
