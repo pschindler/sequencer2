@@ -38,3 +38,22 @@
 - Wait insn
 - phase coherent switching
 - High level functions for the DAC,DDS
+
+
+* Description of missing features
+
+
+- More than 7 transitions:
+
+At the moment there are only 8 different frequencies possible. At the moment
+all transmitted frequencies are initialized at the beginning of the sequence.
+A possible solution would be to initialize the frequencies after the sequence
+was parsed and initialized only the ued frequencies. This would require a major
+rewrite of the main program structure
+
+
+- Simultanious pulses:
+
+The rf_pulse may be edited to support two RF frequencies at the same time.
+Alternatively an additional pulse may be used (rf_pulse_dual)
+
