@@ -21,15 +21,11 @@ class DacControl:
     """
 
     def __init__(self, num_cards):
-        self.init_module(num_cards)
-        #und was halt sonst noch alles gemacht werden muss.....
-
-    def init_module(self, num_cards=1):
-        """init the NIDAQ objects and local variables
-        """
+        "create an instance for all Cards and put them into card_dict"
         self.card_dict = {}
         for i in range(1,num_cards+1):
             self.card_dict[i] = nidaq.Nidaq(i)
+        #und was halt sonst noch alles gemacht werden muss.....
 
     #Static update methods:
     def set_static(self, device, dac_array):

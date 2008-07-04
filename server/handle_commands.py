@@ -111,7 +111,8 @@ class CommandHandler:
             num_array = get_array(splitted, start_split = 2)
             self.dac_voltarrays[splitted[1]] = num_array
         elif (splitted[0]=="RAMP"):
-            self.dac_ramps.append(self.get_dictionary(splitted))
+            ramp_dict = self.get_dictionary(splitted)
+            self.dac_ramps[rampdict["ramp"]] = ramp_dict
 
 
     def get_transition(self, splitted):
