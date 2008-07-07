@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-07 12:54:21 c704271"
+# Time-stamp: "2008-07-07 15:52:01 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -136,6 +136,8 @@ class SequenceHandler(object):
         Maybe better data structure: use dict for conflict_array
         Missing: Check if all instructions are still there !!??
         """
+        for item in final_array:
+            print item
         has_conflict = False
         new_array = []
         conflict_array = []
@@ -151,6 +153,7 @@ class SequenceHandler(object):
 
             if (this_item.start_time == next_item.start_time):
                 if conflict_array.count(this_item) == 0:
+                    print "added to conf"+str(this_item)
                     conflict_array.append(this_item)
                 conflict_array.append(next_item)
             else:
@@ -164,14 +167,14 @@ class SequenceHandler(object):
                             conflict_array.remove(conf_item2)
                         else:
                             self.logger.debug("cannot combine: "+str(conf_item.name)\
-                                                + " "  +str(conf_item2.name))
+                                                 + " "  +str(conf_item2.name))
                     new_array.append(conf_item)
                     has_conflict = True
                 if not has_conflict:
                     new_array.append(this_item)
                 else:
                     has_conflict = False
-        new_array.append(next_item)
+        new_array.append(this_item)
         return new_array
 
     def send_sequence(self):

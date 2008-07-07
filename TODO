@@ -1,9 +1,7 @@
-* Missing features - Important:
-
-- More than 7 transitions
-
 * Possible Bugs:
 
+- Three conflicts at the same time are not handled correctly
+- Conflict handler does not check if the same TTL channel is switched
 - NULL transition not added to index list
 - Trigger sequence at the beginning. No edge detection
 - Pulse number after conflict handling
@@ -19,8 +17,10 @@
 - Error handling
 - Stack for subroutines (in VHDL ???)
 - QFP variable type handling (bool, int)
+- More than 7 transitions in one sequence
 
 * Missing unitttests
+
 
 - Simultanious RF pulses
 - DIO confiuration

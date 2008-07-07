@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-21 13:56:26 c704271"
+# Time-stamp: "2008-07-07 14:51:33 c704271"
 
 #  file       include_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -29,8 +29,8 @@ class IncludeHandler:
         file_list = []
         for f in os.listdir(self.include_dir):
             module_name, ext = os.path.splitext(f) # Handles no-extension files, etc.
-            self.logger.debug("Including module: "+str(module_name))
             if ((ext == '.py') and (module_name != "__init__")): # Important, ignore .pyc/other files.
+                self.logger.debug("Including module: "+str(module_name))
                 file_list.append(self.include_dir+module_name+ext)
         return file_list
 

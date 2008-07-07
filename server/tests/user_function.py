@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "04-Jul-2008 19:25:59 viellieb"
+# Time-stamp: "2008-07-07 15:46:38 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -71,6 +71,43 @@ class TestUserFunction(unittest.TestCase):
         return_var = my_main_program.execute_program(cmd_str)
         if return_var.is_error:
             self.fail(return_var.return_string)
+
+    def test_conflict_handler(self):
+        "Test the conflict handler"
+        from server.user_function import *
+        from server.instruction_handler import *
+        fobj = open("server/user_function.py")
+        sequence_string = fobj.read()
+        fobj.close()
+        seq_list = sequence_string.split("#--1")
+
+#        exec(seq_list[1])
+
+        command_string = generate_cmd_str("test_sequence.py", 4)
+        chandler = handle_commands.CommandHandler()
+        variable_dict = chandler.get_variables(command_string)
+        user_api = user_function.userAPI(chandler, dds_count=3)
+
+        incl_list = user_api.include_handler.generate_include_list()
+        for file_name, cmd_str in incl_list:
+            exec(cmd_str)
+        transitions = chandler.transitions
+        sequence_var = []
+        pulse1 = TTLPulse(0, 10, "1", is_last=False)
+        pulse2 = TTLPulse(0, 10, "2", is_last=False)
+        pulse3 = TTLPulse(0, 30, "3")
+        sequence_var.append(pulse1.sequence_var)
+        sequence_var.append(pulse2.sequence_var)
+        sequence_var.append(pulse3.sequence_var)
+        user_api.final_array = user_api.get_sequence_array(sequence_var)
+        ttl_ev1 = user_api.final_array[0]
+        for item in user_api.final_array:
+            print item
+        print ttl_ev1.device_key
+        assert ttl_ev1.device_key == ["3","2","1"]
+        ttl_ev2 = user_api.final_array[1]
+        print ttl_ev2
+
 
 #------------------------------------------------------------------------------
 # Collect all test suites for running

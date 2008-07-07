@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "04-Jul-2008 20:27:49 viellieb"
+# Time-stamp: "2008-07-07 15:33:24 c704271"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -56,6 +56,8 @@ class SeqInstruction:
 class TTLPulse(SeqInstruction):
     "generates a TTL pulse"
     def __init__(self, start_time, duration, device_key, is_last=True):
+        start_time = float(start_time)
+        duration = float(duration)
         stop_time = start_time + duration
         value_on = []
         value_off = []
@@ -135,7 +137,7 @@ class RFPulse(SeqInstruction):
         if slope_duration < cycle_time :
             dac_start_event = DACEvent(dac_start_time, amplitude, \
                                             address, is_last=False)
-            dac_stop_event = DACEvent(dac_start_time, amplitude_off, \
+            dac_stop_event = DACEvent(dac_stop_time, amplitude_off, \
                                            address, is_last=False)
         else:
             dac_start_event = DACShapeEvent(dac_start_time, transition_obj, \
@@ -214,7 +216,7 @@ class RFBichroPulse(SeqInstruction):
         if slope_duration < cycle_time :
             dac_start_event = DACEvent(dac_start_time, amplitude, \
                                             address, is_last=False)
-            dac_stop_event = DACEvent(dac_start_time, amplitude_off, \
+            dac_stop_event = DACEvent(dac_stop_time, amplitude_off, \
                                            address, is_last=False)
         else:
             dac_start_event = DACShapeEvent(dac_start_time, transition_obj, \
