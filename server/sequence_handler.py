@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "04-Jul-2008 20:39:54 viellieb"
+# Time-stamp: "2008-07-07 12:54:21 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -117,7 +117,7 @@ class SequenceHandler(object):
                 None
 
         final_array += is_last_array
-#        final_array = self.handle_conflicts(final_array)
+        final_array = self.handle_conflicts(final_array)
         if self.logger.level < 11 :
             log_str  = ""
             for i in final_array:
@@ -200,25 +200,8 @@ class SequenceHandler(object):
             dds_profile_list[trans_name] = index
             debug_str = "Transition: " +  str(trans_name) + " | freq: "  \
                 +  str(frequency) + " | index: "+ str(index)
+            self.logger.debug(debug_str)
             index += 1
-
-##         index = 0
-##         for name, trans in self.chandler.transitions.iteritems():
-##             debug_str = str(name)
-##             frequency = trans.frequency
-
-##             if index < 7:
-##                 for dds_instance in  dds_list:
-##                     self.chandler.transitions.index_list[index] = trans
-##                     api.set_dds_freq(dds_instance, frequency, index)
-##             else:
-##                 raise RuntimeError("Cannot handle more than 7 transitions - YET")
-##             api.load_phase(dds_instance, index)
-##             dds_profile_list[name] = index
-##             debug_str = "Transition: " +  str(name) + " | freq: "  \
-##                 +  str(frequency) + " | index: "+ str(index)
-##             self.logger.debug(debug_str)
-##             index += 1
 
         return dds_profile_list
 

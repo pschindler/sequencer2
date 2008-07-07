@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "04-Jul-2008 20:45:22 viellieb"
+# Time-stamp: "2008-07-07 12:39:58 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -279,6 +279,7 @@ class userAPI(SequenceHandler):
             raise RuntimeError("Cannot generate an empty sequence")
         # Here all the magic of sequence creation is done
         # see sequence_handler.py for details
+        assert len(sequence_var) > 0, "Empty sequence"
         self.final_array = self.get_sequence_array(sequence_var)
         return return_str
 

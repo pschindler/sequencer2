@@ -7,6 +7,7 @@
 - NULL transition not added to index list
 - Trigger sequence at the beginning. No edge detection
 - Pulse number after conflict handling
+- Rounding of the DDS frequency register in relation to the FPGA
 
 * Missing features - Not that important
 

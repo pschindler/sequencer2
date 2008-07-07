@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "04-Jul-2008 20:32:19 viellieb"
+# Time-stamp: "2008-07-07 12:55:14 c704271"
 
 #  file       test_ipython.py
 #  copyright  (c) Philipp Schindler 2008
@@ -8,6 +8,9 @@
 
 from server.user_function import *
 from server import handle_commands
+from sequencer2 import ptplog
+
+
 
 def generate_cmd_str(filename, nr_of_car=1):
     data = "NAME,"+filename+";CYCLES,10;TRIGGER,YES;"
@@ -18,6 +21,8 @@ def generate_cmd_str(filename, nr_of_car=1):
         data += "SLOPE_DUR,0;IONS,1:201,2:202,3:203"
         data += ";FREQ2,10;AMPL2,1;"
     return data
+
+logger=ptplog.ptplog(level=logging.DEBUG)
 
 fobj = open("server/user_function.py")
 sequence_string = fobj.read()
