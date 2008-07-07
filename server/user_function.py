@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-07 12:39:58 c704271"
+# Time-stamp: "07-Jul-2008 23:49:44 viellieb"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -127,7 +127,6 @@ def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
     """
     global sequence_var
     if str(transition_param) == transition_param:
-        transitions.make_current("NULL")
         transitions.make_current(transition_param)
         transition_obj = transitions
 
@@ -148,7 +147,6 @@ def rf_bichro_pulse(theta, phi, ion, transition_param, transition2_param, \
     """
     global sequence_var
     if str(transition_param) == transition_param:
-        transitions.make_current("NULL")
         transitions.make_current(transition_param, transition2_param)
         transition_obj = transitions
 
@@ -274,7 +272,6 @@ class userAPI(SequenceHandler):
         transitions = self.chandler.transitions
         #Execute sequence
         exec(seq_str)
-        transitions.make_current("NULL")
         if sequence_var == []:
             raise RuntimeError("Cannot generate an empty sequence")
         # Here all the magic of sequence creation is done

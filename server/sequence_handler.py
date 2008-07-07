@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "07-Jul-2008 23:19:25 viellieb"
+# Time-stamp: "07-Jul-2008 23:46:26 viellieb"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -15,7 +15,12 @@ Overview
   TransitionListObject
   --------------------
 
-  Nothing to say right now :-(
+  Enhanced dict with support for an index list containing the used transitions
+
+  SequenceDict
+  ------------
+
+  Enhanced dict with a method for adding events and included conflict resolving
 
   SequenceHandler
   ---------------
@@ -170,9 +175,8 @@ class SequenceHandler(object):
         "Generates the frequency events"
         # Make sure that the NULL transition is on index 0
         # Missing
-        if dds_list == []:
-            raise RuntimeError("Cannot create frequencies without any configured dds")
-
+        assert dds_list != [], "Cannot create frequencies without any configured dds"
+        self.chandler.transitions.index_list.append("NULL")
         dds_profile_list = {}
         index = 0
         for index_name in self.chandler.transitions.index_list:

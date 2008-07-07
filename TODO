@@ -1,10 +1,7 @@
 * Possible Bugs:
 
-- Three conflicts at the same time are not handled correctly
 - Conflict handler does not check if the same TTL channel is switched
-- NULL transition not added to index list
 - Trigger sequence at the beginning. No edge detection
-- Pulse number after conflict handling
 - Rounding of the DDS frequency register in relation to the FPGA
 
 * Missing features - Not that important
@@ -20,7 +17,6 @@
 - More than 7 transitions in one sequence
 
 * Missing unitttests
-
 
 - Simultanious RF pulses
 - DIO confiuration
@@ -46,25 +42,3 @@
 - phase coherent switching
 - High level functions for the DAC,DDS
 
-
-* Description of missing features
-
-- More than 7 transitions:
-
-At the moment there are only 8 different frequencies possible. At the moment
-all transmitted frequencies are initialized at the beginning of the sequence.
-A possible solution would be to initialize the frequencies after the sequence
-was parsed and initialized only the ued frequencies. This would require a major
-rewrite of the main program structure
-
-- Possible workaround :
-
-Save the used frequencies in a global list. (extend sequence_var or use transitions)
-
-Start the init_freq part and therefore also the trigger part after the
-generate_sequence execution
-Take care that the "NULL" transition is always initialized
-
-initialize only the used frequencies.
-
-But what to do with the indeces ??

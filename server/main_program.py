@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "04-Jul-2008 20:32:01 viellieb"
+# Time-stamp: "07-Jul-2008 23:47:32 viellieb"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -127,15 +127,9 @@ class MainProgram:
         # initialize API
         user_api = user_function.userAPI(self.chandler, ttl_dict=self.ttl_dict, \
                                          dds_count = self.dds_count)
-        # generate sequence  before loop trigger
-        # initialize frequencies
-        # Start looping and triggers
-##         try:
-##             user_api.init_sequence()
-##         except:
-##             self.logger.exception("Error while initializing sequence")
-##             return_var.error("Error while initializing sequence")
-##             return return_var
+        # The init sequence is now executed in compile_sequence.
+        # This is due to the transition management system
+
         # Generate sequence
         try:
             generate_str = user_api.generate_sequence()
