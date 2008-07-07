@@ -14,7 +14,7 @@ import logging
 
 def parse_sequence(sequence_string):
   "parses the sequencefile for the RAMP tag and creates the code toset it up"
-  logger = logging.getLogger("server")
+  logger = logging.getLogger("DACcontrol")
   current_tag=""
   sequence_dict={}
   for line in sequence_string.splitlines():

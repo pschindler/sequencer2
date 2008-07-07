@@ -64,4 +64,20 @@ class ptplog:
         logger3.addHandler(ch3)
         self.logger3 = logger3
 
+        level4 = level
+        logger4 = logging.getLogger("DACcontrol")
+        logger4.setLevel(level3)
+        ch4 = logging.StreamHandler()
+        ch4.setLevel(level)
+        #create formatter
+        if filename == None:
+            formatter = logging.Formatter("DACcontrol : %(levelname)s  %(message)s")
+        else:
+            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        #add formatter to ch
+        ch4.setFormatter(formatter)
+        #add ch to logger
+        #create console handler and set level to debug
+        logger4.addHandler(ch4)
+        self.logger4 = logger4
 # logging.py ends here

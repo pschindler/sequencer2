@@ -11,6 +11,7 @@ import logging
 class dac_API(DacControl):
 
     def __init__(self, num_cards):
+        self.logger = logging.getLogger("DACcontrol")
         DacControl.__init__(self, num_cards)
         Update_only = False
 
@@ -42,7 +43,7 @@ class dac_API(DacControl):
 
 
 class RampHandler(DacControl):
-    "class for all the ramping stuff"
+    "class for all the ramping stuff."
 
     def __init__(self, chandler):
         "inits Ramphandling by getting ramps from handler and sequencefile"
