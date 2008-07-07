@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-07 15:33:24 c704271"
+# Time-stamp: "07-Jul-2008 23:15:12 viellieb"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -14,6 +14,7 @@ from transitions import Transitions
 from  sequencer2 import config
 
 import logging
+import copy
 
 global_config = config.Config()
 global_reference_frequency = global_config.get_float("SERVER","reference_frequency")
@@ -249,7 +250,7 @@ class TTLEvent(SeqInstruction):
         for index in range(len(device_key)):
             self.val_dict[device_key[index]] = value[index]
         self.start_time = start_time
-        self.device_key = device_key
+        self.device_key = copy.copy(device_key)
         self.name = "TTLEvent"
         self.duration = self.cycle_time
         self.is_last = is_last

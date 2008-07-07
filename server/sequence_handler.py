@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-07 15:52:01 c704271"
+# Time-stamp: "07-Jul-2008 23:19:25 viellieb"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -74,6 +74,39 @@ class TransitionListObject(dict):
         my_str += " || " + str(self.current_transition)
         return my_str
 
+
+class SequenceDict(dict):
+    """An enhanced dictionary with methods for adding events
+    and resolving some conflicts"""
+    logger = None
+    def add_event(self, event):
+        "Adds an event to the sequence dictionary"
+        # Missing: rounding of start time
+        my_key = event.start_time
+        if self.has_key(my_key):
+            self.resolve_conflict(event)
+        else:
+            self[my_key] = [event]
+
+    def resolve_conflict(self, event):
+        "Resolve conflicts immediate"
+        my_key = event.start_time
+        conflict_array = self[my_key]
+        for conf_item2 in conflict_array:
+            is_merged = event.resolve_conflict(conf_item2)
+            if is_merged:
+                if self.logger != None:
+                    self.logger.debug("Combining: "+str(event) \
+                                      +str(conf_item2))
+                conflict_array.remove(conf_item2)
+                break #Only merge once
+            else:
+                if self.logger != None:
+                    self.logger.debug("cannot combine: "+str(event.name)\
+                                      + " "  +str(conf_item2.name))
+        conflict_array.append(event)
+
+
 class SequenceHandler(object):
     "Base class for the user api"
     logger = None
@@ -86,8 +119,10 @@ class SequenceHandler(object):
 
     def get_sequence_array(self, seq_array):
         "Sorts the sequence array and sets the real start times"
+        final_dict = SequenceDict()
+        final_dict.logger = self.logger
         final_array = []
-        is_last_array = []
+        log_str = ""
         current_time = 0.0
         max_time = 0.0
         # loop over all insn arrays
@@ -103,79 +138,27 @@ class SequenceHandler(object):
                         max_time = last_insn.start_time + last_insn.duration
                     # Increase start time of instruction
                     last_insn.start_time += current_time
-                    is_last_array.append(last_insn)
+                    final_dict.add_event(last_insn)
                     if last_insn.is_last:
                         current_time += max_time
                         # Sort the array on the instruction start time
-                        is_last_array.sort(sort_method)
-                        final_array += is_last_array
-                        is_last_array = []
                         max_time = 0
                         break
 
             except IndexError:
                 None
 
-        final_array += is_last_array
-        final_array = self.handle_conflicts(final_array)
-        if self.logger.level < 11 :
-            log_str  = ""
-            for i in final_array:
-                log_str += str(i) + "\n"
-            self.logger.debug(log_str)
+        dict_list = final_dict.items()
+        dict_list.sort()
+        for key, event_list in dict_list:
+            for event in event_list:
+                final_array.append(event)
+                if self.logger.level < 11 :
+                    log_str += str(event) + "\n"
+        self.logger.debug(log_str)
 
         return final_array
 
-    def handle_conflicts(self, final_array):
-        """Let's see if we can combine some instructions
-        Long story made short: This is not implemented well yet :-(
-        The final array is checked for items with the same start time
-        If items have the same start time they are added to the conflict_array
-        This conflict_array is emptied if an item with a different start time occurs
-
-        Maybe better data structure: use dict for conflict_array
-        Missing: Check if all instructions are still there !!??
-        """
-        for item in final_array:
-            print item
-        has_conflict = False
-        new_array = []
-        conflict_array = []
-        final_length = len(final_array) - 1
-        final_array.reverse()
-        next_item = final_array.pop()
-        for index in range(final_length):
-            this_item = next_item
-            try:
-                next_item = final_array.pop()
-            except IndexError:
-                break
-
-            if (this_item.start_time == next_item.start_time):
-                if conflict_array.count(this_item) == 0:
-                    print "added to conf"+str(this_item)
-                    conflict_array.append(this_item)
-                conflict_array.append(next_item)
-            else:
-                while conflict_array != []:
-                    conf_item = conflict_array.pop()
-                    for conf_item2 in conflict_array:
-                        is_merged = conf_item.resolve_conflict(conf_item2)
-                        if is_merged:
-                            self.logger.debug("Combining: "+str(conf_item) \
-                                                  +str(conf_item2))
-                            conflict_array.remove(conf_item2)
-                        else:
-                            self.logger.debug("cannot combine: "+str(conf_item.name)\
-                                                 + " "  +str(conf_item2.name))
-                    new_array.append(conf_item)
-                    has_conflict = True
-                if not has_conflict:
-                    new_array.append(this_item)
-                else:
-                    has_conflict = False
-        new_array.append(this_item)
-        return new_array
 
     def send_sequence(self):
         "send the sequence to the Box"
