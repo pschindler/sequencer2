@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-16 13:10:31 c704271"
+# Time-stamp: "2008-06-24 13:47:53 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -17,7 +17,7 @@ API
 
     Following functions are most commonly used:
       - wait(wait_time)
-      - dac_value(??)
+      - dac_value(db_value)
       - ttl_set_multiple(value_dict)
 
 """

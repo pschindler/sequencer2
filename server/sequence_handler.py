@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-24 09:58:35 c704271"
+# Time-stamp: "2008-07-07 12:54:21 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -45,17 +45,32 @@ class TransitionListObject(dict):
     """An enhanced Transition dictionary class with support for the DDS
     additionaly to the standard dictionary it features a dictionary dds_list
     in this dictionary the registers in the dds are stored"""
-    index_list = {}
+    index_list = []
     current_transition = "NULL"
+    transition2_name = None
+    max_transition = 7
+
+    def make_current(self, transition_name, transition2_name=None):
+        trans_list = [transition_name]
+        if transition2_name != None:
+            trans_list.append(transition2_name)
+            self.transition2_name = transition2_name
+        else:
+            self.transition2_name = None
+        for item_name in trans_list:
+            if self.index_list.count(item_name) == 0:
+                self.index_list.append(item_name)
+        self.current_transition = transition_name
+        if len(self.index_list) > self.max_transition:
+            raise RuntimeError("Cannot handle more than 7 transitions in one sequence")
 
     def __str__(self):
         my_str = ""
         for name, item in self.iteritems():
             my_str += str(name) + ", "
         my_str += " || "
-        for name, item in self.index_list.iteritems():
-            my_str += str(name)
-            my_str += " : " + str(item.name) + ", "
+        for item in self.index_list:
+            my_str += " : " + str(item) + ", "
         my_str += " || " + str(self.current_transition)
         return my_str
 
@@ -119,6 +134,7 @@ class SequenceHandler(object):
         This conflict_array is emptied if an item with a different start time occurs
 
         Maybe better data structure: use dict for conflict_array
+        Missing: Check if all instructions are still there !!??
         """
         has_conflict = False
         new_array = []
@@ -155,6 +171,7 @@ class SequenceHandler(object):
                     new_array.append(this_item)
                 else:
                     has_conflict = False
+        new_array.append(next_item)
         return new_array
 
     def send_sequence(self):
@@ -169,21 +186,19 @@ class SequenceHandler(object):
         # Missing
         if dds_list == []:
             raise RuntimeError("Cannot create frequencies without any configured dds")
-        index = 0
-        dds_profile_list = {}
-        for name, trans in self.chandler.transitions.iteritems():
-            debug_str = str(name)
-            frequency = trans.frequency
 
-            if index < 7:
-                for dds_instance in  dds_list:
-                    self.chandler.transitions.index_list[index] = trans
-                    api.set_dds_freq(dds_instance, frequency, index)
-            else:
-                raise RuntimeError("Cannot handle more than 7 transitions - YET")
+        dds_profile_list = {}
+        index = 0
+        for index_name in self.chandler.transitions.index_list:
+            trans_name = self.chandler.transitions.index_list[index]
+            trans_obj = self.chandler.transitions[trans_name]
+            frequency = trans_obj.frequency
+
+            for dds_instance in  dds_list:
+                api.set_dds_freq(dds_instance, frequency, index)
             api.load_phase(dds_instance, index)
-            dds_profile_list[name] = index
-            debug_str = "Transition: " +  str(name) + " | freq: "  \
+            dds_profile_list[trans_name] = index
+            debug_str = "Transition: " +  str(trans_name) + " | freq: "  \
                 +  str(frequency) + " | index: "+ str(index)
             self.logger.debug(debug_str)
             index += 1

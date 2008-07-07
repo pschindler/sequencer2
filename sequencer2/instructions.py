@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-05 10:46:31 c704271"
+# Time-stamp: "2008-06-25 15:56:15 c704271"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -138,6 +138,7 @@ class bdec(j):
             raise RuntimeError("Register address canot be greater then 15")
         self.target_name = label_name
         self.register_address = register_address
+        self.target_address = None
 
     def get_jump_value(self, target_address):
         "returns the hex value for bdec insns"
@@ -147,6 +148,7 @@ class bdec(j):
         return " add: "+str(self.address) + \
                " -- op:  "+str(hex(self.opcode)) + \
                " -- nam: "+str(self.name) + \
+               " -- tar: "+str(self.target_address) + \
                " -- reg addr: "+str(self.register_address)
 
 class call(j):

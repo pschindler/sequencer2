@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-20 16:19:29 c704271"
+# Time-stamp: "2008-06-24 16:27:19 c704271"
 
 #  file      : server.py
 #  email     : philipp DOT emacs DOT schindler AT uibk DOT ac DOT at
@@ -62,7 +62,10 @@ class tcp_Server:
                   return_var = program_method(receivedData)
                   stop_time=time.time()
                   used_time=round((stop_time-start_time)*1000)
-                  time_str="OK, execution_time, " +str(used_time)+";\n"
+                  if return_var.is_error:
+                    time_str = "ERROR"
+                  else:
+                    time_str="Ok, execution_time, " +str(used_time)+";\n"
 
                   return_string = return_var.return_string
                   error_string = return_var.error_string

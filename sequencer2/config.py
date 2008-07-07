@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "14-Jun-2008 14:56:54 viellieb"
+# Time-stamp: "04-Jul-2008 19:06:15 viellieb"
 
 #  file       config.py
 #  copyright  (c) Philipp Schindler 2008
@@ -50,6 +50,16 @@ class Config:
             self.logger.info("Cannot find duration information for key: "+str(key))
             val = 1
         return val
+
+    def get_float_dict_val(self, key):
+        "Returns a value frrom the dictionary defined in get_all_dict"
+        try:
+            val = float(self.item_dict[key])
+        except KeyError:
+            self.logger.info("Cannot find duration information for key: "+str(key))
+            val = 1
+        return val
+
 
     def get_bool(self,section, option):
         """returns a bool from option
