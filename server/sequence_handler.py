@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "07-Jul-2008 23:46:26 viellieb"
+# Time-stamp: "2008-07-08 10:38:38 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -55,7 +55,14 @@ class TransitionListObject(dict):
     transition2_name = None
     max_transition = 7
 
+    def __init__(self):
+        """empty the index list"""
+        dict.__init__({})
+        self.index_list = []
+        self.transition2_name = None
+
     def make_current(self, transition_name, transition2_name=None):
+        "set current transition and add it to the index_list"
         trans_list = [transition_name]
         if transition2_name != None:
             trans_list.append(transition2_name)
@@ -70,13 +77,13 @@ class TransitionListObject(dict):
             raise RuntimeError("Cannot handle more than 7 transitions in one sequence")
 
     def __str__(self):
-        my_str = ""
+        my_str = "items:"
         for name, item in self.iteritems():
             my_str += str(name) + ", "
-        my_str += " || "
+        my_str += " || index: "
         for item in self.index_list:
             my_str += " : " + str(item) + ", "
-        my_str += " || " + str(self.current_transition)
+        my_str += " || curr: " + str(self.current_transition)
         return my_str
 
 
