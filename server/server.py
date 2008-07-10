@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-10 14:34:27 c704271"
+# Time-stamp: "2008-07-10 14:47:46 c704271"
 
 #  file      : server.py
 #  email     : philipp DOT emacs DOT schindler AT uibk DOT ac DOT at
 #            : remove the "One And Only Editor"
 #  copyright : (c) 2006 Philipp Schindler
-
+# pylint: disable-msg=E1101
 #_* Code
 
 import socket
@@ -31,7 +31,7 @@ class TcpServer:
         "Executes program method with the received string as the argument"
         while True:
             self.logger.info("server started")
-            sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.bind(('', self.port))
             sock.listen(5)
             try:
@@ -41,7 +41,8 @@ class TcpServer:
                     while True:
                         try:
                             self.logger.debug("ready to receive:")
-                            receivedData = newSocket.recv(4*8192)#maybe we should increase the max receive data
+                            receivedData = newSocket.recv(4*8192)
+                            #maybe we should increase the max receive data
                         except:
                             self.logger.warn("Socket error while receiving data")
                         if not receivedData:
@@ -81,7 +82,7 @@ class TcpServer:
                         else:
                             self.logger.debug("trying to send error: "+error_string)
                             if self.answer:
-                                newSocket.sendall(error_srtring+"\r\n")
+                                newSocket.sendall(error_string+"\r\n")
                             error_string = ""
                         self.logger.debug("finish connected")
                     newSocket.close()
