@@ -226,6 +226,29 @@ class Test_Sequencer(unittest.TestCase):
       self.fail("Failed speed test: "+str(time2-time1))
 
 
+  def test_sequence_length(self):
+    """Test maximum sequence length. This test may take some time !!!!
+    """
+    return None
+#    psyco.full()
+    time1=time.time()
+    my_sequencer=sequencer.sequencer()
+    my_api=api.api(my_sequencer)
+    N0=1000000
+    my_api.dac_value(1,-3)
+    my_api.jump("test")
+    for i in range(N0):
+        my_api.dac_value(1,-3)
+    my_api.label("test")
+    my_sequencer.compile_sequence()
+    print len(my_sequencer.current_sequence)
+    if N0 < 100:
+        my_sequencer.debug_sequence()
+    #    print my_my_sequencer.word_list
+    time2=time.time()
+    print str(time2-time1)
+
+
   def test_finite_loop(self):
     "Testing the finite loop construct"
     my_sequencer=sequencer.sequencer()

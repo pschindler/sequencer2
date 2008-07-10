@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-08 10:38:38 c704271"
+# Time-stamp: "2008-07-10 13:37:03 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -50,9 +50,6 @@ class TransitionListObject(dict):
     """An enhanced Transition dictionary class with support for the DDS
     additionaly to the standard dictionary it features a dictionary dds_list
     in this dictionary the registers in the dds are stored"""
-    index_list = []
-    current_transition = "NULL"
-    transition2_name = None
     max_transition = 7
 
     def __init__(self):
@@ -60,6 +57,17 @@ class TransitionListObject(dict):
         dict.__init__({})
         self.index_list = []
         self.transition2_name = None
+        self.current_transition = "NULL"
+
+    def clear(self):
+        """remove everything"""
+        self.__init__()
+
+    def clear_index(self):
+        "clear the index list and the current_transition"
+        self.index_list = []
+        self.transition2_name = None
+        self.current_transition = "NULL"
 
     def make_current(self, transition_name, transition2_name=None):
         "set current transition and add it to the index_list"

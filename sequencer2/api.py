@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-24 13:47:53 c704271"
+# Time-stamp: "2008-07-10 13:45:16 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -58,6 +58,12 @@ class api:
         self.ttl_sys = outputsystem.OutputSystem(ttl_dict)
 
         self.recalibration = self.config.recalibration
+        self.dds_list = []
+
+    def clear(self):
+        "Reset the dds list"
+        self.dds_list = []
+
     #################################################################
     #   The general PCP instructions
     #################################################################

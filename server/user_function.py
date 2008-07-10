@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "07-Jul-2008 23:49:44 viellieb"
+# Time-stamp: "2008-07-10 13:43:39 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -225,6 +225,11 @@ class userAPI(SequenceHandler):
 
         self.sequence_parser = sequence_parser.parse_sequence
 
+    def clear(self):
+        self.sequencer.clear()
+        self.api.clear()
+        self.final_array = []
+
     def init_sequence(self, initial_ttl=0x0):
         "generate triggers, frequency initialization and loop targets"
         if initial_ttl != 0:
@@ -269,6 +274,7 @@ class userAPI(SequenceHandler):
         global sequence_var
         sequence_var = []
         global transitions
+        transitions.clear()
         transitions = self.chandler.transitions
         #Execute sequence
         exec(seq_str)

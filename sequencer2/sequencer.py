@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-25 15:50:51 c704271"
+# Time-stamp: "2008-07-10 13:45:52 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -26,12 +26,15 @@ class sequencer:
         self.config = config.Config()
         self.branch_delay_slots = self.config.get_int("PCP", "branch_delay_slots")
         self.max_sequence_length = self.config.get_int("PCP", "max_sequence_length")
-
 # This would collide with the subroutine handling :-(
 # So we remove it and hope for the best
 #        nop_insn = instructions.nop()
 #        self.add_insn(nop_insn)
         self.initial_sequence = copy.copy(self.current_sequence)
+
+    def clear(self):
+        "just execute the init function"
+        self.__init__()
 
     def get_binary_charlist(self, hex_num, byte_width):
         """hex_char_list(hex_num, byte_width)

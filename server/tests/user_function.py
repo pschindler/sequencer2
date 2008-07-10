@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "07-Jul-2008 23:49:56 viellieb"
+# Time-stamp: "2008-07-10 13:55:49 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -10,6 +10,8 @@ import unittest
 import time
 import logging
 
+from server.user_function import *
+from server.instruction_handler import *
 
 from sequencer2 import sequencer
 from sequencer2 import api
@@ -54,6 +56,14 @@ class TestUserFunction(unittest.TestCase):
         if return_var.is_error:
             self.fail(return_var.return_string)
 
+    def test_nr_carrier_nr(self):
+        "Test how many transitions the server can handle"
+        cmd_str = generate_cmd_str("test_sequence_many.py", nr_of_car=9)
+        my_main_program = main_program.MainProgram()
+        return_var = my_main_program.execute_program(cmd_str)
+        if return_var.is_error:
+            self.fail(return_var.return_string)
+
     def test_pulse_shaping(self):
         "Test if the shaping works at all"
         trans_obj = sequence_handler.transition("1", 0, 2, amplitude=-3, \
@@ -62,6 +72,7 @@ class TestUserFunction(unittest.TestCase):
         my_api = api.api(my_sequencer)
         ihandler = instruction_handler.DACShapeEvent(0,trans_obj,1, step_nr=10)
         ihandler.handle_instruction(my_api)
+        assert len(my_sequencer.current_sequence) > 99, "Sequence to small"
         my_sequencer.debug_sequence()
 
     def test_bichro_pulse(self):
@@ -74,16 +85,7 @@ class TestUserFunction(unittest.TestCase):
 
     def test_conflict_handler(self):
         "Test the conflict handler"
-        from server.user_function import *
-        from server.instruction_handler import *
-        fobj = open("server/user_function.py")
-        sequence_string = fobj.read()
-        fobj.close()
-        seq_list = sequence_string.split("#--1")
-
-#        exec(seq_list[1])
-
-        command_string = generate_cmd_str("test_sequence.py", 4)
+        command_string = generate_cmd_str("test_sequence.py", 9)
         chandler = handle_commands.CommandHandler()
         variable_dict = chandler.get_variables(command_string)
         user_api = user_function.userAPI(chandler, dds_count=3)
@@ -107,6 +109,34 @@ class TestUserFunction(unittest.TestCase):
         assert ttl_ev1.device_key == ["3","2","1"]
         ttl_ev2 = user_api.final_array[1]
         print ttl_ev2
+
+    def test_conflict_handler(self):
+        "Test the conflict handler"
+        fobj = open("server/user_function.py")
+
+        command_string = generate_cmd_str("test_sequence.py", 9)
+
+        chandler = handle_commands.CommandHandler()
+        variable_dict = chandler.get_variables(command_string)
+        user_api = user_function.userAPI(chandler, dds_count=3)
+
+        incl_list = user_api.include_handler.generate_include_list()
+        for file_name, cmd_str in incl_list:
+            exec(cmd_str)
+        transitions = chandler.transitions
+        sequence_var = []
+        pulse1 = TTLPulse(0, 10, "1", is_last=False)
+        pulse2 = TTLPulse(0, 20, "1", is_last=False)
+        pulse3 = TTLPulse(0, 30, "3")
+        sequence_var.append(pulse1.sequence_var)
+        sequence_var.append(pulse2.sequence_var)
+        sequence_var.append(pulse3.sequence_var)
+        try:
+            user_api.final_array = user_api.get_sequence_array(sequence_var)
+            self.fail("Program did not detect simulatnois TTL error")
+        except RuntimeError:
+            pass
+
 
 
 #------------------------------------------------------------------------------

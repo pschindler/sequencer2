@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "07-Jul-2008 23:47:32 viellieb"
+# Time-stamp: "2008-07-10 14:36:41 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -84,7 +84,7 @@ class MainProgram:
         server_port = self.config.get_int("SERVER","server_port")
         answer = self.config.get_bool("SERVER","server_answer")
         pre_return = self.config.get_bool("SERVER","server_pre_return")
-        self.server = server.tcp_Server(port=server_port, answer=answer, pre_return=pre_return)
+        self.server = server.TcpServer(port=server_port, answer=answer, pre_return=pre_return)
 
     def start_server(self):
         "executes the main loop of the server"
@@ -155,6 +155,7 @@ class MainProgram:
         except:
             self.logger.exception("Error while sending sequence")
             return_var.error("Error while sending sequence")
+        user_api.clear()
         del(user_api)
         return_var.return_string = generate_str
         return return_var
