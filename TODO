@@ -41,3 +41,23 @@
 - phase coherent switching
 - High level functions for the DAC,DDS
 
+
+* DDS Sweeps
+
+- External Pins:
+   - DRCTL
+   - DROVER
+   - DRHOLD
+
+- Configuration:
+   - Frequency in dedicated register
+   - Digital Ramp destination bits:
+      CFR2(21:20): 00 - Frequency
+   - No Dwell - 1
+   - Use register 0
+
+- Sequencer2
+   - Use register which is used as NULL frequency
+   - Initialize register before sweeping
+   - Do sweep
+   - Rewrite NULL transition after sweep

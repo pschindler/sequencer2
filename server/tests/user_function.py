@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-10 13:55:49 c704271"
+# Time-stamp: "2008-07-11 11:01:57 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -103,17 +103,11 @@ class TestUserFunction(unittest.TestCase):
         sequence_var.append(pulse3.sequence_var)
         user_api.final_array = user_api.get_sequence_array(sequence_var)
         ttl_ev1 = user_api.final_array[0]
-        for item in user_api.final_array:
-            print item
-        print ttl_ev1.device_key
         assert ttl_ev1.device_key == ["3","2","1"]
         ttl_ev2 = user_api.final_array[1]
-        print ttl_ev2
 
-    def test_conflict_handler(self):
-        "Test the conflict handler"
-        fobj = open("server/user_function.py")
-
+    def test_conflict_handler2(self):
+        "Test the TTL conflict handling of simultanious pulses"
         command_string = generate_cmd_str("test_sequence.py", 9)
 
         chandler = handle_commands.CommandHandler()
@@ -133,9 +127,35 @@ class TestUserFunction(unittest.TestCase):
         sequence_var.append(pulse3.sequence_var)
         try:
             user_api.final_array = user_api.get_sequence_array(sequence_var)
-            self.fail("Program did not detect simulatnois TTL error")
+            self.fail("Program did not detect simulatnious TTL error")
         except RuntimeError:
             pass
+
+
+    def test_transition_modifiers(self):
+        "Test the offset and multiplier of the transitions"
+        global transitions
+        command_string = generate_cmd_str("test_sequence.py", 9)
+
+        chandler = handle_commands.CommandHandler()
+        variable_dict = chandler.get_variables(command_string)
+        user_api = user_function.userAPI(chandler, dds_count=3)
+        user_api.clear()
+
+        pulse1 = TTLPulse(0, 10, "1", is_last=False)
+        pulse2 = TTLPulse(0, 20, "1", is_last=False)
+        pulse3 = TTLPulse(0, 30, "3")
+        sequence_var.append(pulse1.sequence_var)
+        sequence_var.append(pulse2.sequence_var)
+        sequence_var.append(pulse3.sequence_var)
+        rf_pulse(1,0,1,"carrier1")
+        transitions = chandler.transitions
+        set_transition("carrier1", "729")
+        assert transitions["carrier1"].offset == 0
+        assert transitions["carrier1"].multiplier == .5
+        set_transition("carrier1", "RF")
+        assert transitions["carrier1"].offset == 285
+        assert transitions["carrier1"].multiplier == 1
 
 
 

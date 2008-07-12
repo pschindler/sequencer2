@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-10 13:43:39 c704271"
+# Time-stamp: "2008-07-11 10:59:45 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -104,6 +104,8 @@ from instruction_handler import *
 return_str = ""
 sequence_var = []
 transitions = TransitionListObject()
+logger = logging.getLogger("server")
+
 
 def test_global(string1):
     "Just testing ..."
@@ -126,12 +128,16 @@ def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
     from the data sent by QFP
     """
     global sequence_var
+    global transitions
+
     if str(transition_param) == transition_param:
         transitions.make_current(transition_param)
         transition_obj = transitions
-
     else:
         transition_obj = transition_param
+        transitions.add_transition(transition_obj)
+        transitions.make_current(transition_obj.name)
+
     rf_pulse_insn = RFPulse(start_time, theta, phi, ion, transition_obj, \
                             is_last=is_last, address=address)
 
@@ -186,6 +192,29 @@ def end_of_sequence(my_api, ttl_trigger_channel):
     my_api.end_finite("finite_label")
     my_api.ttl_set_bit(ttl_trigger_channel, 1)
 
+
+def set_transition(transition_name, name_str="729"):
+    "Sets the frequency modifiers of the transition"
+    global transitions
+    if name_str == "729":
+        multiplier = .5
+        offset = 0
+
+    if name_str == "Raman":
+        multiplier = .25
+        offset = 285
+
+    if name_str == "RF":
+        multiplier = 1
+        offset = 285
+    try:
+        transitions[transition_name].set_freq_modifier(multiplier, offset)
+        logger.debug("setting transition: "+str(transitions[transition_name]))
+    except KeyError:
+        raise RuntimeError("Error while setting transition" + str(transition_name))
+
+
+
 # DO NOT remove the line below - This is needed by the ipython debugger
 #--1
 ################################################################################
@@ -226,9 +255,15 @@ class userAPI(SequenceHandler):
         self.sequence_parser = sequence_parser.parse_sequence
 
     def clear(self):
+        "Clear all the local and global variables"
         self.sequencer.clear()
         self.api.clear()
         self.final_array = []
+        global transitions
+        transitions.clear()
+        global sequence_var
+        sequence_var = []
+
 
     def init_sequence(self, initial_ttl=0x0):
         "generate triggers, frequency initialization and loop targets"

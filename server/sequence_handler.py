@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-10 13:37:03 c704271"
+# Time-stamp: "2008-07-11 11:40:23 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -83,6 +83,11 @@ class TransitionListObject(dict):
         self.current_transition = transition_name
         if len(self.index_list) > self.max_transition:
             raise RuntimeError("Cannot handle more than 7 transitions in one sequence")
+
+    def add_transition(self, transition_obj):
+        "Adds a transition to the dictionary"
+        if not self.has_key(transition_obj.name):
+            self[transition_obj.name] = transition_obj
 
     def __str__(self):
         my_str = "items:"
@@ -197,7 +202,7 @@ class SequenceHandler(object):
         for index_name in self.chandler.transitions.index_list:
             trans_name = self.chandler.transitions.index_list[index]
             trans_obj = self.chandler.transitions[trans_name]
-            frequency = trans_obj.frequency
+            frequency = trans_obj.get_frequency()
 
             for dds_instance in  dds_list:
                 api.set_dds_freq(dds_instance, frequency, index)
@@ -258,5 +263,27 @@ class transition:
         self.multiplier = multiplier
         self.freq_is_init = False
         self.port = port
+
+    def get_frequency(self):
+        "Return the corrected frequency"
+        real_freq = self.offset + (self.frequency * self.multiplier)
+        return real_freq
+
+    def set_freq_modifier(self, multiplier, offset):
+        "Set the multiplier and the offset"
+        self.multiplier = multiplier
+        self.offset = offset
+
+    def get_phase(self, phase):
+        "returns the corrected phase"
+        return phase * self.multiplier
+
+    def __str__(self):
+        my_str = "Nam: " + str(self.name)
+        my_str += " | freq: " +str(self.frequency)
+        my_str += " | ampl: " +str(self.amplitude)
+        my_str += " | mult: " +str(self.multiplier)
+        my_str += " | off: " +str(self.offset)
+        return my_str
 
 # sequence_handler.py ends here

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-10 15:00:53 c704271"
+# Time-stamp: "2008-07-11 10:38:52 c704271"
 
 #  file      : sequence_parser.py
 #  email     : philipp DOT schindler AT frog DOT uibk DOT ac DOT at
@@ -32,19 +32,19 @@ def parse_sequence(sequence_string, is_ramp=False):
             except KeyError:
                 sequence_dict[current_tag]=line+"\n"
         got_new_tag=False
-  if is_ramp:
-      name_list=["<VARIABLES>","<RAMP>"]
-  else:
-      name_list=["<VARIABLES>","<TRANSITIONS>","<SEQUENCE>"]
-  return_string=""
-  for item in name_list:
-      try:
-          return_string+=sequence_dict[item]
-      except KeyError:
-          logger.info("error while getting tag: "+str(item))
-  if is_ramp:
-      return_string += "setup_ramps()\n"
-  return return_string
+    if is_ramp:
+        name_list=["<VARIABLES>","<RAMP>"]
+    else:
+        name_list=["<VARIABLES>","<TRANSITIONS>","<SEQUENCE>"]
+    return_string=""
+    for item in name_list:
+        try:
+            return_string+=sequence_dict[item]
+        except KeyError:
+            logger.info("error while getting tag: "+str(item))
+    if is_ramp:
+        return_string += "setup_ramps()\n"
+    return return_string
 
 
 

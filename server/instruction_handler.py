@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-10 14:18:14 c704271"
+# Time-stamp: "2008-07-11 11:24:21 c704271"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -86,6 +86,7 @@ class RFPulse(SeqInstruction):
     "Generates an RF pulse"
     def __init__(self, start_time, theta, phi, ion, transitions, \
                      is_last=False, address=0):
+
         cycle_time = self.cycle_time
         dac_switch_time = self.get_hardware_duration("dac_duration")
         dds_switch_time = self.get_hardware_duration("dds_duration")
@@ -98,6 +99,8 @@ class RFPulse(SeqInstruction):
         except KeyError:
             raise RuntimeError("Transition name not found: " + \
                                    str(transitions.current_transition))
+        # Set the real phase
+        phi = transition_obj.get_phase(phi)
         try:
             pulse_duration = transition_obj.t_rabi[ion] * theta
         except KeyError:
@@ -160,6 +163,8 @@ class RFBichroPulse(SeqInstruction):
         except KeyError:
             raise RuntimeError("Bichro Pulse Transition name not found: " + \
                                    str(transitions.current_transition))
+        # Set the real phase
+        phi = transition_obj.get_phase(phi)
         try:
             pulse_duration = transition_obj.t_rabi[ion] * theta
         except KeyError:
