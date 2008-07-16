@@ -26,6 +26,7 @@
 - DDS switching off
 - Conflict handling
 - Pulse Shaping
+- Wait instruction splitting
 
 * Missing tests on hardware
 

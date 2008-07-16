@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-10 13:45:16 c704271"
+# Time-stamp: "2008-07-16 11:07:51 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -41,6 +41,7 @@ class api:
         self.config = config.Config()
         self.cycle_time = self.config.get_float("SERVER", "cycle_time")
         self.branch_delay_slots = self.config.get_int("PCP", "branch_delay_slots")
+        self.max_wait_cycles = self.config.get_int("PCP", "max_wait_cycles")
 
         self.sequencer = sequencer
         # The LVDS opcodes
@@ -76,11 +77,20 @@ class api:
         if wait_cycles < 1.0:
             self.logger.info("Cannot wait for less than one cycle")
             return
+
         nop_insn = instructions.nop()
         if wait_cycles > self.branch_delay_slots:
-            wait_insn = instructions.wait(wait_cycles - 4)
-            # Do we really need wait_cycles - 4 ??
-            self.sequencer.add_insn(wait_insn)
+            wait_cycles -= self.branch_delay_slots - 1
+            while wait_cycles > 0:
+                if wait_cycles > self.max_wait_cycles:
+                    my_wait = self.max_wait_cycles
+                else:
+                    my_wait = wait_cycles
+
+                wait_insn = instructions.wait(my_wait)
+                #Do we really need wait_cycles - 4 ??
+                self.sequencer.add_insn(wait_insn)
+                wait_cycles -= my_wait
             for i in range(self.branch_delay_slots):
                 self.sequencer.add_insn(copy.copy(nop_insn))
         else:
