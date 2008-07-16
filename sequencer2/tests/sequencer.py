@@ -127,7 +127,16 @@ class Test_Sequencer(unittest.TestCase):
     wait_insn = instructions.wait(wait_cycles)
     test_value = wait_insn.get_value()
     self.assertEquals(test_value,value)
-
+    my_sequencer=sequencer.sequencer()
+    my_api = api.api(my_sequencer)
+    my_api.wait((2**14+100)*0.01)
+    current_seq = my_sequencer.current_sequence
+    insn1 = current_seq[0]
+    insn2 = current_seq[1]
+    value = 0x9 << 28 | 2**14-1
+    value1 = 0x9 << 28 | 100 +1 -4
+    self.assertEquals(insn1.get_value(), value)
+    self.assertEquals(insn2.get_value(), value1)
 
   def test_subroutine(self):
     """Test the subroutine calling
