@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-10 14:36:41 c704271"
+# Time-stamp: "2008-07-21 17:02:10 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -69,6 +69,7 @@ class MainProgram:
         "sets up the configuration and the logger"
         self.logger = logging.getLogger("server")
         self.config = config.Config()
+        self.config.parse_cmd_line()
         self.server = None
         self.setup_server()
         self.chandler = handle_commands.CommandHandler()

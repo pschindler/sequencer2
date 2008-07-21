@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-11 10:59:45 c704271"
+# Time-stamp: "2008-07-21 16:38:53 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -194,19 +194,11 @@ def end_of_sequence(my_api, ttl_trigger_channel):
 
 
 def set_transition(transition_name, name_str="729"):
-    "Sets the frequency modifiers of the transition"
+    """Sets the frequency modifiers of the transition
+    For configuration see config/rf_setup.py"""
     global transitions
-    if name_str == "729":
-        multiplier = .5
-        offset = 0
-
-    if name_str == "Raman":
-        multiplier = .25
-        offset = 285
-
-    if name_str == "RF":
-        multiplier = 1
-        offset = 285
+    my_config = config.Config()
+    [offset, multiplier] = my_config.get_rf_settings(name_str)
     try:
         transitions[transition_name].set_freq_modifier(multiplier, offset)
         logger.debug("setting transition: "+str(transitions[transition_name]))
@@ -233,7 +225,7 @@ class userAPI(SequenceHandler):
         self.config = config.Config()
         self.logger = logging.getLogger("server")
         self.seq_directory = self.config.get_str("SERVER","sequence_dir")
-        self.is_nonet = self.config.get_bool("SERVER","nonet")
+        self.is_nonet = self.config.is_nonet()
         # Instnciate the IncludeHandler
         include_dir = self.config.get_str("SERVER","include_dir")
         self.include_handler = IncludeHandler(include_dir)
