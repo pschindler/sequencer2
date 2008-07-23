@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-16 11:07:51 c704271"
+# Time-stamp: "23-Jul-2008 18:13:48 viellieb"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -63,7 +63,8 @@ class api:
 
     def clear(self):
         "Reset the dds list"
-        self.dds_list = []
+        pass
+        #self.dds_list = []
 
     #################################################################
     #   The general PCP instructions

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-21 16:38:53 c704271"
+# Time-stamp: "23-Jul-2008 17:36:44 viellieb"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -134,9 +134,9 @@ def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
         transitions.make_current(transition_param)
         transition_obj = transitions
     else:
-        transition_obj = transition_param
-        transitions.add_transition(transition_obj)
-        transitions.make_current(transition_obj.name)
+        transitions.add_transition(transition_param)
+        transitions.make_current(transition_param.name)
+        transition_obj = transitions
 
     rf_pulse_insn = RFPulse(start_time, theta, phi, ion, transition_obj, \
                             is_last=is_last, address=address)
@@ -197,6 +197,7 @@ def set_transition(transition_name, name_str="729"):
     """Sets the frequency modifiers of the transition
     For configuration see config/rf_setup.py"""
     global transitions
+    assert type(transition_name)==str, "set_transition needs string identifier for transition"
     my_config = config.Config()
     [offset, multiplier] = my_config.get_rf_settings(name_str)
     try:
@@ -204,7 +205,6 @@ def set_transition(transition_name, name_str="729"):
         logger.debug("setting transition: "+str(transitions[transition_name]))
     except KeyError:
         raise RuntimeError("Error while setting transition" + str(transition_name))
-
 
 
 # DO NOT remove the line below - This is needed by the ipython debugger

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-21 17:02:10 c704271"
+# Time-stamp: "23-Jul-2008 18:13:55 viellieb"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -128,6 +128,7 @@ class MainProgram:
         # initialize API
         user_api = user_function.userAPI(self.chandler, ttl_dict=self.ttl_dict, \
                                          dds_count = self.dds_count)
+        user_api.clear()
         # The init sequence is now executed in compile_sequence.
         # This is due to the transition management system
 
@@ -145,7 +146,7 @@ class MainProgram:
             user_api.compile_sequence()
             sequence_length = len(user_api.sequencer.current_sequence)
             self.logger.info("sequence length: "+str(hex(sequence_length)))
-        except:
+        except SyntaxError:
             self.logger.exception("Error while compiling sequence")
             return_var.error("Error while compiling sequence")
             return return_var
