@@ -120,6 +120,7 @@ class api:
         """
         jump_insn = instructions.btr(target_name, trigger)
         nop_insn = instructions.nop()
+        self.sequencer.add_insn(jump_insn)
         for index in range(self.branch_delay_slots):
             self.sequencer.add_insn(copy.copy(nop_insn))
 

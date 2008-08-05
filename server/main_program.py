@@ -146,7 +146,7 @@ class MainProgram:
             user_api.compile_sequence()
             sequence_length = len(user_api.sequencer.current_sequence)
             self.logger.info("sequence length: "+str(hex(sequence_length)))
-        except SyntaxError:
+        except:
             self.logger.exception("Error while compiling sequence")
             return_var.error("Error while compiling sequence")
             return return_var
