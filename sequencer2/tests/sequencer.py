@@ -127,7 +127,16 @@ class Test_Sequencer(unittest.TestCase):
     wait_insn = instructions.wait(wait_cycles)
     test_value = wait_insn.get_value()
     self.assertEquals(test_value,value)
-
+    my_sequencer=sequencer.sequencer()
+    my_api = api.api(my_sequencer)
+    my_api.wait((2**14+100)*0.01)
+    current_seq = my_sequencer.current_sequence
+    insn1 = current_seq[0]
+    insn2 = current_seq[1]
+    value = 0x9 << 28 | 2**14-1
+    value1 = 0x9 << 28 | 100 +1 -4
+    self.assertEquals(insn1.get_value(), value)
+    self.assertEquals(insn2.get_value(), value1)
 
   def test_subroutine(self):
     """Test the subroutine calling
@@ -224,6 +233,29 @@ class Test_Sequencer(unittest.TestCase):
     print str(time2-time1)
     if time2-time1 > 1:
       self.fail("Failed speed test: "+str(time2-time1))
+
+
+  def test_sequence_length(self):
+    """Test maximum sequence length. This test may take some time !!!!
+    """
+    return None
+#    psyco.full()
+    time1=time.time()
+    my_sequencer=sequencer.sequencer()
+    my_api=api.api(my_sequencer)
+    N0=1000000
+    my_api.dac_value(1,-3)
+    my_api.jump("test")
+    for i in range(N0):
+        my_api.dac_value(1,-3)
+    my_api.label("test")
+    my_sequencer.compile_sequence()
+    print len(my_sequencer.current_sequence)
+    if N0 < 100:
+        my_sequencer.debug_sequence()
+    #    print my_my_sequencer.word_list
+    time2=time.time()
+    print str(time2-time1)
 
 
   def test_finite_loop(self):

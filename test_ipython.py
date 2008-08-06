@@ -4,7 +4,7 @@
 
 #  file       test_ipython.py
 #  copyright  (c) Philipp Schindler 2008
-#  url        http://pulse-sequencer.sf.net
+#  url        http://pulse-sequencer.sf.net test
 
 from server.user_function import *
 from server import handle_commands

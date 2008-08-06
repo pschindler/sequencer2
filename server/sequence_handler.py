@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-07 12:54:21 c704271"
+# Time-stamp: "2008-07-11 11:40:23 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -15,7 +15,12 @@ Overview
   TransitionListObject
   --------------------
 
-  Nothing to say right now :-(
+  Enhanced dict with support for an index list containing the used transitions
+
+  SequenceDict
+  ------------
+
+  Enhanced dict with a method for adding events and included conflict resolving
 
   SequenceHandler
   ---------------
@@ -45,12 +50,27 @@ class TransitionListObject(dict):
     """An enhanced Transition dictionary class with support for the DDS
     additionaly to the standard dictionary it features a dictionary dds_list
     in this dictionary the registers in the dds are stored"""
-    index_list = []
-    current_transition = "NULL"
-    transition2_name = None
     max_transition = 7
 
+    def __init__(self):
+        """empty the index list"""
+        dict.__init__({})
+        self.index_list = []
+        self.transition2_name = None
+        self.current_transition = "NULL"
+
+    def clear(self):
+        """remove everything"""
+        self.__init__()
+
+    def clear_index(self):
+        "clear the index list and the current_transition"
+        self.index_list = []
+        self.transition2_name = None
+        self.current_transition = "NULL"
+
     def make_current(self, transition_name, transition2_name=None):
+        "set current transition and add it to the index_list"
         trans_list = [transition_name]
         if transition2_name != None:
             trans_list.append(transition2_name)
@@ -64,15 +84,53 @@ class TransitionListObject(dict):
         if len(self.index_list) > self.max_transition:
             raise RuntimeError("Cannot handle more than 7 transitions in one sequence")
 
+    def add_transition(self, transition_obj):
+        "Adds a transition to the dictionary"
+        if not self.has_key(transition_obj.name):
+            self[transition_obj.name] = transition_obj
+
     def __str__(self):
-        my_str = ""
+        my_str = "items:"
         for name, item in self.iteritems():
             my_str += str(name) + ", "
-        my_str += " || "
+        my_str += " || index: "
         for item in self.index_list:
             my_str += " : " + str(item) + ", "
-        my_str += " || " + str(self.current_transition)
+        my_str += " || curr: " + str(self.current_transition)
         return my_str
+
+
+class SequenceDict(dict):
+    """An enhanced dictionary with methods for adding events
+    and resolving some conflicts"""
+    logger = None
+    def add_event(self, event):
+        "Adds an event to the sequence dictionary"
+        # Missing: rounding of start time
+        my_key = event.start_time
+        if self.has_key(my_key):
+            self.resolve_conflict(event)
+        else:
+            self[my_key] = [event]
+
+    def resolve_conflict(self, event):
+        "Resolve conflicts immediate"
+        my_key = event.start_time
+        conflict_array = self[my_key]
+        for conf_item2 in conflict_array:
+            is_merged = event.resolve_conflict(conf_item2)
+            if is_merged:
+                if self.logger != None:
+                    self.logger.debug("Combining: "+str(event) \
+                                      +str(conf_item2))
+                conflict_array.remove(conf_item2)
+                break #Only merge once
+            else:
+                if self.logger != None:
+                    self.logger.debug("cannot combine: "+str(event.name)\
+                                      + " "  +str(conf_item2.name))
+        conflict_array.append(event)
+
 
 class SequenceHandler(object):
     "Base class for the user api"
@@ -86,8 +144,10 @@ class SequenceHandler(object):
 
     def get_sequence_array(self, seq_array):
         "Sorts the sequence array and sets the real start times"
+        final_dict = SequenceDict()
+        final_dict.logger = self.logger
         final_array = []
-        is_last_array = []
+        log_str = ""
         current_time = 0.0
         max_time = 0.0
         # loop over all insn arrays
@@ -103,76 +163,27 @@ class SequenceHandler(object):
                         max_time = last_insn.start_time + last_insn.duration
                     # Increase start time of instruction
                     last_insn.start_time += current_time
-                    is_last_array.append(last_insn)
+                    final_dict.add_event(last_insn)
                     if last_insn.is_last:
                         current_time += max_time
                         # Sort the array on the instruction start time
-                        is_last_array.sort(sort_method)
-                        final_array += is_last_array
-                        is_last_array = []
                         max_time = 0
                         break
 
             except IndexError:
                 None
 
-        final_array += is_last_array
-        final_array = self.handle_conflicts(final_array)
-        if self.logger.level < 11 :
-            log_str  = ""
-            for i in final_array:
-                log_str += str(i) + "\n"
-            self.logger.debug(log_str)
+        dict_list = final_dict.items()
+        dict_list.sort()
+        for key, event_list in dict_list:
+            for event in event_list:
+                final_array.append(event)
+                if self.logger.level < 11 :
+                    log_str += str(event) + "\n"
+        self.logger.debug(log_str)
 
         return final_array
 
-    def handle_conflicts(self, final_array):
-        """Let's see if we can combine some instructions
-        Long story made short: This is not implemented well yet :-(
-        The final array is checked for items with the same start time
-        If items have the same start time they are added to the conflict_array
-        This conflict_array is emptied if an item with a different start time occurs
-
-        Maybe better data structure: use dict for conflict_array
-        Missing: Check if all instructions are still there !!??
-        """
-        has_conflict = False
-        new_array = []
-        conflict_array = []
-        final_length = len(final_array) - 1
-        final_array.reverse()
-        next_item = final_array.pop()
-        for index in range(final_length):
-            this_item = next_item
-            try:
-                next_item = final_array.pop()
-            except IndexError:
-                break
-
-            if (this_item.start_time == next_item.start_time):
-                if conflict_array.count(this_item) == 0:
-                    conflict_array.append(this_item)
-                conflict_array.append(next_item)
-            else:
-                while conflict_array != []:
-                    conf_item = conflict_array.pop()
-                    for conf_item2 in conflict_array:
-                        is_merged = conf_item.resolve_conflict(conf_item2)
-                        if is_merged:
-                            self.logger.debug("Combining: "+str(conf_item) \
-                                                  +str(conf_item2))
-                            conflict_array.remove(conf_item2)
-                        else:
-                            self.logger.debug("cannot combine: "+str(conf_item.name)\
-                                                + " "  +str(conf_item2.name))
-                    new_array.append(conf_item)
-                    has_conflict = True
-                if not has_conflict:
-                    new_array.append(this_item)
-                else:
-                    has_conflict = False
-        new_array.append(next_item)
-        return new_array
 
     def send_sequence(self):
         "send the sequence to the Box"
@@ -184,15 +195,14 @@ class SequenceHandler(object):
         "Generates the frequency events"
         # Make sure that the NULL transition is on index 0
         # Missing
-        if dds_list == []:
-            raise RuntimeError("Cannot create frequencies without any configured dds")
-
+        assert dds_list != [], "Cannot create frequencies without any configured dds"
+        self.chandler.transitions.index_list.append("NULL")
         dds_profile_list = {}
         index = 0
         for index_name in self.chandler.transitions.index_list:
             trans_name = self.chandler.transitions.index_list[index]
             trans_obj = self.chandler.transitions[trans_name]
-            frequency = trans_obj.frequency
+            frequency = trans_obj.get_frequency()
 
             for dds_instance in  dds_list:
                 api.set_dds_freq(dds_instance, frequency, index)
@@ -253,5 +263,27 @@ class transition:
         self.multiplier = multiplier
         self.freq_is_init = False
         self.port = port
+
+    def get_frequency(self):
+        "Return the corrected frequency"
+        real_freq = self.offset + (self.frequency * self.multiplier)
+        return real_freq
+
+    def set_freq_modifier(self, multiplier, offset):
+        "Set the multiplier and the offset"
+        self.multiplier = multiplier
+        self.offset = offset
+
+    def get_phase(self, phase):
+        "returns the corrected phase"
+        return phase * self.multiplier
+
+    def __str__(self):
+        my_str = "Nam: " + str(self.name)
+        my_str += " | freq: " +str(self.frequency)
+        my_str += " | ampl: " +str(self.amplitude)
+        my_str += " | mult: " +str(self.multiplier)
+        my_str += " | off: " +str(self.offset)
+        return my_str
 
 # sequence_handler.py ends here

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "04-Jul-2008 20:32:01 viellieb"
+# Time-stamp: "23-Jul-2008 18:13:55 viellieb"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -69,6 +69,7 @@ class MainProgram:
         "sets up the configuration and the logger"
         self.logger = logging.getLogger("server")
         self.config = config.Config()
+        self.config.parse_cmd_line()
         self.server = None
         self.setup_server()
         self.chandler = handle_commands.CommandHandler()
@@ -84,7 +85,7 @@ class MainProgram:
         server_port = self.config.get_int("SERVER","server_port")
         answer = self.config.get_bool("SERVER","server_answer")
         pre_return = self.config.get_bool("SERVER","server_pre_return")
-        self.server = server.tcp_Server(port=server_port, answer=answer, pre_return=pre_return)
+        self.server = server.TcpServer(port=server_port, answer=answer, pre_return=pre_return)
 
     def start_server(self):
         "executes the main loop of the server"
@@ -126,15 +127,10 @@ class MainProgram:
         # initialize API
         user_api = user_function.userAPI(self.chandler, ttl_dict=self.ttl_dict, \
                                          dds_count = self.dds_count)
-        # generate sequence  before loop trigger
-        # initialize frequencies
-        # Start looping and triggers
-##         try:
-##             user_api.init_sequence()
-##         except:
-##             self.logger.exception("Error while initializing sequence")
-##             return_var.error("Error while initializing sequence")
-##             return return_var
+        user_api.clear()
+        # The init sequence is now executed in compile_sequence.
+        # This is due to the transition management system
+
         # Generate sequence
         try:
             generate_str = user_api.generate_sequence()
@@ -160,6 +156,7 @@ class MainProgram:
         except:
             self.logger.exception("Error while sending sequence")
             return_var.error("Error while sending sequence")
+        user_api.clear()
         del(user_api)
         return_var.return_string = generate_str
         return return_var

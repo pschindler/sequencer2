@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-07 12:39:58 c704271"
+# Time-stamp: "23-Jul-2008 17:36:44 viellieb"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -104,6 +104,8 @@ from instruction_handler import *
 return_str = ""
 sequence_var = []
 transitions = TransitionListObject()
+logger = logging.getLogger("server")
+
 
 def test_global(string1):
     "Just testing ..."
@@ -126,13 +128,16 @@ def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
     from the data sent by QFP
     """
     global sequence_var
+    global transitions
+
     if str(transition_param) == transition_param:
-        transitions.make_current("NULL")
         transitions.make_current(transition_param)
         transition_obj = transitions
-
     else:
-        transition_obj = transition_param
+        transitions.add_transition(transition_param)
+        transitions.make_current(transition_param.name)
+        transition_obj = transitions
+
     rf_pulse_insn = RFPulse(start_time, theta, phi, ion, transition_obj, \
                             is_last=is_last, address=address)
 
@@ -148,7 +153,6 @@ def rf_bichro_pulse(theta, phi, ion, transition_param, transition2_param, \
     """
     global sequence_var
     if str(transition_param) == transition_param:
-        transitions.make_current("NULL")
         transitions.make_current(transition_param, transition2_param)
         transition_obj = transitions
 
@@ -188,6 +192,21 @@ def end_of_sequence(my_api, ttl_trigger_channel):
     my_api.end_finite("finite_label")
     my_api.ttl_set_bit(ttl_trigger_channel, 1)
 
+
+def set_transition(transition_name, name_str="729"):
+    """Sets the frequency modifiers of the transition
+    For configuration see config/rf_setup.py"""
+    global transitions
+    assert type(transition_name)==str, "set_transition needs string identifier for transition"
+    my_config = config.Config()
+    [offset, multiplier] = my_config.get_rf_settings(name_str)
+    try:
+        transitions[transition_name].set_freq_modifier(multiplier, offset)
+        logger.debug("setting transition: "+str(transitions[transition_name]))
+    except KeyError:
+        raise RuntimeError("Error while setting transition" + str(transition_name))
+
+
 # DO NOT remove the line below - This is needed by the ipython debugger
 #--1
 ################################################################################
@@ -206,7 +225,7 @@ class userAPI(SequenceHandler):
         self.config = config.Config()
         self.logger = logging.getLogger("server")
         self.seq_directory = self.config.get_str("SERVER","sequence_dir")
-        self.is_nonet = self.config.get_bool("SERVER","nonet")
+        self.is_nonet = self.config.is_nonet()
         # Instnciate the IncludeHandler
         include_dir = self.config.get_str("SERVER","include_dir")
         self.include_handler = IncludeHandler(include_dir)
@@ -226,6 +245,17 @@ class userAPI(SequenceHandler):
         self.line_trigger_value = self.config.get_int("SERVER","line_trigger_value")
 
         self.sequence_parser = sequence_parser.parse_sequence
+
+    def clear(self):
+        "Clear all the local and global variables"
+        self.sequencer.clear()
+        self.api.clear()
+        self.final_array = []
+        global transitions
+        transitions.clear()
+        global sequence_var
+        sequence_var = []
+
 
     def init_sequence(self, initial_ttl=0x0):
         "generate triggers, frequency initialization and loop targets"
@@ -271,10 +301,10 @@ class userAPI(SequenceHandler):
         global sequence_var
         sequence_var = []
         global transitions
+        transitions.clear()
         transitions = self.chandler.transitions
         #Execute sequence
         exec(seq_str)
-        transitions.make_current("NULL")
         if sequence_var == []:
             raise RuntimeError("Cannot generate an empty sequence")
         # Here all the magic of sequence creation is done

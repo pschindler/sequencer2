@@ -14,7 +14,7 @@ class PTPComm:
 #    MY_PORT  = 0x221e
 
     MY_PORT  = 0x221f
-    HIS_PORT = 0x2229
+    HIS_PORT = 8743  #8743  #0x2229
     HIS_IP   = '192.168.0.229'
     RETRY_COUNT = 5
     MAX_FRAME_LENGTH = 984

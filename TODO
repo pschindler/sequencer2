@@ -1,17 +1,11 @@
-* Missing features - Important:
-
-- More than 7 transitions
-
 * Possible Bugs:
 
-- NULL transition not added to index list
+- Conflict handler does not check if the same TTL channel is switched
 - Trigger sequence at the beginning. No edge detection
-- Pulse number after conflict handling
 - Rounding of the DDS frequency register in relation to the FPGA
 
 * Missing features - Not that important
 
-- Change sequence list to custom dict
 - Add an interactive include tester
 - Logging to files
 - DDS sweeps
@@ -19,6 +13,7 @@
 - Error handling
 - Stack for subroutines (in VHDL ???)
 - QFP variable type handling (bool, int)
+- More than 7 transitions in one sequence
 
 * Missing unitttests
 
@@ -31,6 +26,7 @@
 - DDS switching off
 - Conflict handling
 - Pulse Shaping
+- Wait instruction splitting
 
 * Missing tests on hardware
 
@@ -47,24 +43,22 @@
 - High level functions for the DAC,DDS
 
 
-* Description of missing features
+* DDS Sweeps
 
-- More than 7 transitions:
+- External Pins:
+   - DRCTL
+   - DROVER
+   - DRHOLD
 
-At the moment there are only 8 different frequencies possible. At the moment
-all transmitted frequencies are initialized at the beginning of the sequence.
-A possible solution would be to initialize the frequencies after the sequence
-was parsed and initialized only the ued frequencies. This would require a major
-rewrite of the main program structure
+- Configuration:
+   - Frequency in dedicated register
+   - Digital Ramp destination bits:
+      CFR2(21:20): 00 - Frequency
+   - No Dwell - 1
+   - Use register 0
 
-- Possible workaround :
-
-Save the used frequencies in a global list. (extend sequence_var or use transitions)
-
-Start the init_freq part and therefore also the trigger part after the
-generate_sequence execution
-Take care that the "NULL" transition is always initialized
-
-initialize only the used frequencies.
-
-But what to do with the indeces ??
+- Sequencer2
+   - Use register which is used as NULL frequency
+   - Initialize register before sweeping
+   - Do sweep
+   - Rewrite NULL transition after sweep

@@ -26,13 +26,17 @@ class OutputSystem:
             for bit_nr in range(16):
                 ttl_dict[str(bit_nr)] = TTLChannel(str(bit_nr),bit_nr,2)
                 ttl_dict[str(bit_nr+16)] = TTLChannel(str(bit_nr+16),bit_nr,3)
-            ttl_dict["QFP_Trig"] = TTLChannel("QFP_Trig",15,2)
+            ttl_dict["PB trigger"] = TTLChannel("PB trigger",15,2)
 
         self.ttl_dict = ttl_dict
 
     def set_bit(self, key, value, output_status):
         "sets a single bit"
-        channel_var = self.ttl_dict[key]
+        try:
+            channel_var = self.ttl_dict[key]
+        except KeyError:
+            raise RuntimeError("Can not find TTL channel " + str(key))
+            
         if channel_var.is_inverted:
             value = abs(value - 1)
         current_state = output_status[channel_var.select]

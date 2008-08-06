@@ -10,6 +10,7 @@ class CommandHandler:
         self.command_dict = self.get_command_dict()
         self.logger = logging.getLogger("sequencer2")
         self.transitions = TransitionListObject()
+        self.transitions.clear()
         self.variables = {}
         self.init_transitions()
         self.pulse_program_name = None

@@ -30,6 +30,26 @@ class HardwareTests:
         my_api.wait(100)
         self.compile(my_sequencer)
 
+    def test_ttl_set(self):
+        "Test ttl pulses of box"
+        my_sequencer = sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+        my_api.ttl_value(0xffff, 2)
+        self.compile(my_sequencer)
+
+    def test_trigger(self):
+        "Test ttl pulses of box"
+        my_sequencer = sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+
+        my_api.ttl_value(0x0, 2)
+        my_api.label("start_loop")
+        my_api.jump_trigger("trig_label",0x2)
+        my_api.jump("start_loop")
+        my_api.label("trig_label")
+        my_api.ttl_value(0xffff, 2)
+        self.compile(my_sequencer)
+
     def test_lvds_bus_infinite(self):
         "Test the LVDS bus. Use this with the corresponding signal tap file"
         my_sequencer = sequencer.sequencer()

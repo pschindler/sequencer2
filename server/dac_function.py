@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-17 11:06:07 c704282"
+# Time-stamp: "2008-07-10 15:03:40 c704271"
 
 #  file       dac_function.py
 #  copyright  (c) Max Harlander 2008
 #  url        http://pulse-sequencer.sf.net
 from dac_control import DacControl
 import logging
+import sequence_handler
 
 class dac_API(DacControl):
 
@@ -29,6 +30,7 @@ class dac_API(DacControl):
         elif self.chandler.dac_ramps:
 #Put everything into an own class, the rampclass... 
             self.rhandler = self.RampHandler(self.chandler)
+        
         return Update_only
 
 
@@ -59,7 +61,7 @@ class RampHandler(DacControl):
         except:
             raise RuntimeError("Error while loading sequence:" +str(filename))
         #Parse sequence
-        ramp_str = ramp_parser.parse_sequence(sequence_string)
+        ramp_str = sequence_handler.parse_sequence(sequence_string, is_ramp=True)
         self.logger.debug(ramp_str)
         exec(ramp_str)
 
