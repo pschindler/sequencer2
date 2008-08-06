@@ -47,7 +47,9 @@ class RampHandler(DacControl):
 
     def __init__(self, chandler):
         "inits Ramphandling by getting ramps from handler and sequencefile"
-        self.devices = {}
+#        self.devices = {}
+        self.ramp_array = []
+        self.all_ramps = []
         self.pulse_program_name = self.chandler.pulse_program_name
         filename = self.seq_directory + self.pulse_program_name
         try:
@@ -79,28 +81,92 @@ class RampHandler(DacControl):
 
 
     def set_ramp(self, rampdict):
-        """sets the ramp_dict from a command string or reutrns the default 
+        """sets the ramp_dict as a instance of RampDict class from a command string or returns the default 
         """
         try:
             rampdict_val = self.chandler.dac_ramps[rampdict["ramp"]]
-            cmd_str = "ramp" + "=" + str(rampdict_val)
+            cmd_str = "ramp" + "= RampDict(" + str(rampdict_val) + ")"
             exec cmd_str
 
         except KeyError:
             # We return the default_val if an unknown variable was asked for.
             self.logger.warn("Ramp not found in comand string: " \
                              +str(rampdict["ramp"]))
-            cmd_str = "ramp" + " = " +str(rampdict)
+            cmd_str = "ramp" + " = RampDict(" +str(rampdict) + ")"
             exec cmd_str
-        self.devices[ramp["dev"]] = True
+#        self.devices[ramp["dev"]] = True
+        self.ramp_array.append(ramp)
         return ramp
 
-    def setup_ramps(self, ramps, rampto):
-        """setup ramps, the sampling rate will be defined by the LAST appended ramp for each device!!!
+    def setup_ramps(self, ramps = self.ramp_array, rampto = {}, offset = False, is_last = True):
+        """sets up the ramps, in that order as its given in the array, or if
+        no array is given, then it'll use order as set_ramp was called in sequencefile
         """
-        for i in range 
+        if rampto and is_last:
+            "Do some ramptostuff"
+            for i in range(1,len(self.card_dict)+1):
+                first_device_ramp_index = ramps.index(i)
+                self.card_dict[i].start_rampto(rampto["T"], rampto["dt"], rampto["shape"])
+#find start values /first rampindex found... now get C to give it to us
+#create the rampto
+#start it for all cards
+#wait till all are done
+#clear all tasks
+            self.clear_data(i)
+            self.stop_card(i)
 
 
+
+        if offset:
+            "or maybe use an offset?"
+#find start values
+#calc offset values
+
+        for ramp in ramps:
+            self.all_ramps.append(ramp)
+        if is_last:
+            min_dt = min(self.all_ramps)["dt"]
+            for ramp in self.all_ramps:
+                self.card_dict[ramp["dev"]].append_ramp(ramp["T"], min_dt)
+            for ramp in self.all_ramps:
+                self.card_dict[ramp["dev"]].append_ramparray(ramp["file"], ramp["T"], ramp["start"], ramp["stop"], ramp["shape"])
+            self.start_ramp_tasks()
+
+    def start_ramp_tasks(self):
+        """Starts the prepared ramptasks
+        """
+
+
+class RampDict(dict):
+    """dictclass with rampextensions so, allowing changes to min()-, index()-function 
+    and create an inverse to run the ramp backwards"""
+    def __init__(self, params):
+        self.update(params)
+        self.inv = self.get_inv()
+
+    def __cmp__(self, y):
+        "will change the min() function for a array of RampDicts"
+        if self["dt"] > y["dt"]:
+            i = 1
+        if self["dt"] < y["dt"]:
+            i = -1
+        else:
+            i = 0
+        return i
+
+    def __eq__(self, y):
+        "will change the .index() function aor an array of Rampdicts"
+        if self["dev"] == y:
+            return True
+        else:
+            return False
+
+    def get_inv(self):
+        "create a copy of the ramp with inversed start and stop, to use it with ramp.inv to go backwards"
+        newdic = self.copy()
+        newdic["stop"] = self["start"]
+        newdic["start"] = self["stop"]
+        return newdic
 
 
 #Der alte Muell, den man nochma brauchen koennt>
@@ -111,10 +177,9 @@ class RampHandler(DacControl):
 
 
 #RAMPstuff:
-
+"""
     def setup_ramps(self, ramps, rampto):
-        """setup ramps, the sampling rate will be defined by the LAST appended ramp for each device!!!
-        """
+        "setup ramps, the sampling rate will be defined by the LAST appended ramp for each device!!!"
         self.clear_all()
         dac_device = {}
         if (rampto):
@@ -143,15 +208,14 @@ class RampHandler(DacControl):
 
 
     def start_ramp_tasks(self, dac_device, timing, continous):
-        """Create and start the ramps Task
-        """
+        "Create and start the ramps Task"
         ramptimes = {}
         for i in range(1, len(dac_device)+1):
             ramptimes[i] = 0
             if (dac_device[i]):
                 self.card_dict[i].start_timed_task(timing, continous)
                 ramptimes[i] = self.new_duration(i)
-        return ramptimes
+        return ramptimes"""
 
 
 # dac_control.py ends here

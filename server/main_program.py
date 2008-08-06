@@ -111,8 +111,7 @@ class MainProgram:
             self.variable_dict = self.chandler.get_variables(command_string)
         except ValueError:
             self.logger.exception("Error while interpreting command string")
-            generate_str = "Error while interpreting command string"
-            return_var.is_error = True
+            return_var.error("Error while generating sequence")
             return_var.return_string = generate_str
             return return_var
 
