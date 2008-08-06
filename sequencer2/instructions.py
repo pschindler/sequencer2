@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-25 15:56:15 c704271"
+# Time-stamp: "06-Aug-2008 22:57:46 viellieb"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -99,6 +99,7 @@ class j(insn_class):
     name = "j"
     def __init__(self, label_name):
         self.target_name = label_name
+        self.target_address = None
 
     def get_value(self):
         """returns the hex value"""
@@ -126,6 +127,7 @@ class btr(j):
         self.trigger = trigger
 
     def get_jump_value(self, target_address):
+        self.target_address = target_address
         """returns the hex value for j insns"""
         return self.opcode << 28 | self.trigger << 19 | target_address
 
