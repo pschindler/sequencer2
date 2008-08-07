@@ -125,6 +125,7 @@ class btr(j):
     def __init__(self, label_name, trigger):
         self.target_name = label_name
         self.trigger = trigger
+        self.target_address = None
 
     def get_jump_value(self, target_address):
         self.target_address = target_address
