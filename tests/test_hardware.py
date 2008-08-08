@@ -30,12 +30,12 @@ class HardwareTests:
         my_api.wait(100)
         self.compile(my_sequencer)
 
-    def test_ttl_set(self):
+    def test_ttl_set(self, value=0xffff, show_debug=0):
         "Test ttl pulses of box"
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
-        my_api.ttl_value(0xffff, 2)
-        self.compile(my_sequencer)
+        my_api.ttl_value(value, 2)
+        self.compile(my_sequencer, show_debug)
 
     def test_trigger(self):
         "Test ttl pulses of box"
@@ -74,10 +74,12 @@ class HardwareTests:
         my_api.dac_value(0, 2**14-100)
         self.compile(my_sequencer)
 
-    def compile(self, my_sequencer):
+    def compile(self, my_sequencer, show_debug=0):
         "compile and send the sequence"
         my_sequencer.compile_sequence()
         ptp1 = comm.PTPComm(self.nonet)
         ptp1.send_code(my_sequencer.word_list)
+        if show_debug:
+            my_sequencer.debug_sequence()
 
 # test_lvds_bus.py ends here

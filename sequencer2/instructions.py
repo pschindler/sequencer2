@@ -138,7 +138,7 @@ class bdec(j):
     opcode = 0xa
     def __init__(self, label_name, register_address):
         if register_address > 15:
-            raise RuntimeError("Register address canot be greater then 15")
+            raise RuntimeError("Register address cannot be greater then 15")
         self.target_name = label_name
         self.register_address = register_address
         self.target_address = None

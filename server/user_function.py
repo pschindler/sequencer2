@@ -286,6 +286,7 @@ class userAPI(SequenceHandler):
                 self.logger.exception("Error while executing include file: " \
                                           + str(file_name))
 
+        # Loading the sequence file
         self.pulse_program_name = self.chandler.pulse_program_name
         filename = self.seq_directory + self.pulse_program_name
         try:
@@ -294,7 +295,7 @@ class userAPI(SequenceHandler):
             fobj.close()
         except:
             raise RuntimeError("Error while loading sequence:" +str(filename))
-        #Parse sequence
+        # Parse sequence
         seq_str = self.sequence_parser(sequence_string)
         self.logger.debug(seq_str)
         # Generate dictionary for sorting the files
@@ -303,7 +304,7 @@ class userAPI(SequenceHandler):
         global transitions
         transitions.clear()
         transitions = self.chandler.transitions
-        #Execute sequence
+        # Execute sequence
         exec(seq_str)
         if sequence_var == []:
             raise RuntimeError("Cannot generate an empty sequence")

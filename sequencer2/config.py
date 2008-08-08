@@ -135,12 +135,12 @@ class Config:
                     if split2[0] == ch_name:
                         split3 = split2[1].split("=")
                         try:
-                            if int(split3[1]) < 15:
+                            if int(split3[1]) <= 15:
                                 select = 2
                             else:
                                 select = 3
                             dictionary[split1[0]] = TTLChannel(split1[0], \
-                                                               int(split3[1]), select, is_inverted)
+                                                               int(split3[1]) % 16, select, is_inverted)
                             self.logger.debug(str(dictionary[split1[0]]))
 
                         except SyntaxError:

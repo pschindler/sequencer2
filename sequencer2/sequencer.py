@@ -86,7 +86,7 @@ class sequencer:
         """generates the binary list
         """
         # Addresses are broken when using subroutines
-
+        
         # Add a halt instruction to the current sequence !
         halt_insn = instructions.halt()
         self.add_insn(halt_insn)
