@@ -162,7 +162,17 @@ def rf_bichro_pulse(theta, phi, ion, transition_param, transition2_param, \
                                          is_last=is_last, address=address, address2=address2)
 
     sequence_var.append(rf_bichro_pulse_insn.sequence_var)
-#################################################################
+
+def seq_wait(wait_time, start_time=0.0):
+    """Generates a waiting time in the sequence
+    wait_time is given in museconds
+    """
+    global sequence_var
+
+    wait_insn = SeqWait(wait_time, start_time)
+    sequence_var.append(wait_insn.sequence_var)
+
+################################################################
 # Initialization and ending of the sequence
 ################################################################
 
@@ -170,6 +180,7 @@ def generate_triggers(my_api, trigger_value, ttl_trigger_channel, \
                           line_trigger_channel=None, loop_count=1):
     "Generates the triggers for QFP - No line trigger supported YET"
     # Missing: Edge detection ??
+    my_api.label("Infinite_loop_label")
     my_api.ttl_set_bit(ttl_trigger_channel, 1)
     my_api.label("wait_label_1")
     my_api.jump_trigger("wait_label_2", trigger_value)
@@ -191,7 +202,8 @@ def end_of_sequence(my_api, ttl_trigger_channel):
     """Sets ttl_trigger channel to high at the end of the sequence"""
     my_api.end_finite("finite_label")
     my_api.ttl_set_bit(ttl_trigger_channel, 1)
-
+    my_api.jump("Infinite_loop_label")
+ 
 
 def set_transition(transition_name, name_str="729"):
     """Sets the frequency modifiers of the transition
@@ -265,7 +277,7 @@ class userAPI(SequenceHandler):
             line_trigger_val = self.line_trigger_value
         else:
             line_trigger_val = None
-        generate_triggers(self.api, 0x1, self.busy_ttl_channel, \
+        generate_triggers(self.api, self.qfp_trigger_value, self.busy_ttl_channel, \
                               line_trigger_val,  self.chandler.cycles)
         self.api.dds_profile_list = self.generate_frequency(self.api, \
                                                                 self.api.dds_list)
@@ -318,6 +330,8 @@ class userAPI(SequenceHandler):
         "Generates the bytecode for the sequence"
         self.init_sequence()
         last_stop_time = 0.0
+
+        # toggle list of generated sequence instructions and add wait events corresponding to the duration of each event
         for instruction in self.final_array:
             wait_time = instruction.start_time - last_stop_time
             if wait_time > 0:
@@ -325,6 +339,9 @@ class userAPI(SequenceHandler):
             instruction.handle_instruction(self.api)
             last_stop_time = instruction.start_time + instruction.duration
         end_of_sequence(self.api, self.busy_ttl_channel)
+
+
+#        print(str(self.sequencer.current_sequence))
 
         self.sequencer.compile_sequence()
         if self.logger.level < 9:

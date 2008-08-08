@@ -54,6 +54,27 @@ class SeqInstruction:
         "By default no conflict is resolved"
         return False
 
+class SeqWait(SeqInstruction):
+    "generates a waiting time from a certain (optional) start time"
+    def __init__(self, wait_time, start_time=0.0, is_last=True):
+        self.duration = float(wait_time)
+        self.start_time = float(start_time)
+        self.is_last = is_last
+        self.name = "WaitEvent"
+        self.sequence_var = []
+        self.sequence_var = self.add_insn(self.sequence_var)
+
+              
+    def handle_instruction(self, api):
+        "does nothing"
+        api.wait(self.duration)
+
+    def __str__(self):
+        return str(self.name) + " | start: " + str(self.start_time) \
+            + " | dur: " + str(self.duration) + " | last: " + str(self.is_last)
+
+   
+
 class TTLPulse(SeqInstruction):
     "generates a TTL pulse"
     def __init__(self, start_time, duration, device_key, is_last=True):
@@ -251,7 +272,7 @@ class TTLEvent(SeqInstruction):
         return True
 
     def __str__(self):
-        return str(self.name) + " start: " + str(self.start_time) \
+        return str(self.name) + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | key: " +str(self.val_dict)
 
@@ -271,7 +292,7 @@ class DACEvent(SeqInstruction):
         api.dac_value(self.address, self.value)
 
     def __str__(self):
-        return str(self.name) + " start: " + str(self.start_time) \
+        return str(self.name) + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | addr: "+str(self.address) + " | val: "+str(self.value)
 
@@ -313,7 +334,7 @@ class DACShapeEvent(SeqInstruction):
                 api.wait(self.wait_time)
 
     def __str__(self):
-        return str(self.name) + " start: " + str(self.start_time) \
+        return str(self.name) + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | dac_addr: "+str(self.dac_address) + " | ampl: " + str(self.amplitude) \
             + " | slope_dur: "+str(self.slope_duration)
@@ -348,7 +369,7 @@ class DDSSwitchEvent(SeqInstruction):
         api.switch_frequency(dds_instance, real_index, self.phase)
 
     def __str__(self):
-        return str(self.name) + " start: " + str(self.start_time) \
+        return str(self.name) + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | dds_addr: "+str(self.dds_address) + " | index: "+str(self.index)
 
