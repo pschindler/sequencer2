@@ -66,7 +66,7 @@ class TcpServer:
                         if return_var.is_error:
                             time_str = "ERROR"
                         else:
-                            time_str = "Ok, execution_time, " + str(used_time) + ";\n"
+                            time_str = "OK, sequence_duration, " + str(used_time) + ";\n"
 
                         return_string = return_var.return_string
                         error_string = return_var.error_string

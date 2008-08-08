@@ -144,13 +144,14 @@ class MainProgram:
         try:
             user_api.compile_sequence()
             sequence_length = len(user_api.sequencer.current_sequence)
+            user_api.sequencer.debug_sequence()
             self.logger.info("sequence length: "+str(hex(sequence_length)))
         except:
             self.logger.exception("Error while compiling sequence")
             return_var.error("Error while compiling sequence")
             return return_var
 
-        #Send sequence to Box
+        # Send sequence to Box
         try:
             user_api.send_sequence()
         except:
