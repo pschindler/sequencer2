@@ -20,7 +20,7 @@ class TTLChannel:
 class OutputSystem:
     """The digital output system. Handles TTL outputs"""
     def __init__(self, ttl_dict=None):
-        "if ttl_dict=Nonne a defualt dictionary will be created"
+        "if ttl_dict=None a default dictionary will be created"
         if ttl_dict == None:
             ttl_dict={}
             for bit_nr in range(16):
@@ -44,5 +44,6 @@ class OutputSystem:
         # Build new state
         new_state = (current_state & inverted_mask) | value << channel_var.bit_nr
         return (channel_var.select, new_state)
+
 
 # output_system.py ends here

@@ -19,6 +19,7 @@ class CommandHandler:
         self.transition = None
         self.default_transition = None
         self.is_triggered = False
+        self.ttl_word = 0
 
     def get_variables(self, var_string):
         self.dac_ramps = {}
@@ -40,6 +41,7 @@ class CommandHandler:
 
             except SyntaxError:
                 self.logger.warn("error while executing command"+str(splitted))
+
         return self.variables
 
     def get_command_dict(self):
@@ -50,6 +52,7 @@ class CommandHandler:
         command_dict["NAME"] = self.get_name
         command_dict["CYCLES"] = self.get_cycles
         command_dict["TRIGGER"] = self.get_trigger
+        command_dict["TTLWORD"] = self.get_ttlword
 
         #Some boring ordinary variables
         command_dict["FLOAT"] = self.get_vars
@@ -75,6 +78,10 @@ class CommandHandler:
 
         #return the dict to the handler !
         return command_dict
+
+    def get_ttlword(self, splitted):
+        "Get the TTL output"
+        self.ttl_word = int(splitted[1])
 
     def get_name(self, splitted):
         "Get name of the pulse program"

@@ -76,8 +76,8 @@ class MainProgram:
         self.variable_dict = {}
         ttl_conf_file = self.config.get_str("SERVER","DIO_configuration_file")
         self.dds_count = self.config.get_int("SERVER","DDS_count")
-        self.ttl_dict = self.config.get_digital_channels(ttl_conf_file)
-        self.setup_dac() #DAC
+        self.ttl_dict = self.config.get_digital_channels(ttl_conf_file)   # Extracts the channel names and numbers from the configuration file written by QFP
+        self.setup_dac() # DAC
 
 
     def setup_server(self):
@@ -109,12 +109,13 @@ class MainProgram:
         """
         return_var = ReturnClass()
         try:
-            self.variable_dict = self.chandler.get_variables(command_string)
+            self.variable_dict = self.chandler.get_variables(command_string)   # command string is parsed by handle_commands.py and variables are saved to a dictionary
         except ValueError:
             self.logger.exception("Error while interpreting command string")
             return_var.error("Error while generating sequence")
             return_var.return_string = generate_str
             return return_var
+
 
 #Here DACs will be handled, have to create my own "API"-file.... :-(:
     #    if self.segfalle:
@@ -128,10 +129,13 @@ class MainProgram:
         user_api = user_function.userAPI(self.chandler, ttl_dict=self.ttl_dict, \
                                          dds_count = self.dds_count)
         user_api.clear()
+        
+        
         # The init sequence is now executed in compile_sequence.
         # This is due to the transition management system
-
+        
         # Generate sequence
+        
         try:
             generate_str = user_api.generate_sequence()
         except:
@@ -140,18 +144,24 @@ class MainProgram:
             return return_var
         # end loops and generate IOs for LabView
         user_api.end_sequence()
+        
+        
+        
         # Compile sequence
+        
         try:
             user_api.compile_sequence()
             sequence_length = len(user_api.sequencer.current_sequence)
-            user_api.sequencer.debug_sequence()
+#            user_api.sequencer.debug_sequence()
             self.logger.info("sequence length: "+str(hex(sequence_length)))
         except:
             self.logger.exception("Error while compiling sequence")
             return_var.error("Error while compiling sequence")
             return return_var
 
+        
         # Send sequence to Box
+
         try:
             user_api.send_sequence()
         except:

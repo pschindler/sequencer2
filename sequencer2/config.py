@@ -105,7 +105,7 @@ class Config:
             raise RuntimeError("Error while setting RF mode to: "+str(key))
 
     def get_digital_channels(self, filename):
-        """ Extracts the channel names and numbers from thhe configuration
+        """ Extracts the channel names and numbers from the configuration
         file written by QFP"""
         try:
             file = open(filename, 'r')
