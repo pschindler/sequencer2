@@ -20,6 +20,7 @@ class CommandHandler:
         self.default_transition = None
         self.is_triggered = False
         self.ttl_word = 0
+        self.ttl_mask = 0 # this is not used
 
     def get_variables(self, var_string):
         self.dac_ramps = {}
@@ -53,6 +54,7 @@ class CommandHandler:
         command_dict["CYCLES"] = self.get_cycles
         command_dict["TRIGGER"] = self.get_trigger
         command_dict["TTLWORD"] = self.get_ttlword
+        command_dict["TTLMASK"] = self.get_ttlmask
 
         #Some boring ordinary variables
         command_dict["FLOAT"] = self.get_vars
@@ -78,6 +80,10 @@ class CommandHandler:
 
         #return the dict to the handler !
         return command_dict
+
+    def get_ttlmask(self, splitted):
+        "Get the TTL mask - not used though"
+        self.ttl_mask = int(splitted[1])
 
     def get_ttlword(self, splitted):
         "Get the TTL output"
