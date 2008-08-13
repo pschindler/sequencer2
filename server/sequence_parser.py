@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-11 10:38:52 c704271"
+# Time-stamp: "2008-08-13 10:18:15 c704271"
 
 #  file      : sequence_parser.py
 #  email     : philipp DOT schindler AT frog DOT uibk DOT ac DOT at
@@ -13,35 +13,36 @@
 import logging
 
 def parse_sequence(sequence_string, is_ramp=False):
+    "Parses the pseudo XML string and returns the python code as a string"
     logger = logging.getLogger("server")
-    current_tag=""
-    sequence_dict={}
+    current_tag = ""
+    sequence_dict = {}
     for line in sequence_string.splitlines():
         try:
-            if line[0]=="<":
-                current_tag=line
-                got_new_tag=True
-            if line[0]=="</":
-                current_tag=""
-                got_new_tag=True
+            if line[0] == "<":
+                current_tag = line
+                got_new_tag = True
+            if line[0] == "</":
+                current_tag = ""
+                got_new_tag = True
         except IndexError:
             continue
-        if current_tag!="" and not got_new_tag:
+        if current_tag != "" and not got_new_tag:
             try:
-                sequence_dict[current_tag]+=line+"\n"
+                sequence_dict[current_tag] += line+"\n"
             except KeyError:
-                sequence_dict[current_tag]=line+"\n"
-        got_new_tag=False
+                sequence_dict[current_tag] = line+"\n"
+        got_new_tag = False
     if is_ramp:
-        name_list=["<VARIABLES>","<RAMP>"]
+        name_list = ["<VARIABLES>", "<RAMP>"]
     else:
-        name_list=["<VARIABLES>","<TRANSITIONS>","<SEQUENCE>"]
-    return_string=""
+        name_list = ["<VARIABLES>", "<TRANSITIONS>", "<SEQUENCE>"]
+    return_string = ""
     for item in name_list:
         try:
-            return_string+=sequence_dict[item]
+            return_string += sequence_dict[item]
         except KeyError:
-            logger.info("error while getting tag: "+str(item))
+            logger.info("error while getting tag: " + str(item))
     if is_ramp:
         return_string += "setup_ramps()\n"
     return return_string

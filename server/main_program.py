@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "23-Jul-2008 18:13:55 viellieb"
+# Time-stamp: "2008-08-13 09:50:51 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
+# pylint: disable-msg = W0702
 """Main Program
 ============
 
@@ -46,17 +47,19 @@ import server
 import handle_commands
 import user_function
 #import dac_function #DAC
-"""This file defines the main_program class for the sequencer2
-"""
 
 class ReturnClass:
-    "a simple class consisting of two strings"
+    """Class for returning strings to LabView
+    return_string : Return string without error
+    error_string: Return string when an error occurred
+    is_error: Bollean which indicates that an error occurred """
     def __init__(self):
         self.error_string = ""
         self.return_string = ""
         self.is_error = False
 
     def error(self, error_string="Undefined Error"):
+        "Method which sets the attributes if an error occurred"
         self.is_error = True
         self.error_string = error_string
         self.return_string = error_string
@@ -76,16 +79,18 @@ class MainProgram:
         self.variable_dict = {}
         ttl_conf_file = self.config.get_str("SERVER","DIO_configuration_file")
         self.dds_count = self.config.get_int("SERVER","DDS_count")
-        self.ttl_dict = self.config.get_digital_channels(ttl_conf_file)   # Extracts the channel names and numbers from the configuration file written by QFP
+        # Extracts the channel names and numbers from the configuration file written by QFP
+        self.ttl_dict = self.config.get_digital_channels(ttl_conf_file)
         self.setup_dac() # DAC
-
+        self.segfalle = None
 
     def setup_server(self):
         "Reads the configurations and configures the server"
         server_port = self.config.get_int("SERVER","server_port")
         answer = self.config.get_bool("SERVER","server_answer")
         pre_return = self.config.get_bool("SERVER","server_pre_return")
-        self.server = server.TcpServer(port=server_port, answer=answer, pre_return=pre_return)
+        self.server = server.TcpServer(port=server_port, answer=answer, \
+                                           pre_return=pre_return)
 
     def start_server(self):
         "executes the main loop of the server"
@@ -112,8 +117,7 @@ class MainProgram:
             self.variable_dict = self.chandler.get_variables(command_string)   # command string is parsed by handle_commands.py and variables are saved to a dictionary
         except ValueError:
             self.logger.exception("Error while interpreting command string")
-            return_var.error("Error while generating sequence")
-            return_var.return_string = generate_str
+            return_var.error("Error while interpreting command string")
             return return_var
 
 
@@ -129,13 +133,13 @@ class MainProgram:
         user_api = user_function.userAPI(self.chandler, ttl_dict=self.ttl_dict, \
                                          dds_count = self.dds_count)
         user_api.clear()
-        
-        
+
+
         # The init sequence is now executed in compile_sequence.
         # This is due to the transition management system
-        
+
         # Generate sequence
-        
+
         try:
             generate_str = user_api.generate_sequence()
         except:
@@ -144,11 +148,11 @@ class MainProgram:
             return return_var
         # end loops and generate IOs for LabView
         user_api.end_sequence()
-        
-        
-        
+
+
+
         # Compile sequence
-        
+
         try:
             user_api.compile_sequence()
             sequence_length = len(user_api.sequencer.current_sequence)
@@ -159,7 +163,7 @@ class MainProgram:
             return_var.error("Error while compiling sequence")
             return return_var
 
-        
+
         # Send sequence to Box
 
         try:
