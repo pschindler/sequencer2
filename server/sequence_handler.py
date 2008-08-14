@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-11 11:40:23 c704271"
+# Time-stamp: "2008-08-13 10:06:50 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -50,7 +50,7 @@ class TransitionListObject(dict):
     """An enhanced Transition dictionary class with support for the DDS
     additionaly to the standard dictionary it features a dictionary dds_list
     in this dictionary the registers in the dds are stored"""
-    max_transition = 7
+    max_transitions = 7
 
     def __init__(self):
         """empty the index list"""
@@ -81,7 +81,7 @@ class TransitionListObject(dict):
             if self.index_list.count(item_name) == 0:
                 self.index_list.append(item_name)
         self.current_transition = transition_name
-        if len(self.index_list) > self.max_transition:
+        if len(self.index_list) > self.max_transitions:
             raise RuntimeError("Cannot handle more than 7 transitions in one sequence")
 
     def add_transition(self, transition_obj):
@@ -171,7 +171,7 @@ class SequenceHandler(object):
                         break
 
             except IndexError:
-                None
+                pass
 
         dict_list = final_dict.items()
         dict_list.sort()

@@ -10,7 +10,7 @@
 """Defines the high level instructions which are used by
 functions in user_fucntion.py"""
 
-from transitions import Transitions
+from transitions import ShapeForms
 from  sequencer2 import config
 
 import logging
@@ -309,7 +309,7 @@ class DACShapeEvent(SeqInstruction):
         self.is_last = is_last
         self.dac_address = dac_address
         # Get the transtion function
-        transitions = Transitions()
+        transitions = ShapeForms()
         try:
             self.shape_func = transitions.trans_dict[transition.slope_type]
         except KeyError:

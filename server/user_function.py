@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "23-Jul-2008 17:36:44 viellieb"
+# Time-stamp: "2008-08-13 10:11:40 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -181,14 +181,15 @@ def generate_triggers(my_api, trigger_value, ttl_trigger_channel, ttl_word, \
     "Generates the triggers for QFP - No line trigger supported YET"
     # Missing: Edge detection ??
     # set ttl output
-    my_api.ttl_value(ttl_word)  # sets the ttl output channels, qfp takes care of the inversion of the ports -> ttl_word is correct
+    # sets the ttl output channels, qfp takes care of the inversion of the ports
+    # -> ttl_word is correct
+    my_api.ttl_value(ttl_word)
     my_api.label("Infinite_loop_label")
-
-#    my_api.jump("wait_label_2")
-
-    my_api.ttl_set_bit(ttl_trigger_channel, 1)  # sets the channel that tells qfp that the box is busy
+    # sets the channel that tells qfp that the box is busy
+    my_api.ttl_set_bit(ttl_trigger_channel, 1)
     my_api.label("wait_label_1")
-    my_api.jump_trigger("wait_label_2", trigger_value)  # waits for a trigger on channel trigger_value
+    # waits for a trigger on channel trigger_value
+    my_api.jump_trigger("wait_label_2", trigger_value)
     my_api.jump("wait_label_1")
     my_api.label("wait_label_2")
     my_api.ttl_set_bit(ttl_trigger_channel, 0)
@@ -209,13 +210,14 @@ def end_of_sequence(my_api, ttl_trigger_channel, ttl_word):
     my_api.ttl_set_bit(ttl_trigger_channel, 1)
     my_api.ttl_value(ttl_word)  # resets the ttl output channels
     my_api.jump("Infinite_loop_label")
- 
+
 
 def set_transition(transition_name, name_str="729"):
     """Sets the frequency modifiers of the transition
     For configuration see config/rf_setup.py"""
     global transitions
-    assert type(transition_name)==str, "set_transition needs string identifier for transition"
+    assert type(transition_name)==str, \
+        "set_transition needs string identifier for transition"
     my_config = config.Config()
     [offset, multiplier] = my_config.get_rf_settings(name_str)
     try:
@@ -232,7 +234,9 @@ def set_transition(transition_name, name_str="729"):
 ###############################################################################
 
 class userAPI(SequenceHandler):
-    """This class is instanciated and used by main_program.py"""
+    """This class is instanciated and used by main_program.py
+    The base class SequenceHandler is defined in the file sequence_handler.py
+    """
     def __init__(self, chandler, dds_count=1, ttl_dict=None):
         # The command handler
         self.chandler = chandler
@@ -277,12 +281,14 @@ class userAPI(SequenceHandler):
 
     def init_sequence(self):
         "generate triggers, frequency initialization and loop targets"
+        print str(self.api.ttl_sys)
         if self.chandler.is_triggered:
             line_trigger_val = self.line_trigger_value
         else:
             line_trigger_val = None
-        generate_triggers(self.api, self.qfp_trigger_value, self.busy_ttl_channel, self.chandler.ttl_word, \
-                              line_trigger_val, self.chandler.cycles)
+        generate_triggers(self.api, self.qfp_trigger_value, self.busy_ttl_channel, \
+                              self.chandler.ttl_word, line_trigger_val, \
+                              self.chandler.cycles)
         self.api.dds_profile_list = self.generate_frequency(self.api, \
                                                                 self.api.dds_list)
         # Missing: triggering, frequency initialization
@@ -335,7 +341,8 @@ class userAPI(SequenceHandler):
         self.init_sequence()
         last_stop_time = 0.0
 
-        # toggle list of generated sequence instructions and add wait events corresponding to the duration of each event
+        # loop through list of generated sequence instructions
+        # and add wait events corresponding to the duration of each event
         for instruction in self.final_array:
             wait_time = instruction.start_time - last_stop_time
             if wait_time > 0:
