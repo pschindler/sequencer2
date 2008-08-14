@@ -215,7 +215,7 @@ class api:
         # Set the low word first
         low_insn = instructions.p(data_val, 1)
         self.sequencer.add_insn(low_insn)
-        # Set the hight words
+        # Set the high words
         high_insn = instructions.p(high_word, 0)
         self.sequencer.add_insn(high_insn)
         high_insn_avail = instructions.p(high_word_avail, 0)

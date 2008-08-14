@@ -199,6 +199,7 @@ class SequenceHandler(object):
         self.chandler.transitions.index_list.append("NULL")
         dds_profile_list = {}
         index = 0
+        
         for index_name in self.chandler.transitions.index_list:
             trans_name = self.chandler.transitions.index_list[index]
             trans_obj = self.chandler.transitions[trans_name]

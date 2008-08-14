@@ -13,6 +13,8 @@ from sequencer2 import comm
 from sequencer2 import ad9910
 from sequencer2 import ptplog
 
+import random
+
 class HardwareTests:
     """Hardware tests for the DDS board"""
     def __init__(self, nonet=False):
@@ -94,6 +96,22 @@ class HardwareTests:
         my_api.jump("beginseq")        
 
         self.compile(my_sequencer)
+
+    def test_kit(self):
+        my_sequencer = sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+        my_api.label("go")
+        for k in range(32):
+            val = 1 << k
+            if k > 16:
+                val = val >> 2*(k-16)
+#            my_api.ttl_value(val, 2)
+            my_api.ttl_value(random.randint(0, 0xffff))
+            print val
+            my_api.wait(200000)
+        my_api.jump("go")
+        self.compile(my_sequencer)
+
 
 
     def compile(self, my_sequencer, show_debug=0):

@@ -281,7 +281,6 @@ class userAPI(SequenceHandler):
 
     def init_sequence(self):
         "generate triggers, frequency initialization and loop targets"
-        print str(self.api.ttl_sys)
         if self.chandler.is_triggered:
             line_trigger_val = self.line_trigger_value
         else:

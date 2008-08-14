@@ -114,7 +114,7 @@ class RFPulse(SeqInstruction):
         # Init the logger
         self.logger = logging.getLogger("server")
         self.logger.debug("Switching frequency to: "+str(transitions))
-        # Extract the transition object and he pulse duration
+        # Extract the transition object and the pulse duration
         try:
             transition_obj = transitions[transitions.current_transition]
         except KeyError:
@@ -129,22 +129,22 @@ class RFPulse(SeqInstruction):
         transition_name = transition_obj.name
         # Set the Amplitudes
         amplitude = transition_obj.amplitude
-        amplitude_off = 0
+        amplitude_off = -100.0
         # Set the slope duration
         if transition_obj.slope_type != "None":
             slope_duration = transition_obj.slope_duration
         else:
             slope_duration = 0
         # Set the start and stop times
-        #Switch the DDS on before the DAC
+        # Switch the DDS on before the DAC
         dds_start_time = start_time
         dac_start_time = start_time + dds_switch_time
-        #Switch the DAC of berfore the DDS
+        # Switch the DAC of berfore the DDS
         dac_stop_time = dds_start_time + pulse_duration - slope_duration
         dds_stop_time = dac_stop_time + dac_switch_time
 
 
-        #Let's check if we're using a shaped pulse or not ....
+        # Let's check if we're using a shaped pulse or not ....
         if slope_duration < cycle_time :
             # We're a rectangular pulse
             dac_start_event = DACEvent(dac_start_time, amplitude, \
@@ -352,7 +352,7 @@ class DDSSwitchEvent(SeqInstruction):
 
     def handle_instruction(self, api):
         "generate API events"
-        #We have to check if the index is a strinf or an integer
+        # We have to check if the index is a string or an integer
         try:
             if int(self.index) == self.index:
                 real_index = self.index
@@ -371,6 +371,6 @@ class DDSSwitchEvent(SeqInstruction):
     def __str__(self):
         return str(self.name) + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
-            + " | dds_addr: "+str(self.dds_address) + " | index: "+str(self.index)
+            + " | dds_addr: "+ str(self.dds_address) + " | index: "+ str(self.index) + " | phase: "+ str(self.phase)
 
 # instruction_handler.py ends here
