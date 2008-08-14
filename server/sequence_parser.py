@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-13 10:18:15 c704271"
+# Time-stamp: "2008-08-14 09:42:25 c704271"
 
 #  file      : sequence_parser.py
 #  email     : philipp DOT schindler AT frog DOT uibk DOT ac DOT at
 #            : remove the "green animal"
 #  copyright : (c) 2006 Philipp Schindler
 #  rcs       : $Id: sequence_parser.py,v 1.2 2006/04/06 11:54:09 viellieb Exp $
+
+"""The sequence parser
+Contains a function which extracts the python code from the pseudo XML code.
+"""
 
 #_* Code
 
