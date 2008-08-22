@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "23-Jul-2008 18:34:41 viellieb"
+# Time-stamp: "2008-08-21 13:59:08 c704271"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -64,7 +64,7 @@ class SeqWait(SeqInstruction):
         self.sequence_var = []
         self.sequence_var = self.add_insn(self.sequence_var)
 
-              
+
     def handle_instruction(self, api):
         "does nothing"
         api.wait(self.duration)
@@ -73,7 +73,7 @@ class SeqWait(SeqInstruction):
         return str(self.name) + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last)
 
-   
+
 
 class TTLPulse(SeqInstruction):
     "generates a TTL pulse"
@@ -359,7 +359,7 @@ class DDSSwitchEvent(SeqInstruction):
         except:
             try:
                 real_index = api.dds_profile_list[self.index]
-            except:
+            except KeyError:
                 raise RuntimeError("Transition name not found: "+str(self.index))
         # Get the right dds object
         try:

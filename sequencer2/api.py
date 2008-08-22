@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "23-Jul-2008 18:13:48 viellieb"
+# Time-stamp: "2008-08-22 10:25:55 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -33,10 +33,17 @@ import config
 
 class api:
     """api.py the api commands for sequencer2
+    This class contains functions to directly access the
+    hardware of the sequencer. This functions are used by
+    the high level functions definde in  server.instruction_handler
+
+    This functions may also be used for testing the hardware
     """
     def __init__(self, sequencer, ttl_dict=None):
-        """A simple initialization
-        The LVDS bus opcodes are defined here
+        """Initialization of the API
+        @param sequencer: a sequencer2.sequencer object
+        @param ttl_dict: A TTL channel dictionary as defined in
+                   sequencer2.outputsystem
         """
         self.config = config.Config()
         self.cycle_time = self.config.get_float("SERVER", "cycle_time")
@@ -71,8 +78,8 @@ class api:
     #################################################################
     def wait(self, wait_time):
         """inserts a wait event
-        wait_cycles : time in ns to wait
         needs calibration !!! wait has to be > 4 ?
+        @param wait_time : time in us to wait
         """
         wait_cycles = int(wait_time/self.cycle_time)
         if wait_cycles < 1.0:
@@ -100,12 +107,14 @@ class api:
 
     def label(self, label_name):
         """inserts a label and a NOP
+        @param label_name: String identifier for the Label
         """
         label_insn = instructions.label(label_name)
         self.sequencer.add_insn(label_insn)
 
     def jump(self, target_name):
-        """jumps to label
+        """unconditional jump to label
+        @param target_name: String identifier of the label to jump to
         """
         jump_insn = instructions.j(target_name)
         nop_insn = instructions.nop()
@@ -116,7 +125,8 @@ class api:
     def jump_trigger(self, target_name, trigger):
         """branch on trigger
         Adds a conditional jump
-        trigger : trigger state in hex
+        @param target_name:  String identifier of the label to jump to
+        @param trigger : trigger state in hex
         """
         jump_insn = instructions.btr(target_name, trigger)
         nop_insn = instructions.nop()
@@ -124,37 +134,42 @@ class api:
         for index in range(self.branch_delay_slots):
             self.sequencer.add_insn(copy.copy(nop_insn))
 
-    def start_finite(self, label_name, loop_count):
+    def start_finite(self, target_name, loop_count):
         """at the beginning of a finite loop
-        adds a ldc instruction and a label intruction"""
+        adds a ldc instruction and a label intruction
+        @param target_name:  String identifier of the label to jump to
+        @param loop_count: Desired number of loops
+        """
         self.sequencer.bdec_register.append(loop_count)
         register_addr = len(self.sequencer.bdec_register) - 1
         ldc_insn = instructions.ldc(register_addr, loop_count)
         self.sequencer.add_insn(ldc_insn)
-        label_insn = instructions.label(label_name)
+        label_insn = instructions.label(target_name)
         self.sequencer.add_insn(label_insn)
 
-    def end_finite(self, label_name):
+    def end_finite(self, target_name):
         """At the einding of a finite loop
         Adds a bdec instruction and fills the branch delay slots
+        @param target_name:  String identifier of the label to jump to
         """
         register_addr = len(self.sequencer.bdec_register) - 1
         if register_addr < 0:
             raise RuntimeError("Cannot pop from empty loop stack")
         self.sequencer.bdec_register.pop()
 
-        bdec_insn = instructions.bdec(label_name, register_addr)
+        bdec_insn = instructions.bdec(target_name, register_addr)
         nop_insn = instructions.nop()
         self.sequencer.add_insn(bdec_insn)
         for index in range(self.branch_delay_slots):
             self.sequencer.add_insn(copy.copy(nop_insn))
 
-    def begin_subroutine(self, label_name):
+    def begin_subroutine(self, sub_name):
         """inserts a label for a subroutine
         It has to be called with an empty sequencer.current_sequence
+        @param sub_name:  String identifier of the subroutine
         """
         self.sequencer.begin_subroutine()
-        self.sequencer.add_insn(instructions.label(label_name))
+        self.sequencer.add_insn(instructions.label(sub_name))
 
     def end_subroutine(self):
         """ends the subroutine
@@ -164,11 +179,12 @@ class api:
         self.sequencer.add_insn(instructions.ret())
         self.sequencer.end_subroutine()
 
-    def call_subroutine(self, label_name):
+    def call_subroutine(self, sub_name):
         """calls a subroutine
-        label_name
+        sub_name
+        @param sub_name:  String identifier of the subroutine to call
         """
-        call_insn = instructions.call(label_name)
+        call_insn = instructions.call(sub_name)
         nop_insn = instructions.nop()
         self.sequencer.add_insn(call_insn)
         self.sequencer.add_insn(nop_insn)
@@ -177,6 +193,8 @@ class api:
 
     def ttl_value(self, value, select=2):
         """Sets the status of a whole 16Bit output system
+        @param value: Integer value corresponding to the 16bit output
+        @param select: Selects which of the 4 16bit subgroups to use
         """
         ttl_insn = instructions.p(value, select)
         self.sequencer.add_insn(ttl_insn)
@@ -185,14 +203,15 @@ class api:
     # The LVDS functions for the ad9910 board
     #################################################################
 
-    def lvds_cmd(self, opcode, address, data, profile=0, control=0, wait=0):
+    def __lvds_cmd(self, opcode, address, data, profile=0, control=0, wait=0):
         """Writes data to the lvds bus
-        opcode : Bits 31:27
-        data_avail : 26
-        address: Bits 25:21
-        control_val Bits 20:21
-        profile_address 19:16
-        data: Bits 15:0
+        The data_avail (Bit 26) is set for each command
+        @param opcode: Bits 31:27
+        @param address: Bits 25:21
+        @param data: Bits 15:0
+        @param profile: Bits 19:16
+        @param control: Bits 20:21
+        @param wait: Time to wait in us after the command is sent
         """
         #High Word consists of following values:
         self.logger.debug("lvds cmd: op: "+str(hex(opcode)) +" add: "+str(hex(address)) + \
@@ -228,13 +247,13 @@ class api:
         """Sets the dac on the DDS board
         """
         val = self.recalibration(val)
-        self.lvds_cmd(self.dac_opcode, address, val)
+        self.__lvds_cmd(self.dac_opcode, address, val)
 
     def reset_fifo(self, dds_instance):
         """resets the FIFO of the dds"""
         device_address = dds_instance.device_addr
         val = 0
-        self.lvds_cmd(self.reset_opcode, device_address, val, wait=2)
+        self.__lvds_cmd(self.reset_opcode, device_address, val, wait=2)
 
     def dds_to_serial(self, word, length, reg_address, dds_address=0):
         """Generates LVDS commands for writing the registers of the DDS
@@ -247,9 +266,9 @@ class api:
         # Write the FIFO with the data
         for i in range(num_words):
             value = (word >>( 16*(num_words-i-1)  ))% 2**16
-            self.lvds_cmd(self.fifo_opcode, dds_address, value, wait=fifo_wait)
+            self.__lvds_cmd(self.fifo_opcode, dds_address, value, wait=fifo_wait)
         # Set the register address and wait until finished
-        self.lvds_cmd(self.addr_opcode, dds_address, reg_address, wait=addr_wait)
+        self.__lvds_cmd(self.addr_opcode, dds_address, reg_address, wait=addr_wait)
 
     #################################################################
     # Functions for the AD9910 DDS
@@ -268,12 +287,12 @@ class api:
         "updates the DDS IO registers after a write"
         address = dds_instance.device_addr
         val = 0
-        self.lvds_cmd(self.dds_up_opcode, address, val, wait=10)
+        self.__lvds_cmd(self.dds_up_opcode, address, val, wait=10)
 
     def set_dds_profile(self, dds_instance, profile=0):
         "Sets the dds profile pin on the DDS"
         dds_address = dds_instance.device_addr
-        self.lvds_cmd(self.dds_profile_opcode, dds_address, profile)
+        self.__lvds_cmd(self.dds_profile_opcode, dds_address, profile)
 
     def set_dds_freq(self, dds_instance, freq_value, profile=0):
         "Sets the dds frequency of a given profile register"
@@ -295,13 +314,13 @@ class api:
         upper_val = (fpga_tuning_word >> 16) % (2**16)
 
         #The control is untested !!!
-        self.lvds_cmd(self.phase_load_opcode, device_address, upper_val,
+        self.__lvds_cmd(self.phase_load_opcode, device_address, upper_val,
                       profile=profile, control=0x0, wait=0)
         # set control word to 1 for set current
-        self.lvds_cmd(self.phase_load_opcode, device_address, lower_val,
+        self.__lvds_cmd(self.phase_load_opcode, device_address, lower_val,
                       profile=profile, control=0x1, wait=0)
         # set control word to 3 for wren
-        self.lvds_cmd(self.phase_load_opcode, device_address, lower_val,
+        self.__lvds_cmd(self.phase_load_opcode, device_address, lower_val,
                       profile=profile, control=0x3, wait=0)
 
     def pulse_phase(self, dds_instance, profile, phase_offset=0):
@@ -311,7 +330,7 @@ class api:
 
         val = (phase_offset / math.pi) * (2 ** 16)
         val = int(val) % (2**16)
-        self.lvds_cmd(self.phase_pulse_opcode, device_address, val,
+        self.__lvds_cmd(self.phase_pulse_opcode, device_address, val,
                       profile=profile, wait=10)
 
     def init_frequency(self, dds_instance, freq_value, profile=0):
@@ -333,8 +352,10 @@ class api:
     #################################################################
     def ttl_set_bit(self, key, value):
         """Sets a single bit of the TTL outputs
+        @param key: string identifier of the TTL channel
+        @param value: integer 0 or 1
         """
-        # UNTESTED
+
         output_state = self.sequencer.current_output
         (select, new_state) = self.ttl_sys.set_bit(key, value, output_state)
         self.sequencer.current_output[select] = new_state
@@ -343,8 +364,12 @@ class api:
     def ttl_set_multiple(self, value_dict):
         """Sets multiple pins of the TTL outputs simultanious
         The values are given in the dictionary value_dict
+        @param value_dict: Dictionary with channels and values:
+                           {"channel" : value, ...}
         """
         # save select is missing !!
+        # Generate the bit mask for the given channels
+        # Every select mask (1bits) is set seperately
         select_list=[]
         for  key in value_dict:
             value = value_dict[key]
@@ -353,6 +378,7 @@ class api:
             self.sequencer.current_output[select] = new_state
             if select_list.count(select) == 0:
                 select_list.append(select)
+        # Set the TTL output for all select banks
         for select in select_list:
             value = self.sequencer.current_output[select]
             self.ttl_value(value, select)

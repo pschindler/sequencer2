@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "23-Jul-2008 18:33:59 viellieb"
+# Time-stamp: "2008-08-21 13:55:41 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -52,9 +52,12 @@ class TestUserFunction(unittest.TestCase):
         my_main_program.execute_program(cmd_str)
 
     def test_nr_carrier_nr(self):
-        "Test how many transitions the server can handle"
+        "Test how many transitions the server can handle - buggy?"
         cmd_str = generate_cmd_str("test_sequence.py", nr_of_car=9)
         my_main_program = main_program.MainProgram()
+        print "------------"
+        print cmd_str
+
         return_var = my_main_program.execute_program(cmd_str)
         if return_var.is_error:
             self.fail(return_var.return_string)
@@ -91,8 +94,7 @@ class TestUserFunction(unittest.TestCase):
         command_string = generate_cmd_str("test_sequence.py", 9)
         chandler = handle_commands.CommandHandler()
         variable_dict = chandler.get_variables(command_string)
-        user_api = user_function.userAPI(chandler, dds_count=3)
-
+        user_api = user_function.userAPI(chandler, dds_count=0)
         incl_list = user_api.include_handler.generate_include_list()
         for file_name, cmd_str in incl_list:
             exec(cmd_str)

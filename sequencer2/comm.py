@@ -7,7 +7,7 @@ import config
 
 class PTPComm:
     """class for communication with the box over the PTP protocol
-
+    For sending a program to the box the method send_code may be used.
     """
 
     #constants
@@ -30,7 +30,8 @@ class PTPComm:
     client_socket = None
 
     def __init__(self, nonet=False):
-        """configuration handler missing
+        """Initialize the PTP communication
+        @param nonet: Boolean; If true no communication with the box is performed
         """
         self.nonet = nonet
         self.logger = logging.getLogger("sequencer2")
@@ -49,7 +50,8 @@ class PTPComm:
 
     #functions
     def print_binary(self, code):
-        """Prints a readeable version of the UDP packets"""
+        """Prints a readeable version of the UDP packets
+        @param code: BInary PTP code """
         if self.debug == False:
             return
         length = len(code) / 4
@@ -66,6 +68,7 @@ class PTPComm:
 
     def send_frame(self, data):
         """Sends an already generated frame to the PCP
+        @param data: Binary PTP packet
         """
         # create a client_socket
         if self.nonet:
@@ -121,7 +124,9 @@ class PTPComm:
 
 
     def pack_write_frame(self, offset, payload):
-        "Generate frame"
+        """Generate PTP frame
+        @param offset: offset in the memory to write to
+        @param payload: Binary instruction words for the PCP"""
         total_length = len(payload) + 14
         # opcode
         data = "\x02\x00"
@@ -138,12 +143,14 @@ class PTPComm:
 
     def reset_dds(self):
         """Sends I2C reset events to the PCP
+        Not needed for the AD9910
         """
         self.send_frame(self.DDS_RESET_REQUEST)
         self.send_frame(self.DDS_UNRESET_REQUEST)
 
     def send_code(self, code_list):
         """Sends a bytecode to the PCP
+        @param code_list: Binary instruction word list
         """
         code = ""
         for code_item in code_list:

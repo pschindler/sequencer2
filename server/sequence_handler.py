@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-13 10:06:50 c704271"
+# Time-stamp: "2008-08-21 13:54:08 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -199,7 +199,7 @@ class SequenceHandler(object):
         self.chandler.transitions.index_list.append("NULL")
         dds_profile_list = {}
         index = 0
-        
+        print self.chandler.transitions.index_list
         for index_name in self.chandler.transitions.index_list:
             trans_name = self.chandler.transitions.index_list[index]
             trans_obj = self.chandler.transitions[trans_name]

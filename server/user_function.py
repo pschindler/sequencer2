@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-13 10:11:40 c704271"
+# Time-stamp: "2008-08-21 13:57:13 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -238,6 +238,7 @@ class userAPI(SequenceHandler):
     The base class SequenceHandler is defined in the file sequence_handler.py
     """
     def __init__(self, chandler, dds_count=1, ttl_dict=None):
+
         # The command handler
         self.chandler = chandler
         # The sequencer and the API
@@ -259,7 +260,7 @@ class userAPI(SequenceHandler):
         ref_freq = self.config.get_float("SERVER","reference_frequency")
         for dds_addr in range(dds_count):
             self.api.dds_list.append(ad9910.AD9910(dds_addr, ref_freq))
-
+        # Set the parameters for the
         self.pulse_program_name = ""
         self.final_array = []
         self.busy_ttl_channel = self.config.get_str("SERVER","busy_ttl_channel")
@@ -288,7 +289,8 @@ class userAPI(SequenceHandler):
         generate_triggers(self.api, self.qfp_trigger_value, self.busy_ttl_channel, \
                               self.chandler.ttl_word, line_trigger_val, \
                               self.chandler.cycles)
-        self.api.dds_profile_list = self.generate_frequency(self.api, \
+        if self.api.dds_list != []:
+            self.api.dds_profile_list = self.generate_frequency(self.api, \
                                                                 self.api.dds_list)
         # Missing: triggering, frequency initialization
 
@@ -349,10 +351,6 @@ class userAPI(SequenceHandler):
             instruction.handle_instruction(self.api)
             last_stop_time = instruction.start_time + instruction.duration
         end_of_sequence(self.api, self.busy_ttl_channel, self.chandler.ttl_word)
-
-
-#        print(str(self.sequencer.current_sequence))
-
         self.sequencer.compile_sequence()
         if self.logger.level < 9:
             self.sequencer.debug_sequence()
