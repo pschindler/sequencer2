@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-01 13:28:51 c704271"
+# Time-stamp: "2008-08-22 12:22:57 c704271"
 
 #  file       test_lvds_bus.py
 #  copyright  (c) Philipp Schindler 2008
@@ -40,7 +40,7 @@ class HardwareTests:
         self.compile(my_sequencer, show_debug)
 
     def test_trigger(self):
-        "Test ttl pulses of box"
+        "Test the trigger functionality of box"
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
 
@@ -85,15 +85,15 @@ class HardwareTests:
     def test_dds_loop(self, frequency=10):
         "Just sets a loop profile of the dds and activates it"
         my_sequencer = sequencer.sequencer()
-        my_api = api.api(my_sequencer)        
-        dds_device = ad9910.AD9910(0, 800)        
+        my_api = api.api(my_sequencer)
+        dds_device = ad9910.AD9910(0, 800)
 
         my_api.label("beginseq")
-        my_api.init_dds(dds_device)        
+        my_api.init_dds(dds_device)
         my_api.set_dds_freq(dds_device, frequency, 0)
         my_api.update_dds(dds_device)
         my_api.dac_value(0, 0)
-        my_api.jump("beginseq")        
+        my_api.jump("beginseq")
 
         self.compile(my_sequencer)
 

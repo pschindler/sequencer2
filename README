@@ -83,10 +83,10 @@ The server uses the epydoc markup language inside the source code.
 
 An (presumably) outdated snapshot is available at:
 
-link:http://pulse-sequencer.sf.net/innsbruck/sequencer2[http://pulse-sequencer.sf.net/innsbruck/sequencer2]
+link:[http://pulse-sequencer.sf.net/innsbruck/sequencer2]
 
 To generate the documentation the epydoc interpreter is needed.
-It is available from: http://epydoc.sf.net
+It is available from: link:[http://epydoc.sf.net]
 
 The documentation is generated with the command:
 
@@ -94,9 +94,52 @@ The documentation is generated with the command:
   epydoc -v --top=server server sequencer2
 ............................................
 
+== Debugging the sequencer ==
+
+For debugging the API commands are used.
+
+Simple tests are collected in the file tests/test_hardware.py
+
+For testing purposes an interactive python shell is needed.
+For better testing experince it is recommended to use the
+improved python shell link:[http://ipython.scipy.org].
+
+If python is in your system path the shell may be invoked
+in a command window by simply typing
+
+.........
+python
+.........
+
+Then the test_hardware file has to be imported:
+
+..................................
+from tests.test_hardware import *
+..................................
+
+After that the HardwareTests class has to instantiated
+
+......................
+ht = HardwareTests()
+......................
+
+To test the TTL subsystem of the Box type then:
+
+...................
+ht.test_ttl_set()
+...................
+
+It is advisable to play around with the commands defined in
+tests.test_hardware.py to get a feeling of how the commands
+work
+
+Tips for trouble shooting can be found in the general box documentation:
+
+link:http://sourceforge.net/project/showfiles.php?group_id=129764&package_id=220283[pcp-doc.pdf]
+
 == Debugging the server with ipython ==
 
-This debugging method is foe low level debugging if the server.
+This debugging method is for low level debugging of the server.
 You might not need it anyway....
 
 For debugging the server the ipython python shell is recommended.
@@ -138,7 +181,8 @@ The sequence is displayed with the following command:
 
 == COPYING ==
 
-Copyright (C) 2008 Philipp Schindler, Max Harlander, Lutz Peterson
+Copyright (C) 2008 Philipp Schindler, Max Harlander,
+                   Lutz Peterson, Boerge Hemmerling
 
 Free use of this software is granted under the terms of the
 GNU General Public License (GPL).
