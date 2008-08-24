@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-21 13:54:08 c704271"
+# Time-stamp: "24-Aug-2008 22:10:52 viellieb"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -104,6 +104,9 @@ class SequenceDict(dict):
     """An enhanced dictionary with methods for adding events
     and resolving some conflicts"""
     logger = None
+    def __init__(self):
+        dict.__init__({})
+
     def add_event(self, event):
         "Adds an event to the sequence dictionary"
         # Missing: rounding of start time
@@ -181,7 +184,6 @@ class SequenceHandler(object):
                 if self.logger.level < 11 :
                     log_str += str(event) + "\n"
         self.logger.debug(log_str)
-
         return final_array
 
 
@@ -199,7 +201,6 @@ class SequenceHandler(object):
         self.chandler.transitions.index_list.append("NULL")
         dds_profile_list = {}
         index = 0
-        print self.chandler.transitions.index_list
         for index_name in self.chandler.transitions.index_list:
             trans_name = self.chandler.transitions.index_list[index]
             trans_obj = self.chandler.transitions[trans_name]

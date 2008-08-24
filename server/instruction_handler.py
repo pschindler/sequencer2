@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-21 13:59:08 c704271"
+# Time-stamp: "24-Aug-2008 22:10:36 viellieb"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -16,19 +16,19 @@ from  sequencer2 import config
 import logging
 import copy
 
-global_config = config.Config()
-global_reference_frequency = global_config.get_float("SERVER","reference_frequency")
-global_clk_divider = global_config.get_float("SERVER","clk_divider")
+GLOBAL_CONFIG = config.Config()
+GLOBAL_REFERENCE = GLOBAL_CONFIG.get_float("SERVER","reference_frequency")
+GLOBAL_CLK_DIVIDER = GLOBAL_CONFIG.get_float("SERVER","clk_divider")
 
-global_config.get_all_dict("Durations")
-global_get_duration = global_config.get_float_dict_val
+GLOBAL_CONFIG.get_all_dict("Durations")
+GLOBAL_GET_DURATION = GLOBAL_CONFIG.get_float_dict_val
 
 class SeqInstruction:
     "Base class used for all intructions"
     duration = 0.0
     start_time = 0.0
-    cycle_time = 1 / global_reference_frequency * global_clk_divider
-    get_hardware_duration = global_get_duration
+    cycle_time = 1 / GLOBAL_REFERENCE * GLOBAL_CLK_DIVIDER
+    get_hardware_duration = GLOBAL_GET_DURATION
     is_last = False
     is_added = False
     sequence_var = []
@@ -100,6 +100,7 @@ class TTLPulse(SeqInstruction):
         start_event = TTLEvent(start_time, device_key, value_on, is_last=False)
         stop_event = TTLEvent(stop_time, device_key, value_off, is_last=is_last)
 
+        self.sequence_var = []
         self.sequence_var = start_event.add_insn(self.sequence_var)
         self.sequence_var = stop_event.add_insn(self.sequence_var)
 
@@ -164,6 +165,7 @@ class RFPulse(SeqInstruction):
         dds_stop_event = DDSSwitchEvent(dds_stop_time, address, "NULL", \
                                                    phi, is_last=is_last)
         # Add the events to the sequence
+        self.sequence_var = []
         self.sequence_var = dac_start_event.add_insn(self.sequence_var)
         self.sequence_var = dac_stop_event.add_insn(self.sequence_var)
         self.sequence_var = dds_start_event.add_insn(self.sequence_var)
@@ -234,6 +236,7 @@ class RFBichroPulse(SeqInstruction):
         dds_stop_event2 = DDSSwitchEvent(dds_stop_time2, address2, "NULL", \
                                          phi, is_last=is_last)
         # Add the events to the sequence
+        self.sequence_var = []
         self.sequence_var = dac_start_event.add_insn(self.sequence_var)
         self.sequence_var = dac_stop_event.add_insn(self.sequence_var)
         self.sequence_var = dds_start_event.add_insn(self.sequence_var)

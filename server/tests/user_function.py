@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-21 13:55:41 c704271"
+# Time-stamp: "24-Aug-2008 21:50:59 viellieb"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008

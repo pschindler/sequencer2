@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-21 13:57:13 c704271"
+# Time-stamp: "24-Aug-2008 22:10:57 viellieb"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -341,7 +341,6 @@ class userAPI(SequenceHandler):
         "Generates the bytecode for the sequence"
         self.init_sequence()
         last_stop_time = 0.0
-
         # loop through list of generated sequence instructions
         # and add wait events corresponding to the duration of each event
         for instruction in self.final_array:
