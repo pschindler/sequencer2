@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-26 13:10:08 c704271"
+# Time-stamp: "2008-08-26 13:22:09 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -68,13 +68,14 @@ Include Files:
   Return Values
   -------------
 
-  The return value for QFP may be set by the global vbariable return str.
+  The return value for QFP may be set by the function add_to_return_list().
   It is set as follows:
 
   >>> def test_include(test_string):
-  >>>     global return_str
-  >>>     return_str += test_string
+  >>>     add_to_return_list("test",er)
   >>>     ttl_pulse("15",300, is_last=True)
+
+  The variables may be read with the function get_return_var(name)
 
 
 """
@@ -103,7 +104,7 @@ from instruction_handler import *
 #--1
 #return_str = ""
 sequence_var = []
-return_var = {}
+return_list = {}
 transitions = TransitionListObject()
 logger = logging.getLogger("server")
 
@@ -358,14 +359,13 @@ class userAPI(SequenceHandler):
         # see sequence_handler.py for details
         assert len(sequence_var) > 0, "Empty sequence"
         self.final_array = self.get_sequence_array(sequence_var)
-        return_str = self.get_return_string(return_var)
+        return_str = self.get_return_string(return_list)
         return return_str
 
     def compile_sequence(self):
         "Generates the bytecode for the sequence"
         self.init_sequence()
         last_stop_time = 0.0
-
         # loop through list of generated sequence instructions
         # and add wait events corresponding to the duration of each event
         for instruction in self.final_array:

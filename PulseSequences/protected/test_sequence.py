@@ -19,6 +19,7 @@ Cycles 1
 </PARAMS OVERRIDE>
 
 <SEQUENCE>
+PMTDetection(2000)
 if det_time == 100000.0:
     raise RuntimeError("Variable not set")
 print det_time

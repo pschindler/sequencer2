@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-21 13:55:41 c704271"
+# Time-stamp: "2008-08-26 13:24:39 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -55,10 +55,10 @@ class TestUserFunction(unittest.TestCase):
         "Test how many transitions the server can handle - buggy?"
         cmd_str = generate_cmd_str("test_sequence.py", nr_of_car=9)
         my_main_program = main_program.MainProgram()
-        print "------------"
-        print cmd_str
 
         return_var = my_main_program.execute_program(cmd_str)
+
+        assert(return_var.return_string == "PM Count, 2;")
         if return_var.is_error:
             self.fail(return_var.return_string)
 
