@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-21 13:54:08 c704271"
+# Time-stamp: "2008-08-26 13:08:10 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -218,7 +218,6 @@ class SequenceHandler(object):
 
 
 
-
     ########################################################################
     # General Helper functions
     ########################################################################
@@ -236,6 +235,15 @@ class SequenceHandler(object):
                              +str(var_name))
             var_obj = default_val
         return var_obj
+
+    def get_return_string(self, return_dict):
+        """Generate a string from the return dictionary
+        @param return_dict: dictionary of the return values with name as key
+        """
+        return_str = ""
+        for name, value in return_dict.iteritems():
+            return_str += str(name) + ", "+ str(value) + ";"
+
 
 # The transition main class
 class transition:

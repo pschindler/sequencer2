@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-21 13:40:29 c704271"
+# Time-stamp: "2008-08-26 13:07:04 c704271"
 
 #  file       PMTDetection
 #  copyright  (c) Philipp Schindler 2008
@@ -11,8 +11,10 @@ def PMTDetection(pmt_detect_length):
     """Generate a PMT detection event
     @param pmt_detect_length: Length of PMT gate time
     """
-    global return_str
-    return_str += "PM Count, 2;"
+    add_to_return_list("PM Count",2)
+#    global return_str
+#    return_str += "PM Count, 2;"
+
     # ttl_pulse(name, duration, starttime=0.0)
     PMT_trigger_length = 1
     ttl_pulse("PMT trigger", PMT_trigger_length)

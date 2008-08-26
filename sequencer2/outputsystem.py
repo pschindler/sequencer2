@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-22 10:49:40 c704271"
+# Time-stamp: "2008-08-22 15:21:08 c704271"
 
 #  file       output_system.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
 """The digital output system"""
 class TTLChannel:
+    "Object for single bit TTL channels"
     def __init__(self, name, bit_nr, select, is_inverted=False):
         """Object for single bit TTL channels
         @param name: String identifier for the channel
@@ -38,11 +39,11 @@ class OutputSystem:
     def __init__(self, ttl_dict=None):
         "if ttl_dict=None a default dictionary will be created"
         if ttl_dict == None:
-            ttl_dict={}
+            ttl_dict = {}
             for bit_nr in range(16):
-                ttl_dict[str(bit_nr)] = TTLChannel(str(bit_nr),bit_nr,2)
-                ttl_dict[str(bit_nr+16)] = TTLChannel(str(bit_nr+16),bit_nr,3)
-            ttl_dict["QFP_Trig"] = TTLChannel("QFP_Trig",15,2)
+                ttl_dict[str(bit_nr)] = TTLChannel(str(bit_nr), bit_nr, 2)
+                ttl_dict[str(bit_nr+16)] = TTLChannel(str(bit_nr+16), bit_nr, 3)
+            ttl_dict["QFP_Trig"] = TTLChannel("QFP_Trig", 15, 2)
 
         self.ttl_dict = ttl_dict
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-21 13:57:13 c704271"
+# Time-stamp: "2008-08-26 13:10:08 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -101,8 +101,9 @@ from instruction_handler import *
 ###############################################################################
 # DO NOT remove the line below - This is needed by the ipython debugger
 #--1
-return_str = ""
+#return_str = ""
 sequence_var = []
+return_var = {}
 transitions = TransitionListObject()
 logger = logging.getLogger("server")
 
@@ -175,6 +176,26 @@ def seq_wait(wait_time, start_time=0.0):
 ################################################################
 # Initialization and ending of the sequence
 ################################################################
+
+
+def add_to_return_list(name, value):
+    """Generates/updates a return variable
+    @param name: string identifier
+    @param value: value
+    """
+    global return_list
+    return_list[name] = value
+
+def get_return_var(name):
+    """Returns value of the return variable with identifier name
+    @param name: string identifier
+    """
+    global return_list
+    try:
+        return return_list_name()
+    except KeyError:
+        # Missing: Debug statement
+        return None
 
 def generate_triggers(my_api, trigger_value, ttl_trigger_channel, ttl_word, \
                           line_trigger_channel=None, loop_count=1):
@@ -278,6 +299,8 @@ class userAPI(SequenceHandler):
         transitions.clear()
         global sequence_var
         sequence_var = []
+        global return_list
+        return_list = {}
 
 
     def init_sequence(self):
@@ -335,6 +358,7 @@ class userAPI(SequenceHandler):
         # see sequence_handler.py for details
         assert len(sequence_var) > 0, "Empty sequence"
         self.final_array = self.get_sequence_array(sequence_var)
+        return_str = self.get_return_string(return_var)
         return return_str
 
     def compile_sequence(self):
