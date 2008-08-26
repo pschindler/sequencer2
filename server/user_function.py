@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-26 13:22:09 c704271"
+# Time-stamp: "26-Aug-2008 23:03:26 viellieb"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -117,7 +117,14 @@ def test_global(string1):
 def ttl_pulse(device_key, duration, start_time=0.0, is_last=True):
     """generates a sequential ttl pulse
     device_key may be a string or a list of strings indicating
-    the used TTL channels"""
+    the used TTL channels
+
+    @param device_key: string identifier of TTL channels or a list of string identifiers
+    @param duration: duration of the TTL pulse
+    @param start_time: pulse start time with respect to the current frame
+    @param is_last: If True a new frame is generated after this event
+    """
+
     global sequence_var
     pulse1 = TTLPulse(start_time, duration, device_key, is_last)
     sequence_var.append(pulse1.sequence_var)
@@ -128,6 +135,14 @@ def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
     The transition_param may be either a string or a transition object.
     If a string is given than the according transition object is extracted
     from the data sent by QFP
+
+    @param theta: rotation angle
+    @param phi: rf_phase
+    @param transition_param: string identifier for the transition or
+                             a transition object
+    @param start_time: pulse start time with respect to the current frame
+    @param is_last: If True a new frame is generated after this event
+    @param address: Integer address of the DDS
     """
     global sequence_var
     global transitions
@@ -145,6 +160,19 @@ def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
 
     sequence_var.append(rf_pulse_insn.sequence_var)
 
+def rf_on(frequency, amplitude, dds_address=0):
+    """Switches on the given dds board.
+
+    Has no start_time or is_last because it is intended to be used only in
+    continous mode experiments.
+
+    @param frequency: frequency in MHz
+    @amplitude: amplitude in dB
+    @dds_address: integer dds address
+    """
+    rf_on_insn = RFOn()
+    sequence_var.append(rf_on_insn.sequence_var)
+
 def rf_bichro_pulse(theta, phi, ion, transition_param, transition2_param, \
                     start_time=0.0, is_last=True, address=0, address2=1):
     """Generates a bichromatic RF pulse
@@ -152,6 +180,15 @@ def rf_bichro_pulse(theta, phi, ion, transition_param, transition2_param, \
     The shape is controlled by the 1st transition.
     The transition_params must be a string !!!
     No direct transition variables allowed !!!
+
+    @param theta: rotation angle
+    @param phi: rf_phase
+    @param transition_param: string identifier for the first transition
+    @param transition2_param: string identifier for the second transition
+    @param start_time: pulse start time with respect to the current frame
+    @param is_last: If True a new frame is generated after this event
+    @param address: Integer address of the first DDS
+    @param address: Integer address of the second DDS
     """
     global sequence_var
     if str(transition_param) == transition_param:

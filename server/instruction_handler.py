@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "24-Aug-2008 22:10:36 viellieb"
+# Time-stamp: "26-Aug-2008 22:13:48 viellieb"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -73,7 +73,39 @@ class SeqWait(SeqInstruction):
         return str(self.name) + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last)
 
+class RFOn(SeqInstruction):
+    "Switches on a given DDS"
+    def __init__(self, start_time, frequency, amplitude, address, is_last=True):
+        start_time = float(start_time)
+        self.frequency = float(frequency)
+        self.amplitude = float(amplitude)
+        self.dds_address = address
+        self.is_last = is_last
+        self.name = "RFOnEvent"
 
+        self.sequence_var = []
+        self.sequence_var = self.add_insn(self.sequence_var)
+
+    def handle_instruction(self, api):
+        """Creates following events:
+         - dac
+         - set_dds_freq
+         - set_dds_profile
+         - update_dds
+         """
+        try:
+            dds_instance = api.dds_list[self.dds_address]
+        except IndexError:
+            raise RuntimeError("DDS not found: "+str(self.dds_address))
+        api.dac_value( self.dds_address, self.amplitude)
+        api.set_dds_freq(dds_instance, self.frequency, profile=0)
+        api.set_dds_profile(dds_instance, profile=0)
+        api.update_dds(dds_instance)
+
+    def __str__(self):
+        return str(self.name) + " | start: " + str(self.start_time) \
+               + " | freq" +str(self.frequency)\
+               + " | amp: " + str(self.amplitude) + " | last: " + str(self.is_last)
 
 class TTLPulse(SeqInstruction):
     "generates a TTL pulse"

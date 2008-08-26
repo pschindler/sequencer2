@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-26 13:24:39 c704271"
+# Time-stamp: "26-Aug-2008 23:03:40 viellieb"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -137,7 +137,35 @@ class TestUserFunction(unittest.TestCase):
             pass
 
 
-    def test_transition_modifiers(self):
+
+
+    def test_conflict_handler2(self):
+        "Test the TTL conflict handling of simultanious pulses"
+        command_string = generate_cmd_str("test_sequence.py", 9)
+
+        chandler = handle_commands.CommandHandler()
+        variable_dict = chandler.get_variables(command_string)
+        user_api = user_function.userAPI(chandler, dds_count=3)
+
+        incl_list = user_api.include_handler.generate_include_list()
+        for file_name, cmd_str in incl_list:
+            exec(cmd_str)
+        transitions = chandler.transitions
+        sequence_var = []
+        pulse1 = TTLPulse(0, 10, "1", is_last=False)
+        pulse2 = TTLPulse(0, 20, "1", is_last=False)
+        pulse3 = TTLPulse(0, 30, "3")
+        sequence_var.append(pulse1.sequence_var)
+        sequence_var.append(pulse2.sequence_var)
+        sequence_var.append(pulse3.sequence_var)
+        try:
+            user_api.final_array = user_api.get_sequence_array(sequence_var)
+            self.fail("Program did not detect simulatnious TTL error")
+        except RuntimeError:
+            pass
+
+
+    def test_rf_on(self):
 #        logger=ptplog.ptplog(level=logging.DEBUG)
 
         fobj = open("server/user_function.py")
@@ -159,24 +187,13 @@ class TestUserFunction(unittest.TestCase):
         transitions = chandler.transitions
         global sequence_var
         sequence_var = []
-
-        pulse1 = TTLPulse(0, 10, "1", is_last=False)
-        pulse2 = TTLPulse(0, 20, "1", is_last=False)
-        pulse3 = TTLPulse(0, 30, "3")
+        pulse1 = RFOn(0, 200, -5, 0)
         sequence_var.append(pulse1.sequence_var)
-        sequence_var.append(pulse2.sequence_var)
-        sequence_var.append(pulse3.sequence_var)
-        rf_pulse(1,0,1,"carrier1")
-        rf_pulse(1,0,1,"carrier2")
-        transitions = copy.copy(chandler.transitions)
-        set_transition("carrier1", "729")
-        set_transition("carrier2", "RF")
-        user_api.init_sequence()
-        assert transitions["carrier1"].offset == 0
-        assert transitions["carrier1"].multiplier == .5
-        assert transitions["carrier2"].offset == 285
-        assert transitions["carrier2"].multiplier == 1
-        print chandler.transitions["carrier2"]
+
+        final_array = user_api.get_sequence_array(sequence_var)
+        for instruction in final_array:
+            instruction.handle_instruction(user_api.api)
+        self.fail("Need a test for the API commands")
 
     def test_direct_transition(self):
 #        logger=ptplog.ptplog(level=logging.DEBUG)
