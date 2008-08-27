@@ -7,12 +7,12 @@ def PMTDetection(pmt_detect_wait):
 
     PMT_trigger_length = 1 
 
-    ttl_pulse("PMT trigger", PMT_trigger_length)
+#    ttl_pulse("PMT trigger", PMT_trigger_length)
 
-    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=pmt_detect_wait)
+#    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=pmt_detect_wait)
 
 
-    seq_wait(50)
+#    seq_wait(50)
 
 
 
