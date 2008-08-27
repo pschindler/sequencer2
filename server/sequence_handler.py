@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-13 10:06:50 c704271"
+# Time-stamp: "2008-08-26 13:20:12 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -104,6 +104,9 @@ class SequenceDict(dict):
     """An enhanced dictionary with methods for adding events
     and resolving some conflicts"""
     logger = None
+    def __init__(self):
+        dict.__init__({})
+
     def add_event(self, event):
         "Adds an event to the sequence dictionary"
         # Missing: rounding of start time
@@ -181,7 +184,6 @@ class SequenceHandler(object):
                 if self.logger.level < 11 :
                     log_str += str(event) + "\n"
         self.logger.debug(log_str)
-
         return final_array
 
 
@@ -199,7 +201,6 @@ class SequenceHandler(object):
         self.chandler.transitions.index_list.append("NULL")
         dds_profile_list = {}
         index = 0
-        
         for index_name in self.chandler.transitions.index_list:
             trans_name = self.chandler.transitions.index_list[index]
             trans_obj = self.chandler.transitions[trans_name]
@@ -215,7 +216,6 @@ class SequenceHandler(object):
             index += 1
 
         return dds_profile_list
-
 
 
 
@@ -236,6 +236,15 @@ class SequenceHandler(object):
                              +str(var_name))
             var_obj = default_val
         return var_obj
+
+    def get_return_string(self, return_dict):
+        """Generate a string from the return dictionary
+        @param return_dict: dictionary of the return values with name as key
+        """
+        return_str = ""
+        for name, value in return_dict.iteritems():
+            return_str += str(name) + ", "+ str(value) + ";"
+        return return_str
 
 # The transition main class
 class transition:

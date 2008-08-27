@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "06-Aug-2008 22:57:46 viellieb"
+# Time-stamp: "2008-08-22 10:38:08 c704271"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -14,7 +14,7 @@
 # ldc
 
 
-class insn_class:
+class InsnClass:
     """Base class for an instruction
     """
     label = None
@@ -38,21 +38,21 @@ class insn_class:
                " -- nam: "+str(self.name)
 
 
-class nop(insn_class):
+class nop(InsnClass):
     """No operation
     """
     def __init__(self):
         self.name = "nop"
         self.opcode = 0x0
 
-class halt(insn_class):
+class halt(InsnClass):
     """stop the processor
     """
     def __init__(self):
         self.name = "halt"
         self.opcode = 0x8
 
-class label(insn_class):
+class label(InsnClass):
     """inserts a NOP and a label
     """
     name = "label"
@@ -66,7 +66,7 @@ class label(insn_class):
                " -- nam: "+str(self.name) + \
                " -- id: " +str(self.label)
 
-class p(insn_class):
+class p(InsnClass):
     """The p instruction:
     p.output_state : hex value of the (16bit)
     p.change state : output select bits (2bit)
@@ -91,7 +91,7 @@ class p(insn_class):
                " -- sel: "+str(hex(self.change_state)) +\
                " -- val: "+str(hex(self.output_state))
 
-class j(insn_class):
+class j(InsnClass):
     """Jumps to a defined label
     """
     is_branch = True
@@ -160,13 +160,13 @@ class call(j):
     name = "call"
     opcode = 0x5
 
-class ret(insn_class):
+class ret(InsnClass):
     """returns from the last subroutine
     """
     name = "ret"
     opcode = 0x6
 
-class wait(insn_class):
+class wait(InsnClass):
     """inserts a wait insn
     """
     name = "wait"
@@ -182,7 +182,7 @@ class wait(insn_class):
                " -- op:  "+str(hex(self.opcode)) + \
                " -- nam: "+str(self.name) + \
                " -- val: "+str(hex(self.wait_cycles))
-class ldc(insn_class):
+class ldc(InsnClass):
     "Loads constant into register for bdec"
     name = "load const"
     opcode = 0xb

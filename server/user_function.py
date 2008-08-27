@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-13 10:11:40 c704271"
+# Time-stamp: "2008-08-26 13:22:09 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -68,13 +68,14 @@ Include Files:
   Return Values
   -------------
 
-  The return value for QFP may be set by the global vbariable return str.
+  The return value for QFP may be set by the function add_to_return_list().
   It is set as follows:
 
   >>> def test_include(test_string):
-  >>>     global return_str
-  >>>     return_str += test_string
+  >>>     add_to_return_list("test",er)
   >>>     ttl_pulse("15",300, is_last=True)
+
+  The variables may be read with the function get_return_var(name)
 
 
 """
@@ -101,8 +102,9 @@ from instruction_handler import *
 ###############################################################################
 # DO NOT remove the line below - This is needed by the ipython debugger
 #--1
-return_str = ""
+#return_str = ""
 sequence_var = []
+return_list = {}
 transitions = TransitionListObject()
 logger = logging.getLogger("server")
 
@@ -176,6 +178,26 @@ def seq_wait(wait_time, start_time=0.0):
 # Initialization and ending of the sequence
 ################################################################
 
+
+def add_to_return_list(name, value):
+    """Generates/updates a return variable
+    @param name: string identifier
+    @param value: value
+    """
+    global return_list
+    return_list[name] = value
+
+def get_return_var(name):
+    """Returns value of the return variable with identifier name
+    @param name: string identifier
+    """
+    global return_list
+    try:
+        return return_list_name()
+    except KeyError:
+        # Missing: Debug statement
+        return None
+
 def generate_triggers(my_api, trigger_value, ttl_trigger_channel, ttl_word, \
                           line_trigger_channel=None, loop_count=1):
     "Generates the triggers for QFP - No line trigger supported YET"
@@ -240,6 +262,7 @@ class userAPI(SequenceHandler):
     The base class SequenceHandler is defined in the file sequence_handler.py
     """
     def __init__(self, chandler, dds_count=1, ttl_dict=None):
+
         # The command handler
         self.chandler = chandler
         # The sequencer and the API
@@ -261,7 +284,7 @@ class userAPI(SequenceHandler):
         ref_freq = self.config.get_float("SERVER","reference_frequency")
         for dds_addr in range(dds_count):
             self.api.dds_list.append(ad9910.AD9910(dds_addr, ref_freq))
-
+        # Set the parameters for the
         self.pulse_program_name = ""
         self.final_array = []
         self.busy_ttl_channel = self.config.get_str("SERVER","busy_ttl_channel")
@@ -279,6 +302,8 @@ class userAPI(SequenceHandler):
         transitions.clear()
         global sequence_var
         sequence_var = []
+        global return_list
+        return_list = {}
 
 
     def init_sequence(self):
@@ -290,7 +315,8 @@ class userAPI(SequenceHandler):
         generate_triggers(self.api, self.qfp_trigger_value, self.busy_ttl_channel, \
                               self.chandler.ttl_word, line_trigger_val, \
                               self.chandler.cycles)
-        self.api.dds_profile_list = self.generate_frequency(self.api, \
+        if self.api.dds_list != []:
+            self.api.dds_profile_list = self.generate_frequency(self.api, \
                                                                 self.api.dds_list)
         # Missing: triggering, frequency initialization
 
@@ -335,13 +361,13 @@ class userAPI(SequenceHandler):
         # see sequence_handler.py for details
         assert len(sequence_var) > 0, "Empty sequence"
         self.final_array = self.get_sequence_array(sequence_var)
+        return_str = self.get_return_string(return_list)
         return return_str
 
     def compile_sequence(self):
         "Generates the bytecode for the sequence"
         self.init_sequence()
         last_stop_time = 0.0
-
         # loop through list of generated sequence instructions
         # and add wait events corresponding to the duration of each event
         for instruction in self.final_array:
@@ -351,10 +377,6 @@ class userAPI(SequenceHandler):
             instruction.handle_instruction(self.api)
             last_stop_time = instruction.start_time + instruction.duration
         end_of_sequence(self.api, self.busy_ttl_channel, self.chandler.ttl_word)
-
-
-#        print(str(self.sequencer.current_sequence))
-
         self.sequencer.compile_sequence()
         if self.logger.level < 9:
             self.sequencer.debug_sequence()

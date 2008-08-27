@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "23-Jul-2008 18:29:40 viellieb"
+# Time-stamp: "2008-08-22 10:24:57 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://wiki.havens.de
 """Sequencer module with compiling functions
+The sequencer conatins a list with the current sequence
+The sequencer object handles the compiling of the sequence
 """
 import logging
 import instructions
@@ -13,6 +15,11 @@ import copy
 import config
 
 class sequencer:
+    """sequener class
+    Stores the current sequence in a list:
+    Handles the creation of the binary instructions from the
+    instructions as defined in L{sequencer2.instructions}
+    """
     def __init__(self):
         self.current_sequence = []
         self.jump_list = []
@@ -38,9 +45,9 @@ class sequencer:
 
     def get_binary_charlist(self, hex_num, byte_width):
         """hex_char_list(hex_num, byte_width)
-        hex_num    = number to convert into a list of bytes
-        byte_width = number of bytes to divide hex_num into
-        Returns a string representing the lower bytes of hex_num
+        @param hex_num: number to convert into a list of bytes
+        @param byte_width: number of bytes to divide hex_num into
+        @return: A string representing the lower bytes of hex_num
         """
         i = 0
         datastring = ''
@@ -54,6 +61,7 @@ class sequencer:
 
     def add_insn(self, instruction):
         """adds instruction to the current_sequence
+        @param instruction: sequencer2.instruction object to add
         """
         self.current_sequence.append(instruction)
         # If insn is a label add it to the label list
@@ -86,7 +94,7 @@ class sequencer:
         """generates the binary list
         """
         # Addresses are broken when using subroutines
-        
+
         # Add a halt instruction to the current sequence !
         halt_insn = instructions.halt()
         self.add_insn(halt_insn)
@@ -143,7 +151,8 @@ class sequencer:
 
     def debug_sequence(self, force=False):
         """Prints out the current instruction list
-
+        @param force: Boolean; If set to True, the sequence_list is printed to
+                      stdout without taking care of the debug level
         """
 #        logging.basicConfig(level=logging.DEBUG,
 #                            format="%(levelname)-10s %(asctime)s %(message)s")

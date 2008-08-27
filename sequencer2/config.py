@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-07-21 17:04:12 c704271"
+# Time-stamp: "2008-08-22 10:46:38 c704271"
 
 #  file       config.py
 #  copyright  (c) Philipp Schindler 2008
@@ -24,8 +24,8 @@ class Config:
 
     def parse_cmd_line(self):
         """Parses the command line arguments
-        --nonet: switches off box communication
-        --force-net: switches on box communication """
+        --nonet: switches off box communication; overrides setting in config file
+        --force-net: switches on box communication; overrides setting in config file"""
         parser = OptionParser()
         parser.add_option("--nonet", dest="nonet", action="store_true", default=None\
                               ,help="Forces the TCP connection to be inactive")
