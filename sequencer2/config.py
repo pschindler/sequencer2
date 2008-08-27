@@ -153,7 +153,7 @@ class Config:
     def recalibration(self, x):
         """ calibration fot the DAC"""
         max_dac_value = 15000
-        min_dac_value = 500
+        min_dac_value = 100
         if x > 0:
             self.logger.warn("Got a DAC amplitude bigger than 0dB: "+str(x))
             x = 0

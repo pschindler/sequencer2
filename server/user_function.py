@@ -183,6 +183,8 @@ def generate_triggers(my_api, trigger_value, ttl_trigger_channel, ttl_word, \
     # set ttl output
     # sets the ttl output channels, qfp takes care of the inversion of the ports
     # -> ttl_word is correct
+    for dds_device in my_api.dds_list:
+        my_api.init_dds(dds_device)
     my_api.ttl_value(ttl_word)
     my_api.label("Infinite_loop_label")
     # sets the channel that tells qfp that the box is busy
