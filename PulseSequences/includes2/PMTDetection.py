@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
 # Time-stamp: "2008-08-26 13:22:19 c704271"
-
 #  file       PMTDetection
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
-
 
 def PMTDetection(pmt_detect_length):
     """Generate a PMT detection event
