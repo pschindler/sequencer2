@@ -76,12 +76,17 @@ class api:
     #################################################################
     #   The general PCP instructions
     #################################################################
-    def wait(self, wait_time):
+    def wait(self, wait_time, use_cycles=False):
         """inserts a wait event
         needs calibration !!! wait has to be > 4 ?
         @param wait_time : time in us to wait
+        @param use_cycles: If set to True the wait_time will be interpreted as cycles
         """
-        wait_cycles = int(wait_time/self.cycle_time)
+        if use_cycles:
+            wait_cycles = wait_time
+        else:
+            wait_cycles = int(wait_time/self.cycle_time)
+
         if wait_cycles < 1.0:
             self.logger.info("Cannot wait for less than one cycle")
             return
@@ -239,7 +244,7 @@ class api:
         self.sequencer.add_insn(high_insn)
         high_insn_avail = instructions.p(high_word_avail, 0)
         self.sequencer.add_insn(high_insn_avail)
-        self.wait(wait)
+        self.wait(wait, use_cycles=True)
         # Add a copy of high_insn
         self.sequencer.add_insn(copy.copy(high_insn))
 
@@ -341,7 +346,8 @@ class api:
         self.load_phase(dds_instance, profile)
 
     def switch_frequency(self, dds_instance, profile, phase_offset=0):
-        """Sets the profile pins of the DDS and generates a pulse phase instruction"""
+        """Sets the profile pins of the DDS and generates a pulse phase instruction\
+        profile=the integer index of the transition that is used"""
         # UNTESTED
         self.set_dds_profile(dds_instance, profile)
         self.update_dds(dds_instance)

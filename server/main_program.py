@@ -149,8 +149,6 @@ class MainProgram:
         # end loops and generate IOs for LabView
         user_api.end_sequence()
 
-
-
         # Compile sequence
 
         try:

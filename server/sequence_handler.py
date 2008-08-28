@@ -90,7 +90,7 @@ class TransitionListObject(dict):
             self[transition_obj.name] = transition_obj
 
     def __str__(self):
-        my_str = "items:"
+        my_str = "items: "
         for name, item in self.iteritems():
             my_str += str(name) + ", "
         my_str += " || index: "
@@ -206,7 +206,7 @@ class SequenceHandler(object):
             trans_obj = self.chandler.transitions[trans_name]
             frequency = trans_obj.get_frequency()
 
-            for dds_instance in  dds_list:
+            for dds_instance in dds_list:
                 api.set_dds_freq(dds_instance, frequency, index)
             api.load_phase(dds_instance, index)
             dds_profile_list[trans_name] = index
@@ -294,6 +294,9 @@ class transition:
         my_str += " | ampl: " +str(self.amplitude)
         my_str += " | mult: " +str(self.multiplier)
         my_str += " | off: " +str(self.offset)
+        my_str += " | slope: " +str(self.slope_type)
+        my_str += " | slp_dur: " +str(self.slope_duration)
+        my_str += " | port: " +str(self.port)
         return my_str
 
 # sequence_handler.py ends here

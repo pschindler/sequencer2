@@ -5,14 +5,14 @@
 #  file       logging.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
-"""Generates a loging object for the python logging framework"""
+"""Generates a logging object for the python logging framework"""
 
 import logging
 
 class ptplog:
     """Generate a Logger with the name sequencer2
     """
-    def __init__(self, filename=None, level=logging.WARNING):
+    def __init__(self, filename=None, level=logging.WARNING, apilevel=logging.WARN):
 
         logger = logging.getLogger("sequencer2")
         logger.setLevel(level)
@@ -32,7 +32,8 @@ class ptplog:
 
         level2 = level
         logger2 = logging.getLogger("api")
-        logger2.setLevel(logging.WARN)
+        logger2.setLevel(apilevel)
+#        logger2.setLevel(level2)
         ch2 = logging.StreamHandler()
         ch2.setLevel(level)
         #create formatter

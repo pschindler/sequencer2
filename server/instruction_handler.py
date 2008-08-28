@@ -114,13 +114,17 @@ class RFPulse(SeqInstruction):
         dds_switch_time = self.get_hardware_duration("dds_duration")
         # Init the logger
         self.logger = logging.getLogger("server")
-        self.logger.debug("Switching frequency to: "+str(transitions))
+#        self.logger.debug("Switching frequency to: "+str(transitions))
         # Extract the transition object and the pulse duration
         try:
             transition_obj = transitions[transitions.current_transition]
         except KeyError:
             raise RuntimeError("Transition name not found: " + \
                                    str(transitions.current_transition))
+
+            
+        self.logger.debug("Switching frequency to: "+str(transition_obj))
+            
         # Set the real phase
         phi = transition_obj.get_phase(phi)
         try:
