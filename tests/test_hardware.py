@@ -56,17 +56,33 @@ class HardwareTests:
         "Test the LVDS bus. Use this with the corresponding signal tap file"
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
+
+#        dds_device = ad9910.AD9910(0, 800)
         my_api.label("start_loop")
+
+
+#        my_api.init_dds(dds_device)
+#        my_api.set_dds_freq(dds_device, 10.0, 0)
+#        my_api.update_dds(dds_device)
+#        my_api.dac_value(0, 0)
+ 
+        my_api.ttl_value(0x1,1) # trigger on bus[0]
+        my_api.ttl_value(0x0,1)
+
         my_api.ttl_value(0xffff, 0)
-        my_api.ttl_value(0xffff, 1)
-        my_api.wait(5000)
+        my_api.wait(1, use_cycles=True)
+        my_api.ttl_value(0xfffe, 1)
+        my_api.wait(10, use_cycles=True)
         my_api.ttl_value(0x0, 0)
         my_api.ttl_value(0x0, 1)
 #        my_api.ttl_value(0xf, 1)
-        my_api.wait(5000)
-#        my_api.ttl_value(0xaaaa, 0)
-#        my_api.ttl_value(0xaaaa, 1)
-#        my_api.wait(100)
+#        my_api.wait(2)
+#        my_api.ttl_value(0xffff, 0)
+#        my_api.ttl_value(0xffff, 1)
+#        my_api.wait(3)
+#        my_api.ttl_value(0x0, 0)
+#        my_api.ttl_value(0x0, 1)
+ 
         my_api.jump("start_loop")
         self.compile(my_sequencer)
 
@@ -75,53 +91,55 @@ class HardwareTests:
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
         dds_device = ad9910.AD9910(my_device, 800)
-        my_api.init_dds(dds_device)
-        my_api.set_dds_freq(dds_device, frequency, 0)
-        my_api.set_dds_profile(dds_device, 0)
+#        my_api.init_dds(dds_device)
+#        my_api.set_dds_freq(dds_device, frequency, 0)
+#        my_api.set_dds_profile(dds_device, 0)
+        my_api.ttl_value(0xf, 1)
         my_api.update_dds(dds_device)        
 #        my_api.dac_value(0, 2**14-100)
-        my_api.dac_value(my_device, amplitude)
+#        my_api.dac_value(my_device, amplitude)
         self.compile(my_sequencer)
 
-    def test_dds_loop(self, frequency=10):
+    def test_dds_loop(self, frequency=10, my_device=0):
         "Just sets a loop profile of the dds and activates it"
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
-        dds_device = ad9910.AD9910(0, 800)
-
+        dds_device = ad9910.AD9910(my_device, 800)
         my_api.label("beginseq")
+
         my_api.init_dds(dds_device)
         my_api.set_dds_freq(dds_device, frequency, 0)
+        my_api.set_dds_profile(dds_device, 0)
+
         my_api.update_dds(dds_device)
-        my_api.dac_value(0, 0)
+        my_api.dac_value(my_device, 0)
         my_api.jump("beginseq")
 
         self.compile(my_sequencer)
 
-    def test_kit(self):
+
+    def test_lvds(self, opcode=1, address=1, data=1, profile=0, control=0, wait=0):
+        "Just tests the lvds command"
+        
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
-        my_api.label("go")
-        for k in range(30):
-            val = 1 << k
-            if k >= 15:
-                val = val >> 2*(k-15)
-            my_api.ttl_value(val, 2)
-            print val
-            my_api.wait(200000)
-        my_api.jump("go")
-        self.compile(my_sequencer, 0)
+        my_api.label("beginseq")
+        my_api.ttl_value(0x2)
 
-    def test_random(self):
-        my_sequencer = sequencer.sequencer()
-        my_api = api.api(my_sequencer)
-        my_api.label("go")
-        my_api.ttl_value(random.randint(0, 0xffff))
-        my_api.wait(200000)
-        my_api.jump("go")
-        self.compile(my_sequencer, 0)
+        #def __lvds_cmd(self, opcode, address, data, profile=0, control=0, wait=0):
 
-    def test_dds_switching(self, frequency1, ampl1, frequency2, ampl2, my_device=0):
+        my_api._api__lvds_cmd(opcode, address, data, profile, control, wait)
+        my_api.wait(1)
+        my_api._api__lvds_cmd(0, 0, 0)
+        my_api.jump("beginseq")
+
+
+        self.compile(my_sequencer)
+
+
+
+
+    def test_dds_switching(self, frequency1, frequency2, ampl1=0, ampl2=0, my_device=0):
         "Just sets a single profile of the dds and activates it"
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
@@ -130,6 +148,7 @@ class HardwareTests:
         my_api.label("beginseq")
         my_api.init_dds(dds_device)
         my_api.ttl_value(0x2)
+        # set_dds_freq params: dds_device, frequency, profile
         my_api.set_dds_freq(dds_device, frequency1, 0)
         my_api.update_dds(dds_device)
         my_api.dac_value(my_device, ampl1)
@@ -174,6 +193,29 @@ class HardwareTests:
         my_api.jump("beginseq")
 
         self.compile(my_sequencer)
+
+    def test_kit(self):
+        my_sequencer = sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+        my_api.label("go")
+        for k in range(30):
+            val = 1 << k
+            if k >= 15:
+                val = val >> 2*(k-15)
+            my_api.ttl_value(val, 2)
+            print val
+            my_api.wait(200000)
+        my_api.jump("go")
+        self.compile(my_sequencer, 0)
+
+    def test_random(self):
+        my_sequencer = sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+        my_api.label("go")
+        my_api.ttl_value(random.randint(0, 0xffff))
+        my_api.wait(200000)
+        my_api.jump("go")
+        self.compile(my_sequencer, 0)
 
 
 

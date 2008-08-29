@@ -398,8 +398,6 @@ class DDSSwitchEvent(SeqInstruction):
         except:
             try:
                 real_index = api.dds_profile_list[self.index]
-                print 'switchin to '  + str(real_index)
-                print 'index ' + str(self.index)
             except KeyError:
                 raise RuntimeError("Transition name not found: "+str(self.index))
         # Get the right dds object

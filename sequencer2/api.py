@@ -212,12 +212,24 @@ class api:
         """Writes data to the lvds bus
         The data_avail (Bit 26) is set for each command
         @param opcode: Bits 31:27
-        @param address: Bits 25:21
+        @param address: Bits 25:22
         @param data: Bits 15:0
         @param profile: Bits 19:16
         @param control: Bits 20:21
         @param wait: Time to wait in us after the command is sent
         """
+
+        # Check the input numbers for errors
+        if address>=2**4:
+            self.logger.error("LVDS: DDS address >= 2**4!")
+        elif opcode>=2**5:
+            self.logger.error("LVDS: Opcode bigger >= 2**5!")
+        elif data>=2**16:
+            self.logger.error("LVDS: Data bigger >= 2**16!")
+        elif profile>=2**4:
+            self.logger.error("LVDS: Profile bigger >= 2**4!")
+           
+
         #High Word consists of following values:
         self.logger.debug("lvds cmd: op: "+str(hex(opcode)) +" add: "+str(hex(address)) + \
             " prof: "+str(hex(profile)) + " ctl: "+str(hex(control)) + \
@@ -286,7 +298,7 @@ class api:
         for register  in dds_instance.reg_value_dict:
             self.reset_fifo(dds_instance)
             val = dds_instance.reg_value_dict[register]
-            self.dds_to_serial(val, register[1], register[0])
+            self.dds_to_serial(val, register[1], register[0], dds_instance.device_addr)
 
     def update_dds(self, dds_instance):
         "updates the DDS IO registers after a write"
@@ -307,7 +319,7 @@ class api:
         reg_addr = freq_register[0] + profile
         word_length =  freq_register[1]
         reg_value = dds_instance.reg_value_dict[(reg_addr, word_length)]
-        self.dds_to_serial(reg_value, word_length, reg_addr)
+        self.dds_to_serial(reg_value, word_length, reg_addr, dds_instance.device_addr)
 
     def load_phase(self, dds_instance, profile=0):
         "Loads the phase register with the FTW of the given register"
