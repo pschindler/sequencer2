@@ -95,9 +95,9 @@ class HardwareTests:
 #        my_api.set_dds_freq(dds_device, frequency, 0)
 #        my_api.set_dds_profile(dds_device, 0)
         my_api.ttl_value(0xf, 1)
-        my_api.update_dds(dds_device)        
-#        my_api.dac_value(0, 2**14-100)
-#        my_api.dac_value(my_device, amplitude)
+        my_api.update_dds(0, dds_device)        
+#        my_api.dac_value(2**14-100, 0)
+#        my_api.dac_value(amplitude, my_device)
         self.compile(my_sequencer)
 
     def test_dds_loop(self, frequency=10, my_device=0):
@@ -112,7 +112,7 @@ class HardwareTests:
         my_api.set_dds_profile(dds_device, 0)
 
         my_api.update_dds(dds_device)
-        my_api.dac_value(my_device, 0)
+        my_api.dac_value(0, my_device)
         my_api.jump("beginseq")
 
         self.compile(my_sequencer)
@@ -151,12 +151,12 @@ class HardwareTests:
         # set_dds_freq params: dds_device, frequency, profile
         my_api.set_dds_freq(dds_device, frequency1, 0)
         my_api.update_dds(dds_device)
-        my_api.dac_value(my_device, ampl1)
+        my_api.dac_value(ampl1, my_device)
         my_api.wait(1)
         my_api.set_dds_freq(dds_device, frequency2, 0)
         my_api.update_dds(dds_device)
         my_api.ttl_value(0x0)
-        my_api.dac_value(my_device, ampl2)
+        my_api.dac_value(ampl2, my_device)
         my_api.set_dds_freq(dds_device, 0.0, 0)
         my_api.update_dds(dds_device)
         my_api.jump("beginseq")
@@ -180,7 +180,7 @@ class HardwareTests:
 
         my_api.update_dds(dds_device)
         my_api.wait(2)
- #       my_api.dac_value(my_device, -2)
+ #       my_api.dac_value(-2, my_device)
         my_api.ttl_value(0x2)
         my_api.set_dds_profile(dds_device, profile1)
         my_api.update_dds(dds_device)

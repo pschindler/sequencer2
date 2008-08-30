@@ -106,7 +106,7 @@ class Test_Sequencer(unittest.TestCase):
     """
     my_sequencer=sequencer.sequencer()
     my_api = api.api(my_sequencer)
-    my_api.dac_value(1, -12)
+    my_api.dac_value(-12, 1)
     current_seq = my_sequencer.current_sequence
     self.assertEquals(len(current_seq),4)
     del(my_sequencer)
@@ -145,23 +145,23 @@ class Test_Sequencer(unittest.TestCase):
     my_api=api.api(my_sequencer)
     print my_sequencer.current_sequence
     my_api.begin_subroutine("test")
-    my_api.dac_value(1,-12)
-    my_api.dac_value(1,-12)
-    my_api.dac_value(1,-12)
+    my_api.dac_value(-12,1)
+    my_api.dac_value(-12,1)
+    my_api.dac_value(-12,1)
     my_api.end_subroutine()
 
     my_api.begin_subroutine("test1")
-    my_api.dac_value(3,-0xf)
-    my_api.dac_value(3,-0xf)
-    my_api.dac_value(3,-0xf)
+    my_api.dac_value(-0xf,3)
+    my_api.dac_value(-0xf,3)
+    my_api.dac_value(-0xf,3)
     my_api.end_subroutine()
 
-    my_api.dac_value(1,-12)
-    my_api.dac_value(1,-12)
+    my_api.dac_value(-12,1)
+    my_api.dac_value(-12,1)
     my_api.call_subroutine("test")
     my_api.call_subroutine("test1")
     my_api.call_subroutine("test")
-    my_api.dac_value(1,-12)
+    my_api.dac_value(-12,1)
     my_sequencer.compile_sequence()
     my_sequencer.debug_sequence()
 #    print "\n\n"
@@ -183,7 +183,7 @@ class Test_Sequencer(unittest.TestCase):
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
     my_api.begin_subroutine("test")
-    my_api.dac_value(1,-12)
+    my_api.dac_value(-12,1)
     try:
       self.assertRaises(RuntimeError, my_api.begin_subroutine("test1"))
     except RuntimeError:
@@ -194,9 +194,9 @@ class Test_Sequencer(unittest.TestCase):
     """
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
-    my_api.dac_value(1,-12)
+    my_api.dac_value(-12,1)
     my_api.label("test")
-    my_api.dac_value(1,-12)
+    my_api.dac_value(-12,1)
     my_api.jump("test")
     my_sequencer.compile_sequence()
     my_sequencer.current_sequence.pop()
@@ -220,10 +220,10 @@ class Test_Sequencer(unittest.TestCase):
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
     N0=10000
-    my_api.dac_value(1,-3)
+    my_api.dac_value(-3,1)
     my_api.jump("test")
     for i in range(N0):
-        my_api.dac_value(1,-3)
+        my_api.dac_value(-3,1)
     my_api.label("test")
     my_sequencer.compile_sequence()
     if N0 < 100:
@@ -244,10 +244,10 @@ class Test_Sequencer(unittest.TestCase):
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
     N0=1000000
-    my_api.dac_value(1,-3)
+    my_api.dac_value(-3,1)
     my_api.jump("test")
     for i in range(N0):
-        my_api.dac_value(1,-3)
+        my_api.dac_value(-3,1)
     my_api.label("test")
     my_sequencer.compile_sequence()
     print len(my_sequencer.current_sequence)

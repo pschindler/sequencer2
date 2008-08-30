@@ -54,7 +54,7 @@ for i in range(1):
 #update dds
 my_api.update_dds(dds_device)
 #Set DAC value
-my_api.dac_value(0,2**14-100)
+my_api.dac_value(2**14-100,0)
 #Reset digital out
 my_api.ttl_value(0x0,0)
 my_api.ttl_value(0x0,1)

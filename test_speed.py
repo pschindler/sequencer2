@@ -21,10 +21,10 @@ my_sequencer=sequencer.sequencer()
 my_api=api.api(my_sequencer)
 N0=10000
 logger.logger.info("generating " + str(N0)+" DAC events")
-my_api.dac_value(12,1)
+my_api.dac_value(1, 12)
 my_api.jump("test")
 for i in range(N0):
-    my_api.dac_value(N0,1)
+    my_api.dac_value(1, N0)
 my_api.label("test")
 my_sequencer.compile_sequence()
 if N0 < 100:

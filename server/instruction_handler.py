@@ -97,7 +97,7 @@ class RFOn(SeqInstruction):
             dds_instance = api.dds_list[self.dds_address]
         except IndexError:
             raise RuntimeError("DDS not found: "+str(self.dds_address))
-        api.dac_value( self.dds_address, self.amplitude)
+        api.dac_value(self.amplitude, self.dds_address)
         api.set_dds_freq(dds_instance, self.frequency, profile=0)
         api.set_dds_profile(dds_instance, profile=0)
         api.update_dds(dds_instance)
@@ -328,7 +328,7 @@ class DACEvent(SeqInstruction):
 
     def handle_instruction(self, api):
         "generate an API event"
-        api.dac_value(self.address, self.value)
+        api.dac_value(self.value, self.address)
 
     def __str__(self):
         return str(self.name) + " | start: " + str(self.start_time) \
@@ -368,7 +368,7 @@ class DACShapeEvent(SeqInstruction):
         for i in range(self.step_nr):
             x = float(i)/float(self.step_nr)
             dac_value = self.shape_func(x, self.is_rising) + self.amplitude
-            api.dac_value(self.dac_address, dac_value)
+            api.dac_value(dav_value, self.dac_address)
             if self.wait_time > 0:
                 api.wait(self.wait_time)
 

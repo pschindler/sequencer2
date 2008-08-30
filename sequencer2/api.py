@@ -260,8 +260,10 @@ class api:
         # Add a copy of high_insn
         self.sequencer.add_insn(copy.copy(high_insn))
 
-    def dac_value(self, address, val):
+    def dac_value(self, val, address):
         """Sets the dac on the DDS board
+        @param: val: value of the dac in db
+        @param: address: logic address of the dds board
         """
         val = self.recalibration(val)
         self.__lvds_cmd(self.dac_opcode, address, val)
