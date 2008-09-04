@@ -330,15 +330,15 @@ class api:
         lower_val = fpga_tuning_word % (2**16)
         upper_val = (fpga_tuning_word >> 16) % (2**16)
 
-        #The control is untested !!!
+        # The control is untested !!!
         self.__lvds_cmd(self.phase_load_opcode, device_address, upper_val,
-                      profile=profile, control=0x0, wait=0)
+                      phase_profile=profile, control=0x0, wait=0)
         # set control word to 1 for set current
         self.__lvds_cmd(self.phase_load_opcode, device_address, lower_val,
-                      profile=profile, control=0x1, wait=0)
+                      phase_profile=profile, control=0x1, wait=0)
         # set control word to 3 for wren
         self.__lvds_cmd(self.phase_load_opcode, device_address, lower_val,
-                      profile=profile, control=0x3, wait=0)
+                      phase_profile=profile, control=0x3, wait=0)
 
     def pulse_phase(self, dds_instance, profile, phase_offset=0):
         """switches to the given phase register with additional phase offset"""
@@ -348,7 +348,7 @@ class api:
         val = (phase_offset / math.pi) * (2 ** 16)
         val = int(val) % (2**16)
         self.__lvds_cmd(self.phase_pulse_opcode, device_address, val,
-                      profile=profile, wait=10)
+                      phase_profile=profile, wait=10)
 
     def init_frequency(self, dds_instance, freq_value, profile=0):
         """Writes the frequency into the DDS and initializes a phase register in the FPGA

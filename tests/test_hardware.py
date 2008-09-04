@@ -123,6 +123,37 @@ class HardwareTests:
 
         self.compile(my_sequencer)
 
+    def test_phase_switching(self, frequency=10, amplitude=0):
+        "Just sets a loop profile of the dds and activates it"
+        my_sequencer = sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+        dds_device = ad9910.AD9910(0, 800)
+        dds_device2 = ad9910.AD9910(1, 800)
+        my_api.label("beginseq")
+
+        my_api.init_dds(dds_device)
+        my_api.init_dds(dds_device2)
+
+        my_api.set_dds_freq(dds_device, frequency, 0)
+        my_api.set_dds_profile(dds_device, 0)
+        my_api.set_dds_freq(dds_device2, frequency, 0)
+        my_api.set_dds_profile(dds_device2, 0)
+
+        my_api.update_dds(dds_device)
+        my_api.update_dds(dds_device2)
+
+        for k in range(50):
+            my_api.pulse_phase(dds_device, 0, k*0.2)
+#            my_api.load_phase(dds_device, k)
+            my_api.wait(10)
+            
+
+
+        my_api.dac_value(amplitude, 0)
+        my_api.dac_value(amplitude, 1)
+        my_api.jump("beginseq")
+
+        self.compile(my_sequencer)
 
     def test_lvds(self, opcode=1, address=1, data=1, phase_profile=0, control=0, wait=0):
         "Just tests the lvds command"
