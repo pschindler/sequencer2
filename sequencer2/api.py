@@ -208,42 +208,40 @@ class api:
     # The LVDS functions for the ad9910 board
     #################################################################
 
-    def __lvds_cmd(self, opcode, address, data, profile=0, control=0, wait=0):
+    def __lvds_cmd(self, opcode, address, data, phase_profile=0, control=0, wait=0):
         """Writes data to the lvds bus
         The data_avail (Bit 26) is set for each command
         @param opcode: Bits 31:27
-        @param address: Bits 25:22
+        @param address: Bits 26:23
         @param data: Bits 15:0
-        @param profile: Bits 19:16
+        @param profile: Bits 19:16 Phase profile for FPGA
         @param control: Bits 20:21
         @param wait: Time to wait in us after the command is sent
         """
 
         # Check the input numbers for errors
-        if address>=2**4:
-            self.logger.error("LVDS: DDS address >= 2**4!")
-        elif opcode>=2**5:
-            self.logger.error("LVDS: Opcode bigger >= 2**5!")
-        elif data>=2**16:
-            self.logger.error("LVDS: Data bigger >= 2**16!")
-        elif profile>=2**4:
-            self.logger.error("LVDS: Profile bigger >= 2**4!")
+        assert address<2**4, "LVDS: DDS address >= 2**4!"
+        assert opcode<2**5 , "LVDS: Opcode bigger >= 2**5!"
+        assert data<2**16, "LVDS: Data bigger >= 2**16!"
+        assert phase_profile<2**4, "LVDS: Phase profile bigger >= 2**4!"
+        assert data<2**16, "LVDS: Data bigger >= 2**16!"
            
 
         #High Word consists of following values:
         self.logger.debug("lvds cmd: op: "+str(hex(opcode)) +" add: "+str(hex(address)) + \
-            " prof: "+str(hex(profile)) + " ctl: "+str(hex(control)) + \
+            " prof: "+str(hex(phase_profile)) + " ctl: "+str(hex(control)) + \
             " wait: " +str(hex(wait)))
         avail_val = 1 << 10
         opcode_val = opcode << 11
         address_val = address << 6
-        control_val = control << 4
-        profile_val = profile
+        control_val = control << 3
+        phase_profile_val = phase_profile
         #The Highword Words calculated:
         high_word = opcode_val | address_val  \
-            | profile_val |control_val
+            | phase_profile_val |control_val
         high_word_avail = high_word | avail_val
         self.logger.debug("lvds cmd: highword: "+str(hex(high_word)))
+
 
         #Low Word
         data_val = data % (2**16)

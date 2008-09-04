@@ -82,7 +82,13 @@ class HardwareTests:
 #        my_api.wait(3)
 #        my_api.ttl_value(0x0, 0)
 #        my_api.ttl_value(0x0, 1)
- 
+#        dds_device = ad9910.AD9910(0, 800)
+#        my_api.init_dds(dds_device)
+#        my_api.set_dds_freq(dds_device, 10, 1)
+#        my_api.update_dds(dds_device)
+#        my_api.dac_value(-20, 0)
+#        my_api.set_dds_profile(dds_device,1)
+
         my_api.jump("start_loop")
         self.compile(my_sequencer)
 
@@ -100,7 +106,7 @@ class HardwareTests:
 #        my_api.dac_value(amplitude, my_device)
         self.compile(my_sequencer)
 
-    def test_dds_loop(self, frequency=10, my_device=0):
+    def test_dds_loop(self, frequency=10, amplitude=0, my_device=0):
         "Just sets a loop profile of the dds and activates it"
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
@@ -112,13 +118,13 @@ class HardwareTests:
         my_api.set_dds_profile(dds_device, 0)
 
         my_api.update_dds(dds_device)
-        my_api.dac_value(0, my_device)
+        my_api.dac_value(amplitude, my_device)
         my_api.jump("beginseq")
 
         self.compile(my_sequencer)
 
 
-    def test_lvds(self, opcode=1, address=1, data=1, profile=0, control=0, wait=0):
+    def test_lvds(self, opcode=1, address=1, data=1, phase_profile=0, control=0, wait=0):
         "Just tests the lvds command"
         
         my_sequencer = sequencer.sequencer()
@@ -128,8 +134,10 @@ class HardwareTests:
 
         #def __lvds_cmd(self, opcode, address, data, profile=0, control=0, wait=0):
 
-        my_api._api__lvds_cmd(opcode, address, data, profile, control, wait)
-        my_api.wait(1)
+        my_api._api__lvds_cmd(0, 0, 1, 0, 0, 0)
+        my_api.wait(1, use_cycles=True)
+        my_api._api__lvds_cmd(opcode, address, data, phase_profile, control, wait)
+        my_api.wait(1, use_cycles=True)
         my_api._api__lvds_cmd(0, 0, 0)
         my_api.jump("beginseq")
 
