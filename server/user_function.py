@@ -114,6 +114,7 @@ def test_global(string1):
     global return_str
     return_str += string1
 
+
 def ttl_pulse(device_key, duration, start_time=0.0, is_last=True):
     """generates a sequential ttl pulse
     device_key may be a string or a list of strings indicating
@@ -230,7 +231,7 @@ def get_return_var(name):
     """
     global return_list
     try:
-        return return_list_name()
+        return return_list[name]
     except KeyError:
         # Missing: Debug statement
         return None
