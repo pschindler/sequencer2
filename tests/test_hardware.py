@@ -123,35 +123,87 @@ class HardwareTests:
 
         self.compile(my_sequencer)
 
-    def test_phase_switching(self, frequency=10, amplitude=0):
+    def test_phase_switching(self, frequency=45, amplitude=0):
         "Just sets a loop profile of the dds and activates it"
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
+
+#        my_api._api__lvds_cmd(0, 0, 1, 0, 0, 0)
+#        my_api.wait(1, use_cycles=True)
+#        my_api._api__lvds_cmd(0, 0, 0, 0, 0, 0)
+#        my_api.wait(1, use_cycles=True)
+
         dds_device = ad9910.AD9910(0, 800)
         dds_device2 = ad9910.AD9910(1, 800)
-        my_api.label("beginseq")
 
         my_api.init_dds(dds_device)
-        my_api.init_dds(dds_device2)
+#        my_api.init_dds(dds_device2)
 
         my_api.set_dds_freq(dds_device, frequency, 0)
+#        my_api.set_dds_freq(dds_device2, frequency, 0)
+
         my_api.set_dds_profile(dds_device, 0)
-        my_api.set_dds_freq(dds_device2, frequency, 0)
-        my_api.set_dds_profile(dds_device2, 0)
+#        my_api.set_dds_profile(dds_device2, 0)
 
+#        my_api.dac_value(amplitude, 1)
+        my_api.dac_value(amplitude, 0)
+
+#        my_api.label("test")
         my_api.update_dds(dds_device)
-        my_api.update_dds(dds_device2)
+#        my_api.update_dds(dds_device2)
+        my_api.ttl_value(0xf, 2)
 
-        for k in range(50):
-            my_api.pulse_phase(dds_device, 0, k*0.2)
+        my_api.load_phase(dds_device, 0)
+#        my_api.load_phase(dds_device2, 0)
+        #set frequency registers
+#        for i in range(8):
+#            my_api.set_dds_freq(dds_device, 1.2, i % 8)
+        #update dds
+#        my_api.update_dds(dds_device)
+        #Set DAC value
+        #my_api.pulse_phase(dds_device, 0, 0)
+#        for i in range(20):
+        my_api.switch_frequency(dds_device, 0, 0*0.5*3.1415-0*0.25*3.1415)
+#            my_api.wait(1)
+#            my_api.switch_frequency(dds_device, 0, .5)
+#            my_api.wait(10)
+
+
+
+
+        #my_api.wait(1000)
+        #my_api.pulse_phase(dds_device, 0, 1.23)
+        #Wait for 10 000 cycles and jump to label before (aka infinite loop)
+
+        my_api.ttl_value(0x0, 2)
+#        my_api.wait(10000)
+#        my_api.jump("test")
+        
+
+
+        #my_api.label("beginseq")
+
+        #my_api.init_dds(dds_device)
+        #my_api.init_dds(dds_device2)
+
+        #my_api.set_dds_freq(dds_device, frequency, 0)
+       # my_api.set_dds_profile(dds_device, 0)
+       # my_api.set_dds_freq(dds_device2, frequency, 0)
+       # my_api.set_dds_profile(dds_device2, 0)
+
+       # my_api.update_dds(dds_device)
+       # my_api.update_dds(dds_device2)
+
+#        for k in range(50):
+#            my_api.pulse_phase(dds_device, 0, k*0.2)
 #            my_api.load_phase(dds_device, k)
-            my_api.wait(10)
+#            my_api.wait(10)
             
 
 
-        my_api.dac_value(amplitude, 0)
-        my_api.dac_value(amplitude, 1)
-        my_api.jump("beginseq")
+#        my_api.dac_value(amplitude, 0)
+#        my_api.dac_value(amplitude, 1)
+#        my_api.jump("beginseq")
 
         self.compile(my_sequencer)
 

@@ -211,12 +211,13 @@ class api:
     def __lvds_cmd(self, opcode, address, data, phase_profile=0, control=0, wait=0):
         """Writes data to the lvds bus
         The data_avail (Bit 26) is set for each command
-        @param opcode: Bits 31:27
-        @param address: Bits 26:23
+        @param opcode: Bits 31:27        
+        @param address: Bits 25:22
         @param data: Bits 15:0
         @param profile: Bits 19:16 Phase profile for FPGA
         @param control: Bits 20:21
         @param wait: Time to wait in us after the command is sent
+        avail_val: Bit 26
         """
 
         # Check the input numbers for errors
@@ -225,7 +226,7 @@ class api:
         assert data<2**16, "LVDS: Data bigger >= 2**16!"
         assert phase_profile<2**4, "LVDS: Phase profile bigger >= 2**4!"
         assert data<2**16, "LVDS: Data bigger >= 2**16!"
-           
+        assert control<2**4, "LVDS: Data bigger >= 2**16!"
 
         #High Word consists of following values:
         self.logger.debug("lvds cmd: op: "+str(hex(opcode)) +" add: "+str(hex(address)) + \
@@ -234,7 +235,7 @@ class api:
         avail_val = 1 << 10
         opcode_val = opcode << 11
         address_val = address << 6
-        control_val = control << 3
+        control_val = control << 4
         phase_profile_val = phase_profile
         #The Highword Words calculated:
         high_word = opcode_val | address_val  \
