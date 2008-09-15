@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-22 10:25:55 c704271"
+# Time-stamp: "2008-09-15 13:04:42 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -60,7 +60,7 @@ class api:
         self.dac_opcode = 0x7
         self.phase_load_opcode = 0xa
         self.phase_pulse_opcode = 0xb
-        self.reset_opcode = 0x1f
+        self.fifo_reset_opcode = 0x1f
 
         self.logger = logging.getLogger("api")
         self.ttl_sys = outputsystem.OutputSystem(ttl_dict)
@@ -211,10 +211,10 @@ class api:
     def __lvds_cmd(self, opcode, address, data, phase_profile=0, control=0, wait=0):
         """Writes data to the lvds bus
         The data_avail (Bit 26) is set for each command
-        @param opcode: Bits 31:27        
+        @param opcode: Bits 31:27
         @param address: Bits 25:22
         @param data: Bits 15:0
-        @param profile: Bits 19:16 Phase profile for FPGA
+        @param phase_profile: Bits 19:16 Phase profile for FPGA
         @param control: Bits 20:21
         @param wait: Time to wait in us after the command is sent
         avail_val: Bit 26
@@ -261,8 +261,8 @@ class api:
 
     def dac_value(self, val, address):
         """Sets the dac on the DDS board
-        @param: val: value of the dac in db
-        @param: address: logic address of the dds board
+        @param val: value of the dac in db
+        @param address: logic address of the dds board
         """
         val = self.recalibration(val)
         self.__lvds_cmd(self.dac_opcode, address, val)
@@ -271,7 +271,7 @@ class api:
         """resets the FIFO of the dds"""
         device_address = dds_instance.device_addr
         val = 0
-        self.__lvds_cmd(self.reset_opcode, device_address, val, wait=2)
+        self.__lvds_cmd(self.fifo_reset_opcode, device_address, val, wait=2)
 
     def dds_to_serial(self, word, length, reg_address, dds_address=0):
         """Generates LVDS commands for writing the registers of the DDS

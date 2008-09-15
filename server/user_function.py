@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "26-Aug-2008 23:03:26 viellieb"
+# Time-stamp: "2008-09-15 13:05:10 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -168,8 +168,8 @@ def rf_on(frequency, amplitude, dds_address=0):
     continous mode experiments.
 
     @param frequency: frequency in MHz
-    @amplitude: amplitude in dB
-    @dds_address: integer dds address
+    @param amplitude: amplitude in dB
+    @param dds_address: integer dds address
     """
     rf_on_insn = RFOn()
     sequence_var.append(rf_on_insn.sequence_var)
