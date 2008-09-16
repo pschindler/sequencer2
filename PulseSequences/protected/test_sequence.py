@@ -19,12 +19,12 @@ Cycles 1
 </PARAMS OVERRIDE>
 
 <SEQUENCE>
-PMTDetection(2000)
+#PMTDetection(2000)
 if det_time == 100000.0:
     raise RuntimeError("Variable not set")
 print det_time
 test_global("Juhu")
-test_include("123")
+test_include("123", local_chandler=local_chandler)
 for i in range(1):
     rf_pulse(1,0,1,"carrier1", is_last=False)
     rf_pulse(1,0,1,"carrier2", is_last=False)
