@@ -83,7 +83,7 @@ class RampHandler(DacControl):
 
 
     def set_ramp(self, rampdict):
-        """sets the ramp_dict as a instance of RampDict class from a command string or returns the default 
+        """sets the ramp_dict as an instance of RampDict class from a command string or returns the default 
         """
         try:
             rampdict_val = self.chandler.dac_ramps[rampdict["ramp"]]
@@ -147,7 +147,7 @@ class RampDict(dict):
         self.inv = self.get_inv()
 
     def __cmp__(self, y):
-        "will change the min() function for a array of RampDicts"
+        "will change the min() function for an array of RampDicts"
         if self["dt"] > y["dt"]:
             i = 1
         if self["dt"] < y["dt"]:
