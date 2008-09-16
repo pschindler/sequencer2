@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "26-Aug-2008 23:03:40 viellieb"
+# Time-stamp: "2008-09-05 14:32:25 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -30,6 +30,7 @@ def generate_cmd_str(filename, nr_of_car=1):
     data = "NAME,"+filename+";CYCLES,10;TRIGGER,YES;"
     data += "FLOAT,det_time,25000.0;"
     for index in range(nr_of_car):
+        data += "TRANSITION,carrier;FREQ,150.0;RABI,1:23,2:45,3:12;"
         data += "TRANSITION,carrier" + str(index + 1) + ";FREQ,150.0;RABI,1:23,2:45,3:12"
         data += ";SLOPE_TYPE,blackman;"
         data += "SLOPE_DUR,0;IONS,1:201,2:202,3:203"

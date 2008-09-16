@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-22 10:25:55 c704271"
+# Time-stamp: "2008-09-15 13:04:42 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -60,7 +60,7 @@ class api:
         self.dac_opcode = 0x7
         self.phase_load_opcode = 0xa
         self.phase_pulse_opcode = 0xb
-        self.reset_opcode = 0x1f
+        self.fifo_reset_opcode = 0x1f
 
         self.logger = logging.getLogger("api")
         self.ttl_sys = outputsystem.OutputSystem(ttl_dict)
@@ -208,42 +208,41 @@ class api:
     # The LVDS functions for the ad9910 board
     #################################################################
 
-    def __lvds_cmd(self, opcode, address, data, profile=0, control=0, wait=0):
+    def __lvds_cmd(self, opcode, address, data, phase_profile=0, control=0, wait=0):
         """Writes data to the lvds bus
         The data_avail (Bit 26) is set for each command
         @param opcode: Bits 31:27
         @param address: Bits 25:22
         @param data: Bits 15:0
-        @param profile: Bits 19:16
+        @param phase_profile: Bits 19:16 Phase profile for FPGA
         @param control: Bits 20:21
         @param wait: Time to wait in us after the command is sent
+        avail_val: Bit 26
         """
 
         # Check the input numbers for errors
-        if address>=2**4:
-            self.logger.error("LVDS: DDS address >= 2**4!")
-        elif opcode>=2**5:
-            self.logger.error("LVDS: Opcode bigger >= 2**5!")
-        elif data>=2**16:
-            self.logger.error("LVDS: Data bigger >= 2**16!")
-        elif profile>=2**4:
-            self.logger.error("LVDS: Profile bigger >= 2**4!")
-           
+        assert address<2**4, "LVDS: DDS address >= 2**4!"
+        assert opcode<2**5 , "LVDS: Opcode bigger >= 2**5!"
+        assert data<2**16, "LVDS: Data bigger >= 2**16!"
+        assert phase_profile<2**4, "LVDS: Phase profile bigger >= 2**4!"
+        assert data<2**16, "LVDS: Data bigger >= 2**16!"
+        assert control<2**4, "LVDS: Data bigger >= 2**16!"
 
         #High Word consists of following values:
         self.logger.debug("lvds cmd: op: "+str(hex(opcode)) +" add: "+str(hex(address)) + \
-            " prof: "+str(hex(profile)) + " ctl: "+str(hex(control)) + \
+            " prof: "+str(hex(phase_profile)) + " ctl: "+str(hex(control)) + \
             " wait: " +str(hex(wait)))
         avail_val = 1 << 10
         opcode_val = opcode << 11
         address_val = address << 6
         control_val = control << 4
-        profile_val = profile
+        phase_profile_val = phase_profile
         #The Highword Words calculated:
         high_word = opcode_val | address_val  \
-            | profile_val |control_val
+            | phase_profile_val |control_val
         high_word_avail = high_word | avail_val
         self.logger.debug("lvds cmd: highword: "+str(hex(high_word)))
+
 
         #Low Word
         data_val = data % (2**16)
@@ -262,8 +261,8 @@ class api:
 
     def dac_value(self, val, address):
         """Sets the dac on the DDS board
-        @param: val: value of the dac in db
-        @param: address: logic address of the dds board
+        @param val: value of the dac in db
+        @param address: logic address of the dds board
         """
         val = self.recalibration(val)
         self.__lvds_cmd(self.dac_opcode, address, val)
@@ -272,7 +271,7 @@ class api:
         """resets the FIFO of the dds"""
         device_address = dds_instance.device_addr
         val = 0
-        self.__lvds_cmd(self.reset_opcode, device_address, val, wait=2)
+        self.__lvds_cmd(self.fifo_reset_opcode, device_address, val, wait=2)
 
     def dds_to_serial(self, word, length, reg_address, dds_address=0):
         """Generates LVDS commands for writing the registers of the DDS
@@ -332,15 +331,15 @@ class api:
         lower_val = fpga_tuning_word % (2**16)
         upper_val = (fpga_tuning_word >> 16) % (2**16)
 
-        #The control is untested !!!
+        # The control is untested !!!
         self.__lvds_cmd(self.phase_load_opcode, device_address, upper_val,
-                      profile=profile, control=0x0, wait=0)
+                      phase_profile=profile, control=0x0, wait=0)
         # set control word to 1 for set current
         self.__lvds_cmd(self.phase_load_opcode, device_address, lower_val,
-                      profile=profile, control=0x1, wait=0)
+                      phase_profile=profile, control=0x1, wait=0)
         # set control word to 3 for wren
         self.__lvds_cmd(self.phase_load_opcode, device_address, lower_val,
-                      profile=profile, control=0x3, wait=0)
+                      phase_profile=profile, control=0x3, wait=0)
 
     def pulse_phase(self, dds_instance, profile, phase_offset=0):
         """switches to the given phase register with additional phase offset"""
@@ -350,7 +349,7 @@ class api:
         val = (phase_offset / math.pi) * (2 ** 16)
         val = int(val) % (2**16)
         self.__lvds_cmd(self.phase_pulse_opcode, device_address, val,
-                      profile=profile, wait=10)
+                      phase_profile=profile, wait=10)
 
     def init_frequency(self, dds_instance, freq_value, profile=0):
         """Writes the frequency into the DDS and initializes a phase register in the FPGA

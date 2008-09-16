@@ -6,7 +6,11 @@
 
 The sequencer2 is a compiler for the FPGA experiment control system known as Pauls Box.
 More information may be found on
-link:http://pulse-sequencer.sf.net[http://pulse-sequencer.sf.net]
+link:[http://pulse-sequencer.sf.net]
+
+or
+
+link:[http://sequencer.brainity.com]
 
 It consists of two different modules:
 
@@ -15,14 +19,6 @@ It consists of two different modules:
 sequencer2         The Bytecode compiler
 server             A TCP server for interfacing with LabView
 -----------------------------------------------------------------
-
-The LabView interface documentation and a general overview may be found in
-the old documentation:
-
-link:http://sourceforge.net/project/showfiles.php?group_id=129764&package_id=220283[pcp-doc.pdf]
-
-Please note that this manual refers to the "old" sequencer and is not generally
-valid for the sequencer2. The LabView interface is identical in the two servers.
 
 == Installing the server ==
 
@@ -79,11 +75,29 @@ If this finishes without any error message your sequencer2 setup should work.
 
 == More documentation ==
 
+A general talk about the Box may be found on
+
+link:[ttp://pulse-sequencer.sourceforge.net/innsbruck/obergurgl-box.pdf]
+
+A sequence programming overview may be found on:
+
+link:[http://pulse-sequencer.sourceforge.net/innsbruck/box-cheat.pdf]
+
+The LabView interface documentation and a general overview may be found in
+the old documentation:
+
+link:http://sourceforge.net/project/showfiles.php?group_id=129764&package_id=220283[pcp-doc.pdf]
+
+Please note that this manual refers to the "old" sequencer and is not generally
+valid for the sequencer2. The LabView interface is identical in the two servers.
+
+=== API documentation ===
+
 The server uses the epydoc markup language inside the source code.
 
 An (presumably) outdated snapshot is available at:
 
-link:[http://pulse-sequencer.sf.net/innsbruck/sequencer2]
+link:[http://pulse-sequencer.sf.net/innsbruck/sequencer2/]
 
 To generate the documentation the epydoc interpreter is needed.
 It is available from: link:[http://epydoc.sf.net]

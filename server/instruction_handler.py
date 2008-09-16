@@ -368,7 +368,7 @@ class DACShapeEvent(SeqInstruction):
         for i in range(self.step_nr):
             x = float(i)/float(self.step_nr)
             dac_value = self.shape_func(x, self.is_rising) + self.amplitude
-            api.dac_value(dav_value, self.dac_address)
+            api.dac_value(dac_value, self.dac_address)
             if self.wait_time > 0:
                 api.wait(self.wait_time)
 
