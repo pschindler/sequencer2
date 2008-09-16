@@ -94,7 +94,7 @@ class RampHandler(DacControl):
             # We return the default_val if an unknown variable was asked for.
             self.logger.warn("Ramp not found in comand string: " \
                              +str(rampdict["ramp"]))
-            cmd_str = "ramp" + " = RampDict(" +str(rampdict) + ")"
+            cmd_str = "ramp" + " = RampDict(" + str(rampdict) + ")"
             exec cmd_str
 #        self.devices[ramp["dev"]] = True
         self.ramp_array.append(ramp)
