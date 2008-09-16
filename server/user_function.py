@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-09-15 13:05:10 c704271"
+# Time-stamp: "2008-09-16 15:16:33 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -364,6 +364,9 @@ class userAPI(SequenceHandler):
         Global variables for transitions and the sequence list are defined and reset.
         The sequence file is loaded and executed
         """
+        # define a local chandler
+        local_chandler = self.chandler
+
         # Try to execute include files
         incl_list = self.include_handler.generate_include_list()
         for file_name, cmd_str in incl_list:
