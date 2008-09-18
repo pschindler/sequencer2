@@ -29,7 +29,7 @@ class dac_API(DacControl):
             Update_only = True
         elif self.chandler.dac_ramps:
 #Put everything into an own class, the rampclass... 
-            self.rhandler = self.RampHandler(self.chandler)
+            self.rhandler = self.RampHandler(self.card_dict, self.chandler)
         
         return Update_only
 
@@ -47,11 +47,14 @@ class dac_API(DacControl):
 class RampHandler(DacControl):
     "class for all the ramping stuff."
 
-    def __init__(self, chandler):
+    def __init__(self, card_dict, chandler):
         "inits Ramphandling by getting ramps from handler and sequencefile"
 #        self.devices = {}
+        self.card_dict = card_dict
         self.ramp_array = []
         self.all_ramps = []
+        self.samples = []
+        self.ramp_devices= []
         self.pulse_program_name = self.chandler.pulse_program_name
         filename = self.seq_directory + self.pulse_program_name
         try:
@@ -100,43 +103,68 @@ class RampHandler(DacControl):
         self.ramp_array.append(ramp)
         return ramp
 
-    def setup_ramps(self, ramps = self.ramp_array, rampto = {}, offset = False, is_last = True):
+
+    def setup_ramps(self, ramp_name, ramps = self.ramp_array, rate, T = 0, rampto = {}, offset = False, is_last = True):
         """sets up the ramps, in that order as its given in the array, or if
         no array is given, then it'll use order as set_ramp was called in sequencefile
         """
+
+#Rampto_handling must be done properly
         if rampto and is_last:
             "Do some ramptostuff"
-            for i in range(1,len(self.card_dict)+1):
-                first_device_ramp_index = ramps.index(i)
-                self.card_dict[i].start_rampto(rampto["T"], rampto["dt"], rampto["shape"])
-#find start values /first rampindex found... now get C to give it to us
-#create the rampto
-#start it for all cards
-#wait till all are done
-#clear all tasks
-            self.clear_data(i)
-            self.stop_card(i)
-
-
-
+            self.ramp_to(rampto)
         if offset:
             "or maybe use an offset?"
 #find start values
 #calc offset values
 
         for ramp in ramps:
-            self.all_ramps.append(ramp)
-        if is_last:
-            min_dt = min(self.all_ramps)["dt"]
-            for ramp in self.all_ramps:
-                self.card_dict[ramp["dev"]].append_ramp(ramp["T"], min_dt)
-            for ramp in self.all_ramps:
-                self.card_dict[ramp["dev"]].append_ramparray(ramp["file"], ramp["T"], ramp["start"], ramp["stop"], ramp["shape"])
-            self.start_ramp_tasks()
+            if (ramp["dev"].sort() != ramps[0]["dev"].sort()):
+                raise RuntimeError("Error in Ramphandling: Devices don't match")
+                break
+                #STOPPP, Sequence won't run!
 
-    def start_ramp_tasks(self):
+            if T = 0:
+                T += ramp["T"]
+            else:
+                ramp["T"] = ramp["T"] / T
+            
+            for dev in ramp["dev"]:
+                ramp_samples = self.card_dict[dev].append_ramp(ramp["T"], dt)
+            self.sample_count[ramp_name] += ramp_samples
+            ramp["N"] = ramp_samples
+            self.all_ramps.append(ramp)
+
+        for dev in ramps[0]["dev"]:
+            if not self.ramp_devices.index(dev):
+                self.ramp_devices.append(dev)
+        if is_last:
+            self.start_ramp_task()
+
+
+    def start_ramp_task(self):
         """Starts the prepared ramptasks
         """
+        for ramp in self.all_ramps:
+            for dev in ramp["dev"]:
+                self.card_dict[dev].append_ramparray(ramp["file"], ramp["N"], ramp["start"], ramp["stop"], ramp["shape"])
+        for dev in self.ramp_devices:
+            self.card_dict[dev].start_timed_task(0, 1)
+
+    def ramp_to(self):
+        """Make rampto within an own function
+        """
+        for i in range(1,len(self.card_dict)+1):
+            first_device_ramp_index = ramps.index(i)
+            self.card_dict[i].start_rampto(rampto["T"], rampto["dt"], rampto["shape"])
+            self.clear_data(i)
+            self.stop_card(i)
+
+#find start values /first rampindex found... now get C to give it to us
+#create the rampto
+#start it for all cards
+#wait till all are done
+
 
 
 class RampDict(dict):
@@ -169,6 +197,7 @@ class RampDict(dict):
         newdic["stop"] = self["start"]
         newdic["start"] = self["stop"]
         return newdic
+
 
 
 #Der alte Muell, den man nochma brauchen koennt>
