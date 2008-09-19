@@ -21,6 +21,8 @@ class CommandHandler:
         self.is_triggered = False
         self.ttl_word = 0
         self.ttl_mask = 0 # this is not used
+        self.dac_sampling_rate = None
+        self.dac_nr_of_samples = None
 
     def get_variables(self, var_string):
         self.dac_ramps = {}

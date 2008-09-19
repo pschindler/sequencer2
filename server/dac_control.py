@@ -29,36 +29,30 @@ class DacControl:
 
     #Static update methods:
     def set_static(self, device, dac_array):
-        """Load given array into card "device", use _start_static_task to update
-        """
+        "Load given array into card "device", use _start_static_task to update"
         self.card_dict[device].set_static(dac_array)
 
     def start_static_task(self, device):
-        """Start static update task, in means of update voltages
-        """
+        "Start static update task, in means of update voltages"
         self.card_dict[device].start_static_task()
 
     #Ramp methods:
     def append_from_file(self, device, file):
-        """Load array from a file into the card "device" for preparing a triggered task
-        """
+        "Load array from a file into the card "device" for preparing a triggered task"
         self.card_dict[device].append_from_file(file)
 
     def new_duration(self, device):
-        """calculate new integer Duration
-        """
+        "calculate new integer Duration"
         new_totaltime = self.card_dict[device].get_new_duration()
         return new_totaltime
 
     def start_timed_task(self, device):
-        """Start a clock-timed task, with preloaded Voltage array
-        """
+        "Start a clock-timed task, with preloaded Voltage array"
         self.card_dict[device].start_timed_task()
 
     #Control methods:
     def clear_data(self, device):
-        """clear the card device
-        """
+        "clear the card device"
         self.card_dict[device].clear_data()
 
     def stop_card(self, device):
