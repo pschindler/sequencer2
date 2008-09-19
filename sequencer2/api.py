@@ -62,7 +62,7 @@ class api:
         self.phase_pulse_opcode = 0xb
         self.reset_opcode = 0x1f
 
-        self.logger = logging.getLogger("api")
+        self.logger = logging.getLogger("api"/)
         self.ttl_sys = outputsystem.OutputSystem(ttl_dict)
 
         self.recalibration = self.config.recalibration

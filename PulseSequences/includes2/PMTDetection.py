@@ -12,16 +12,13 @@ def PMTDetection(pmt_detect_length):
     add_to_return_list("PM Count",2)
 
     # ttl_pulse(name, duration, starttime=0.0)
-    PMT_trigger_length = 1
-#    ttl_pulse("PMT trigger", PMT_trigger_length)
-#    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=pmt_detect_length)
+    PMT_trigger_length = 10
+    ttl_pulse("PMT trigger", PMT_trigger_length)
+    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=0)
 
     rf_pulse(25,0,1,"carrier", 0.0, is_last=False, address=1)
-    rf_pulse(5,pi/4,1,"carrier", 0.0, is_last=False, address=0)
-    rf_pulse(5,0,1,"carrier", 6.0, is_last=False, address=0)
+    rf_pulse(5,0,1,"carrier", 0.0, is_last=False, address=0)
 
-    rf_pulse(5,0,1,"carrier", 12.0, is_last=False, address=0)
-    rf_pulse(5,0,1,"carrier", 6.0+12.0, is_last=False, address=0)
 
 
 #    rf_pulse(10,0,1,"clock1", 0, is_last=True)
