@@ -108,11 +108,11 @@ class HardwareTests:
 #        my_api.dac_value(amplitude, my_device)
         self.compile(my_sequencer)
 
-    def test_dds_loop(self, frequency=10, amplitude=0, my_device=0):
+    def test_dds_loop(self, frequency=10, amplitude=0, my_device=0, clock=800):
         "Just sets a loop profile of the dds and activates it"
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
-        dds_device = ad9910.AD9910(my_device, 800)
+        dds_device = ad9910.AD9910(my_device, clock)
         my_api.label("beginseq")
 
         my_api.init_dds(dds_device)
@@ -126,7 +126,7 @@ class HardwareTests:
 
         self.compile(my_sequencer)
 
-    def test_phase_switching(self, frequency=45, amplitude=-15, address1=0, address2=0, my_offset=0):
+    def test_phase_switching(self, frequency=45, amplitude=-15, address1=0, address2=1, my_offset=0, clock=800):
         "Just sets a loop profile of the dds and activates it"
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
@@ -136,8 +136,8 @@ class HardwareTests:
 #        my_api._api__lvds_cmd(0, 0, 0, 0, 0, 0)
 #        my_api.wait(1, use_cycles=True)
 
-        dds_device = ad9910.AD9910(address1, 800)
-        dds_device2 = ad9910.AD9910(address2, 800)
+        dds_device = ad9910.AD9910(address1, clock)
+        dds_device2 = ad9910.AD9910(address2, clock)
 
         my_api.init_dds(dds_device)
         my_api.init_dds(dds_device2)
@@ -261,14 +261,14 @@ class HardwareTests:
         self.compile(my_sequencer)
 
 
-    def test_all_dds_loops(self, frequency=10, amplitude=-15, no_of_boards=6):
+    def test_all_dds_loops(self, frequency=10, amplitude=-15, no_of_boards=6, clock=800):
         "Just sets a single profile of the dds and activates it"
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
 
         dds_device = []
         for k in range(no_of_boards):
-            dds_device.append(ad9910.AD9910(k, 800))
+            dds_device.append(ad9910.AD9910(k, clock))
             my_api.init_dds(dds_device[k])
 
         my_api.label("beginseq")
