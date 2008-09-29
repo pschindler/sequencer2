@@ -37,6 +37,7 @@ class HardwareTests:
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
         my_api.ttl_value(value, 2)
+        my_api.ttl_value(value, 3)
         self.compile(my_sequencer, show_debug)
 
     def test_trigger(self):
@@ -67,6 +68,7 @@ class HardwareTests:
 #        my_api.dac_value(0, 0)
  
         my_api.ttl_value(0x1,1) # trigger on bus[0]
+        my_api.wait(10, use_cycles=True)
         my_api.ttl_value(0x0,1)
 
         my_api.ttl_value(0xffff, 0)
@@ -124,7 +126,7 @@ class HardwareTests:
 
         self.compile(my_sequencer)
 
-    def test_phase_switching(self, frequency=45, amplitude=0, my_offset=0):
+    def test_phase_switching(self, frequency=45, amplitude=-15, address1=0, address2=0, my_offset=0):
         "Just sets a loop profile of the dds and activates it"
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
@@ -134,24 +136,26 @@ class HardwareTests:
 #        my_api._api__lvds_cmd(0, 0, 0, 0, 0, 0)
 #        my_api.wait(1, use_cycles=True)
 
-        dds_device = ad9910.AD9910(0, 800)
-        dds_device2 = ad9910.AD9910(1, 800)
+        dds_device = ad9910.AD9910(address1, 800)
+        dds_device2 = ad9910.AD9910(address2, 800)
 
         my_api.init_dds(dds_device)
         my_api.init_dds(dds_device2)
 
-        my_api.set_dds_freq(dds_device, frequency, 0)
-        my_api.set_dds_freq(dds_device2, frequency, 0)
+#        my_api.set_dds_freq(dds_device, frequency, 0)
+#        my_api.set_dds_freq(dds_device2, frequency, 0)
+#        my_api.load_phase(dds_device, 0)
+#        my_api.load_phase(dds_device2, 0)
+        my_api.init_frequency(dds_device, frequency, 0)
+        my_api.init_frequency(dds_device2, frequency, 0)
 
-#        my_api.set_dds_profile(dds_device, 0)
-#        my_api.set_dds_profile(dds_device2, 0)
+        my_api.set_dds_profile(dds_device, 0)
+        my_api.set_dds_profile(dds_device2, 0)
 
-        my_api.dac_value(amplitude, 1)
-        my_api.dac_value(amplitude, 0)
+        my_api.dac_value(amplitude, address1)
+        my_api.dac_value(amplitude, address2)
 
-        my_api.load_phase(dds_device, 0)
-        my_api.load_phase(dds_device2, 0)
- 
+
         my_api.update_dds(dds_device)
         my_api.update_dds(dds_device2)
 
@@ -174,6 +178,9 @@ class HardwareTests:
         my_api.jump("test")
         
         self.compile(my_sequencer)
+
+
+
 
     def test_lvds(self, opcode=1, address=1, data=1, phase_profile=0, control=0, wait=0):
         "Just tests the lvds command"
@@ -254,6 +261,41 @@ class HardwareTests:
         self.compile(my_sequencer)
 
 
+    def test_all_dds_loops(self, frequency=10, amplitude=-15, no_of_boards=6):
+        "Just sets a single profile of the dds and activates it"
+        my_sequencer = sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+
+        dds_device = []
+        for k in range(no_of_boards):
+            dds_device.append(ad9910.AD9910(k, 800))
+            my_api.init_dds(dds_device[k])
+
+        my_api.label("beginseq")
+        # saves frequencies in dds registers/profiles
+        for k in range(no_of_boards):
+            my_api.dac_value(amplitude, k)            
+            my_api.init_frequency(dds_device[k], frequency, 0)
+            my_api.update_dds(dds_device[k])
+
+
+ 
+        my_api.wait(2)
+        my_api.ttl_value(0x1)
+
+        for k in range(no_of_boards):
+            my_api.set_dds_profile(dds_device[k], 0)
+            my_api.update_dds(dds_device[k])
+
+            
+        my_api.ttl_value(0x0)
+        my_api.jump("beginseq")
+
+        self.compile(my_sequencer)
+
+
+
+
 
     def test_all_dds_boards(self):
         "Just sets a single profile of the dds and activates it"
@@ -263,12 +305,12 @@ class HardwareTests:
         dds_device = []
         for k in range(6):
             dds_device.append(ad9910.AD9910(k, 800))
+            my_api.init_dds(dds_device[k])
 
         my_api.label("beginseq")
-        my_api.init_dds(dds_device[k])
         # saves frequencies in dds registers/profiles
         for k in range(6):
-            my_api.dac_value(-10, k)            
+            my_api.dac_value(-15, k)            
             my_api.init_frequency(dds_device[k], 0.0, 0)
             my_api.init_frequency(dds_device[k], 5.0, 1)
             my_api.init_frequency(dds_device[k], 10.0, 2)

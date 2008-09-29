@@ -207,8 +207,9 @@ class SequenceHandler(object):
             frequency = trans_obj.get_frequency()
 
             for dds_instance in dds_list:
-                api.set_dds_freq(dds_instance, frequency, index)
-            api.load_phase(dds_instance, index)
+#                api.set_dds_freq(dds_instance, frequency, index)
+#                api.load_phase(dds_instance, index)
+                api.init_frequency(dds_instance, frequency, index)
             dds_profile_list[trans_name] = index
             debug_str = "Transition: " +  str(trans_name) + " | freq: "  \
                 +  str(frequency) + " | index: "+ str(index)

@@ -62,7 +62,7 @@ class api:
         self.phase_pulse_opcode = 0xb
         self.fifo_reset_opcode = 0x1f
 
-        self.logger = logging.getLogger("api"/)
+        self.logger = logging.getLogger("api")
         self.ttl_sys = outputsystem.OutputSystem(ttl_dict)
 
         self.recalibration = self.config.recalibration
@@ -254,6 +254,9 @@ class api:
         high_insn = instructions.p(high_word, 0)
         self.sequencer.add_insn(high_insn)
         high_insn_avail = instructions.p(high_word_avail, 0)
+
+        self.wait(3, use_cycles=True)
+
         self.sequencer.add_insn(high_insn_avail)
         self.wait(wait, use_cycles=True)
         # Add a copy of high_insn

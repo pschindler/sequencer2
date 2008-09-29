@@ -16,8 +16,13 @@ def PMTDetection(pmt_detect_length):
     ttl_pulse("PMT trigger", PMT_trigger_length)
     ttl_pulse("PMT trigger", PMT_trigger_length, start_time=0)
 
-    rf_pulse(25,0,1,"carrier", 0.0, is_last=False, address=1)
-    rf_pulse(5,0,1,"carrier", 0.0, is_last=False, address=0)
+#    rf_pulse(8,0,1,"carrier", 0.0, is_last=False, address=1)
+#    rf_pulse(3,0,1,"carrier", 0.0, is_last=False, address=0)
+#    rf_pulse(10,0,1,"clock1", 0.0, is_last=False, address=2)
+#    rf_pulse(15,0,1,"clock2", 0.0, is_last=False, address=5)
+    for k in range(6):
+        rf_pulse(15,0,1,"carrier", k+0.0, is_last=False, address=k)
+#        seq_wait(1, k+20.0)
 
 
 
