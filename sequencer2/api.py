@@ -101,11 +101,11 @@ class api:
                     my_wait = wait_cycles
 
                 wait_insn = instructions.wait(my_wait)
-                #Do we really need wait_cycles - 4 ??
+                # Do we really need wait_cycles - 4 ??
                 self.sequencer.add_insn(wait_insn)
                 wait_cycles -= my_wait
-            for i in range(self.branch_delay_slots):
-                self.sequencer.add_insn(copy.copy(nop_insn))
+                for i in range(self.branch_delay_slots):
+                    self.sequencer.add_insn(copy.copy(nop_insn))
         else:
             for i in range(wait_cycles):
                 self.sequencer.add_insn(copy.copy(nop_insn))
@@ -391,7 +391,7 @@ class api:
         """
         # save select is missing !!
         # Generate the bit mask for the given channels
-        # Every select mask (1bits) is set seperately
+        # Every select mask (1bits) is set separately
         select_list=[]
         for  key in value_dict:
             value = value_dict[key]
