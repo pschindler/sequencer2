@@ -53,6 +53,7 @@ class sequencer:
         datastring = ''
         while i < byte_width:
             datastring = chr(hex_num & 0xff) + datastring
+#            datastring = hex(hex_num & 0xff) + datastring
             # Prepend b/c we return in MSB
             hex_num >>= 8
             i += 1
@@ -78,7 +79,7 @@ class sequencer:
             raise RuntimeError, "Previous subroutine not ended"
         #check if current sequence is empty
         if self.current_sequence != self.initial_sequence:
-            self.logger.exception("tried to insert subroutine with a non empty sqeuence")
+            self.logger.exception("tried to insert subroutine with a non empty sequence")
             raise RuntimeError, "Subroutine can only be started at beginnig of sequence"
         self.is_subroutine = True
 
@@ -95,6 +96,7 @@ class sequencer:
         """
         # Addresses are broken when using subroutines
 
+
         # Add a halt instruction to the current sequence !
         halt_insn = instructions.halt()
         self.add_insn(halt_insn)
@@ -106,20 +108,20 @@ class sequencer:
         sequence_list = self.current_sequence
         word_index = len(self.current_sequence)
 
-        # Add  the subroutines to current_sequence
+        # Add the subroutines to current_sequence
         for insn_list in self.sub_list:
             self.label_dict[insn_list[0].label] = word_index
             sequence_list += insn_list
             word_index += len(insn_list)
         self.word_list = []
-        # reset the address cpunter
+        # reset the address counter
         address = 0
         # Append the binary charlist to the word_list
         # If the calue of the insn is None we are dealing
         # with a jump insn and adding it to the jump_list
 
         for insn in sequence_list:
-            #calculate the instruction's machine code as an int
+            # calculate the instruction's machine code as an int
             value = insn.get_value()
             if insn.is_branch == True:
                 self.word_list.append(insn)
@@ -143,25 +145,33 @@ class sequencer:
             except:
                 self.logger.exception("error while handling jump: " \
                                           + str(jump_insn.target_name))
-        #update current_sequence to make debugging possible
+        # update current_sequence to make debugging possible
         if len(sequence_list) > self.max_sequence_length - 1:
             raise RuntimeError("Maximum sequence length exceeded: " + \
                                    str(hex(len(sequence_list))))
         self.current_sequence = sequence_list
 
-    def debug_sequence(self, force=False):
+#       print self.word_list
+
+    def debug_sequence(self, force=False, show_word_list=False):
         """Prints out the current instruction list
         @param force: Boolean; If set to True, the sequence_list is printed to
                       stdout without taking care of the debug level
+        @param show_word_list: Boolean; If True, shows the word that is sent to the box for each instruction
         """
 #        logging.basicConfig(level=logging.DEBUG,
 #                            format="%(levelname)-10s %(asctime)s %(message)s")
         insn_str = "\n\n"
         for insn in self.current_sequence:
-            insn_str += str(insn) + "\n"
+            if show_word_list==False:
+                insn_str += str(insn) + "\n"
+            else:
+                insn_str += str(insn) + " word: " + repr(self.word_list[insn.address]) + "\n"
+ 
         self.logger.debug(insn_str)
         if force:
             print insn_str
+
 
 ## sequencer.py
 ## Login : <viellieb@ohm>

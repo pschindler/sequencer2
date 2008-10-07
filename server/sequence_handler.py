@@ -161,7 +161,7 @@ class SequenceHandler(object):
             try:
                 while True:
                     last_insn = insn_array.pop()
-                    #Set max time per is_last
+                    # Set max time per is_last
                     if last_insn.start_time + last_insn.duration > max_time:
                         max_time = last_insn.start_time + last_insn.duration
                     # Increase start time of instruction

@@ -68,6 +68,7 @@ class api:
         self.recalibration = self.config.recalibration
         self.dds_list = []
 
+
     def clear(self):
         "Reset the dds list"
         pass
@@ -142,20 +143,22 @@ class api:
     def start_finite(self, target_name, loop_count):
         """at the beginning of a finite loop
         adds a ldc instruction and a label intruction
-        @param target_name:  String identifier of the label to jump to
+        @param target_name: String identifier of the label to jump to
         @param loop_count: Desired number of loops
         """
         self.sequencer.bdec_register.append(loop_count)
         register_addr = len(self.sequencer.bdec_register) - 1
+
         ldc_insn = instructions.ldc(register_addr, loop_count)
         self.sequencer.add_insn(ldc_insn)
+
         label_insn = instructions.label(target_name)
         self.sequencer.add_insn(label_insn)
 
     def end_finite(self, target_name):
-        """At the einding of a finite loop
+        """At the ending of a finite loop
         Adds a bdec instruction and fills the branch delay slots
-        @param target_name:  String identifier of the label to jump to
+        @param target_name: String identifier of the label to jump to
         """
         register_addr = len(self.sequencer.bdec_register) - 1
         if register_addr < 0:
@@ -163,10 +166,20 @@ class api:
         self.sequencer.bdec_register.pop()
 
         bdec_insn = instructions.bdec(target_name, register_addr)
+
         nop_insn = instructions.nop()
         self.sequencer.add_insn(bdec_insn)
         for index in range(self.branch_delay_slots):
             self.sequencer.add_insn(copy.copy(nop_insn))
+
+    def my_bdec(self, target_name, reg_addr):
+        bdec_insn = instructions.bdec(target_name, reg_addr)
+        nop_insn = instructions.nop()
+        self.sequencer.add_insn(bdec_insn)
+        for index in range(self.branch_delay_slots):
+            self.sequencer.add_insn(copy.copy(nop_insn))
+
+
 
     def begin_subroutine(self, sub_name):
         """inserts a label for a subroutine

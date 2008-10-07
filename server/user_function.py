@@ -108,11 +108,73 @@ return_list = {}
 transitions = TransitionListObject()
 logger = logging.getLogger("server")
 
+# global list for automatically labeling finite loops and stuff like that
+# last element contains the next label which will be used
+automatic_label_list = ['aut_label_1']
 
 def test_global(string1):
     "Just testing ..."
     global return_str
     return_str += string1
+
+
+
+
+class multiple_pulses():
+    """generates an instruction that is repeated 'no_of_pulses' times
+    @param no_of_pulses: number of repetition
+    usage: for i in multiple_pulse(5):
+                ttl_pulse(...)
+                rf_pulse(...)
+                ttl_pulse(...)
+    """
+    def __init__(self, no_of_pulses):
+
+        global automatic_label_list
+        self.max_no_of_cycles = 255
+        self.no_of_pulses = no_of_pulses
+              
+
+        # loops bigger than max_no_of_cycles will be split in several loops               
+        self.add_no_of_loops = int(self.no_of_pulses - 1) / int(self.max_no_of_cycles)   # == 0, if no_of_pulses<=255
+        self.rest_cycles = int(self.no_of_pulses - 1) % int(self.max_no_of_cycles) + 1
+
+        self.counter = 0
+
+        self.label = []
+        for i in range(self.add_no_of_loops+1):
+            self.last_label_index = len(automatic_label_list)-1
+            self.label.append(automatic_label_list[self.last_label_index])
+            automatic_label_list.append('aut_label_' + str(self.last_label_index+2))
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if self.counter == 0:
+            self.counter = 1
+            # add additional loops which go up to 255 and one loop for the rest cycles            
+            for i in range(self.add_no_of_loops):
+                self.start_finite(self.label[i], self.max_no_of_cycles)
+            self.start_finite(self.label[self.add_no_of_loops], self.rest_cycles)
+            return 0
+        else:
+            self.end_finite(self.label[self.add_no_of_loops])
+            for i in range(self.add_no_of_loops-1, -1, -1):
+                self.end_finite(self.label[i])
+            raise StopIteration()
+            return 0
+
+    def start_finite(self, target_name, loop_counts):
+        global sequence_var
+        start_fin = Start_Finite(target_name, loop_counts)
+        sequence_var.append(start_fin.sequence_var)
+
+    def end_finite(self, target_name):
+        global sequence_var
+        end_fin = End_Finite(target_name)
+        sequence_var.append(end_fin.sequence_var)
+
 
 
 def ttl_pulse(device_key, duration, start_time=0.0, is_last=True):
@@ -255,6 +317,8 @@ def generate_triggers(my_api, trigger_value, ttl_trigger_channel, ttl_word, \
     my_api.jump("wait_label_1")
     my_api.label("wait_label_2")
     my_api.ttl_set_bit(ttl_trigger_channel, 0)
+
+#    my_api.start_finite("test_label", 2)
     my_api.start_finite("finite_label", loop_count)
 
     if line_trigger_channel != None:
@@ -268,7 +332,14 @@ def generate_triggers(my_api, trigger_value, ttl_trigger_channel, ttl_word, \
 
 def end_of_sequence(my_api, ttl_trigger_channel, ttl_word):
     """Sets ttl_trigger channel to high at the end of the sequence"""
+
+#    my_api.my_bdec("aut_label_1",0)
+#    my_api.my_bdec("finite_label",2)
+
     my_api.end_finite("finite_label")
+
+
+#    my_api.end_finite("test_label")
     my_api.ttl_set_bit(ttl_trigger_channel, 1)
     my_api.ttl_value(ttl_word)  # resets the ttl output channels
     my_api.jump("Infinite_loop_label")

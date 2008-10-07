@@ -117,7 +117,7 @@ class j(InsnClass):
 
 class btr(j):
     """Jumps to a defined label if the trigger is satisfied
-    trigge is the trigger state in HEX
+    trigger is the trigger state in HEX
     """
 
     name = "btr"
@@ -147,6 +147,7 @@ class bdec(j):
         "returns the hex value for bdec insns"
         self.target_address = target_address
         return self.opcode << 28 | self.register_address << 23  | target_address
+
     def __str__(self):
         return " add: "+str(self.address) + \
                " -- op:  "+str(hex(self.opcode)) + \

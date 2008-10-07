@@ -54,6 +54,67 @@ class SeqInstruction:
         "By default no conflict is resolved"
         return False
 
+
+
+class Multiple_Pulses(SeqInstruction):
+    "generates a loop with certain number of pulses"
+    def __init__(self, no_of_pulses):
+        self.name = 'LoopEvent'
+        self.count = 0
+    def __iter__(self):
+        return self
+    def next(self):
+        if self.counter == 0:
+            self.counter = 1
+            return 0
+        else:
+            raise StopIteration()
+
+    def __str__(self):
+        return str(self.name)
+
+class Start_Finite(SeqInstruction):
+    """at the beginning of a finite loop
+    adds a ldc instruction and a label intruction
+    @param target_name:  String identifier of the label to jump to
+    @param loop_count: Desired number of loops
+    """
+    def __init__(self, target_name, loop_counts=1):
+        self.target_name = target_name
+        self.loop_counts = loop_counts
+        self.start_time = 0.0
+        self.is_last = True
+        self.name = "StartLoopEvent"
+        self.sequence_var = []
+        self.sequence_var = self.add_insn(self.sequence_var)
+
+    def handle_instruction(self, api):
+        api.start_finite(self.target_name, self.loop_counts)
+
+    def __str__(self):
+        return str(self.name) + " | start: " + str(self.start_time) \
+            + " | cnt: " + str(self.loop_counts) + " | last: " + str(self.is_last)
+
+class End_Finite(SeqInstruction):
+    """At the einding of a finite loop
+    Adds a bdec instruction and fills the branch delay slots
+    @param target_name:  String identifier of the label to jump to
+    """
+    def __init__(self, target_name):
+        self.target_name = target_name
+        self.start_time = 0.0
+        self.is_last = True
+        self.name = "EndLoopEvent"
+        self.sequence_var = []
+        self.sequence_var = self.add_insn(self.sequence_var)
+
+    def handle_instruction(self, api):
+        api.end_finite(self.target_name)
+
+    def __str__(self):
+        return str(self.name) + " | start: " + str(self.start_time) \
+            + " | last: " + str(self.is_last)
+
 class SeqWait(SeqInstruction):
     "generates a waiting time from a certain (optional) start time"
     def __init__(self, wait_time, start_time=0.0, is_last=True):
@@ -63,7 +124,6 @@ class SeqWait(SeqInstruction):
         self.name = "WaitEvent"
         self.sequence_var = []
         self.sequence_var = self.add_insn(self.sequence_var)
-
 
     def handle_instruction(self, api):
         "does nothing"
