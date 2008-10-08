@@ -89,6 +89,11 @@ class AD9910:
     FTW = (0x07, 32)
     PHOW = (0x08, 16)
     PROF_START = (0x0E, 64)
+
+    DRL = (0x0B, 64) # Digital Ramp Limit Register
+    DRS = (0x0C, 64) # Digital Ramp Step Register
+    DRR = (0x0D, 32) # Digital Ramp Rate Register
+
     # Bitmasks for the configuration
     auto_clr = Bitmask(label="auto_clr", width=1, shift=13)
     pdclk_en = Bitmask(label="pdclk_en", width=1, shift=11)
@@ -155,7 +160,7 @@ class AD9910:
         freq_val = int(2**(32) * frequency / self.ref_freq) + 1
         freq_val = freq_val - freq_val % 8
         phase_val = phase << 32
-        asf_val = asf << 48
+        asf_val = asf << 48      # amplitude scaling factor
         addr_tuple = (self.PROF_START[0] + register_addr, self.PROF_START[1])
         self.reg_value_dict[addr_tuple] = freq_val | asf_val | phase_val
 
@@ -166,5 +171,45 @@ class AD9910:
         dds_ftw = self.reg_value_dict[addr_tuple] % 2**32
         fpga_ftw = int(dds_ftw *  self.clk_divider) % 2**32
         return fpga_ftw
+
+
+# what we need: upper. lower limit, time and value step size set
+# activate ramp (save old parameters)
+# autoclear to switch off
+# choose between phase, amplitude, frequency
+# check wether current_frequency in (lower, upper) limits
+# check input parameters for max and min
+
+
+    def set_ramp_configuration_registers(self, dt_pos, dt_neg, dfreq, lower_limit, upper_limit):
+        """sets the registers for the digital ramp controller
+        ramp = (dfreq/dt_(pos,neg)) * t + current_frequency
+        min(ramp) = lower_limit
+        max(ramp) = upper_limit
+        min(dt_(pos,neg)) = 5ns @ 800 MHz clock
+        """
+        if (lower_limit>upper_limit):
+            raise("Can't programm ramp generator because lower limit > upper limit")
+
+        reg_lower_limit   = int(2**(32) * lower_limit / self.ref_freq) + 1
+        reg_upper_limit   = int(2**(32) * upper_limit / self.ref_freq) + 1
+        reg_upper_limit   = reg_upper_limit << 32
+        
+        reg_ramp_step_pos = int(dt_pos/4 * self.reg_freq)
+        reg_ramp_step_neg = int(dt_neg/4 * self.reg_freq)
+        reg_ramp_step_neg = reg_ramp_step_neg << 32
+        
+        reg_ramp_rate     = int(2**(32) * dfreq / self.ref_freq) + 1   # only valid for frequency ramping
+
+        self.reg_value_dict[DRL] = reg_lower_limit | reg_upper_limit
+        self.reg_value_dict[DRS] = reg_ramp_step_pos | reg_ramp_step_neg
+        self.reg_value_dict[DRR] = reg_ramp_rate
+
+
+
+
+
+
+
 
 # ad9910.py ends here

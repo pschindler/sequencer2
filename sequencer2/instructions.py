@@ -183,6 +183,7 @@ class wait(InsnClass):
                " -- op:  "+str(hex(self.opcode)) + \
                " -- nam: "+str(self.name) + \
                " -- val: "+str(hex(self.wait_cycles))
+
 class ldc(InsnClass):
     "Loads constant into register for bdec"
     name = "load const"

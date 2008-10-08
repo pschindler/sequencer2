@@ -308,6 +308,8 @@ def generate_triggers(my_api, trigger_value, ttl_trigger_channel, ttl_word, \
     for dds_device in my_api.dds_list:
         my_api.init_dds(dds_device)
     my_api.ttl_value(ttl_word)
+
+
     my_api.label("Infinite_loop_label")
     # sets the channel that tells qfp that the box is busy
     my_api.ttl_set_bit(ttl_trigger_channel, 1)
@@ -338,6 +340,9 @@ def end_of_sequence(my_api, ttl_trigger_channel, ttl_word):
 
     my_api.end_finite("finite_label")
 
+
+#    my_api.instructions_bdec("aut_label_1", 2)
+#    my_api.instructions_ldc(2, 2)
 
 #    my_api.end_finite("test_label")
     my_api.ttl_set_bit(ttl_trigger_channel, 1)

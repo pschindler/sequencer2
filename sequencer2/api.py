@@ -172,12 +172,27 @@ class api:
         for index in range(self.branch_delay_slots):
             self.sequencer.add_insn(copy.copy(nop_insn))
 
-    def my_bdec(self, target_name, reg_addr):
+
+
+
+
+
+
+    def instructions_bdec(self, target_name, reg_addr):
         bdec_insn = instructions.bdec(target_name, reg_addr)
         nop_insn = instructions.nop()
         self.sequencer.add_insn(bdec_insn)
-        for index in range(self.branch_delay_slots):
-            self.sequencer.add_insn(copy.copy(nop_insn))
+
+    def instructions_ldc(self, reg_addr, loop_count):
+        ldc_insn = instructions.ldc(reg_addr, loop_count)
+        nop_insn = instructions.nop()
+        self.sequencer.add_insn(ldc_insn)
+
+
+
+
+
+
 
 
 
@@ -291,6 +306,8 @@ class api:
 
     def dds_to_serial(self, word, length, reg_address, dds_address=0):
         """Generates LVDS commands for writing the registers of the DDS
+        word = value written in the register
+        length = length of word or length of register, respectively
         """
         fifo_wait = 8
         addr_wait = 20 + 30*int(length / 16) * 2
@@ -332,7 +349,7 @@ class api:
         "Sets the dds frequency of a given profile register"
         self.reset_fifo(dds_instance)
         dds_instance.set_freq_register(profile, freq_value)
-        freq_register = dds_instance.PROF_START
+        freq_register = dds_instance.PROF_START   # (addr, length) of first profile register
         reg_addr = freq_register[0] + profile
         word_length =  freq_register[1]
         reg_value = dds_instance.reg_value_dict[(reg_addr, word_length)]
@@ -381,6 +398,30 @@ class api:
         self.set_dds_profile(dds_instance, profile)
         self.update_dds(dds_instance)
         self.pulse_phase(dds_instance, profile, phase_offset)
+
+
+
+    # digital ramp generator
+    def init_digital_ramp_generator(self, dds_instance, dt_pos, dt_neg, dfreq, lower_limit, upper_limit):
+
+        dds_instance.set_ramp_configuration_registers(dt_pos, dt_neg, dfreq, lower_limit, upper_limit) 
+
+        DRLreg = dds_instance.DRL
+        DRSreg = dds_instance.DRS
+        DRRreg = dds_instance.DRR
+
+        reg_value = dds_instance.reg_value_dict[DRLreg]
+        self.dds_to_serial(reg_value, DRLreg[1], DRLreg[0], dds_instance.device_addr)
+        reg_value = dds_instance.reg_value_dict[DRSreg]
+        self.dds_to_serial(reg_value, DRSreg[1], DRSreg[0], dds_instance.device_addr)
+        reg_value = dds_instance.reg_value_dict[DRRreg]
+        self.dds_to_serial(reg_value, DRRreg[1], DRRreg[0], dds_instance.device_addr)
+
+
+
+
+
+
 
     #################################################################
     # Functions for the TTL output system

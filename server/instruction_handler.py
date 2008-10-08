@@ -55,24 +55,6 @@ class SeqInstruction:
         return False
 
 
-
-class Multiple_Pulses(SeqInstruction):
-    "generates a loop with certain number of pulses"
-    def __init__(self, no_of_pulses):
-        self.name = 'LoopEvent'
-        self.count = 0
-    def __iter__(self):
-        return self
-    def next(self):
-        if self.counter == 0:
-            self.counter = 1
-            return 0
-        else:
-            raise StopIteration()
-
-    def __str__(self):
-        return str(self.name)
-
 class Start_Finite(SeqInstruction):
     """at the beginning of a finite loop
     adds a ldc instruction and a label intruction

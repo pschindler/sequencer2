@@ -154,7 +154,7 @@ class sequencer:
 #       print self.word_list
 
     def debug_sequence(self, force=False, show_word_list=False):
-        """Prints out the current instruction list
+        """Prints out the current instruction list including the word that is sent to the box
         @param force: Boolean; If set to True, the sequence_list is printed to
                       stdout without taking care of the debug level
         @param show_word_list: Boolean; If True, shows the word that is sent to the box for each instruction
@@ -166,8 +166,11 @@ class sequencer:
             if show_word_list==False:
                 insn_str += str(insn) + "\n"
             else:
-                insn_str += str(insn) + " word: " + repr(self.word_list[insn.address]) + "\n"
- 
+                if insn.is_branch==True:
+                    insn_str += str(insn) + (69 - len(str(insn)))*' ' + "word: " + hex(insn.get_jump_value(insn.target_address)) + "\n"
+                else:
+                    insn_str += str(insn) + (69 - len(str(insn)))*' ' + "word: " + hex(insn.get_value()) + "\n"
+
         self.logger.debug(insn_str)
         if force:
             print insn_str
