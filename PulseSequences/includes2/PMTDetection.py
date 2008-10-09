@@ -31,11 +31,16 @@ def PMTDetection(pmt_detect_length):
     ttl_pulse("PMT trigger", PMT_trigger_length)
     ttl_pulse("PMT trigger", PMT_trigger_length, start_time=pmt_detect_length)
 
-    seq_wait(20)
+    seq_wait(5)
 
-    for i in multiple_pulses(3):
-        ttl_pulse("PMT trigger", 10)
-        seq_wait(10)
+#    for i in multiple_pulses(3):
+#        ttl_pulse("PMT trigger", 10)
+#        seq_wait(10)
+
+
+    dds_freq_sweep(5, 0.1, 0.1, 5, 5, 10, 60, start_time=10.0)
+
+    seq_wait(20)
 
 #    for i in multiple_pulses(4):
 #        ttl_pulse("PMT trigger", 10)

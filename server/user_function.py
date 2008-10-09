@@ -177,6 +177,17 @@ class multiple_pulses():
 
 
 
+
+
+def dds_freq_sweep(dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, start_time=0.0, is_last=False):
+
+    global sequence_var
+    ramp_init = ActivateDDSRamp(start_time, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last)
+    sequence_var.append(ramp_init.sequence_var)
+
+
+
+
 def ttl_pulse(device_key, duration, start_time=0.0, is_last=True):
     """generates a sequential ttl pulse
     device_key may be a string or a list of strings indicating

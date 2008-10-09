@@ -126,6 +126,46 @@ class HardwareTests:
 
         self.compile(my_sequencer)
 
+
+    def test_ramp_generator(self, my_device=0, frequency=10, amplitude=-15, dt=1, lower_limit=5, upper_limit=50, clock=800):
+        "Just sets a loop profile of the dds and activates it"
+        my_sequencer = sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+        dds_device = ad9910.AD9910(my_device, clock)
+
+
+        my_api.label("beginseq")
+
+        my_api.init_dds(dds_device)
+        my_api.init_frequency(dds_device, frequency, 0)
+        my_api.set_dds_profile(dds_device, 0)
+
+        my_api.update_dds(dds_device)
+        my_api.dac_value(amplitude, my_device)
+
+
+        my_api.init_digital_ramp_generator(dds_device, dt, dt, upper_limit-lower_limit, upper_limit-lower_limit, lower_limit, upper_limit)
+        my_api.start_digital_ramp_generator(dds_device, slope_direction=1)
+        my_api.start_digital_ramp_generator(dds_device)
+
+        ramp_direction = 1
+
+               
+        for i in range(10):
+            my_api.configure_ramping(dds_device, ramp_direction)
+            my_api.wait(dt)
+            ramp_direction = ramp_direction ^ 1
+
+        my_api.stop_digital_ramp_generator(dds_device)
+
+        my_api.jump("beginseq")
+
+        self.compile(my_sequencer)
+
+
+
+
+
     def test_phase_switching(self, freq1=45, freq2=45, amplitude=-15, address1=0, address2=1, clock=800):
         "Just sets a loop profile of the dds and activates it"
         my_sequencer = sequencer.sequencer()
