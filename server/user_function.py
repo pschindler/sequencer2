@@ -179,11 +179,33 @@ class multiple_pulses():
 
 
 
-def dds_freq_sweep(dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, start_time=0.0, is_last=False):
+def dds_freq_sweep(dds_address, time_array, slope_array, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last=False):
 
     global sequence_var
-    ramp_init = ActivateDDSRamp(start_time, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last)
+    ramp_init = DDSSweep('freq', time_array, slope_array, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last)
+ 
     sequence_var.append(ramp_init.sequence_var)
+
+def dds_phase_sweep(dds_address, time_array, slope_array, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last=False):
+
+    global sequence_var
+    ramp_init = DDSSweep('phase', time_array, slope_array, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last)
+ 
+    sequence_var.append(ramp_init.sequence_var)
+
+def dds_ampl_sweep(dds_address, time_array, slope_array, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last=False):
+
+    global sequence_var
+    ramp_init = DDSSweep('ampl', time_array, slope_array, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last)
+ 
+    sequence_var.append(ramp_init.sequence_var)
+
+
+
+
+
+
+
 
 
 

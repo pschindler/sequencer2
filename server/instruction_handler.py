@@ -325,39 +325,41 @@ class RFBichroPulse(SeqInstruction):
 
 
 
-class ActivateDDSRamp(SeqInstruction):
-    "Programs the ramp generator"
-    def __init__(self, start_time, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last=False):
+class DDSSweep(SeqInstruction):
+    """Programs the DDS Digital Ramp Generator Registers
+    ramp_type = 'freq', 'ampl', 'phase'
+    the non-ramped parameters will be taken from the current profile settings
+    """
+    def __init__(self, ramp_type, time_array, slope_array, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last):
 
-        amplitude = -15
-        
-
-
-        init_ramp_gen_event = InitRampGeneratorEvent(start_time+10, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last)
-        start_dds_ramp_event = StartRampGeneratorEvent(start_time+15.01, dds_address, is_last)
-        stop_dds_ramp_event = StopRampGeneratorEvent(start_time+110.02, dds_address, is_last)
-
-        dac_start_event = DACEvent(start_time, amplitude, dds_address, is_last=False)
-
-        
-
-        # Add the events to the sequence
         self.sequence_var = []
+        dds_prg_time = 0.1
+        dds_stop_time = 0.1
+        dds_conf_time = 0.1
 
-        self.sequence_var = dac_start_event.add_insn(self.sequence_var)
+        start_time = time_array[0]
 
-        self.sequence_var = init_ramp_gen_event.add_insn(self.sequence_var)
+        program_ramp_gen_event = ProgramRampGeneratorEvent(ramp_type, start_time, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last=False)
+
+        start_dds_ramp_event = StartRampGeneratorEvent(start_time + dds_prg_time, dds_address, is_last=False)
+
+
+
+        
+        conf_ramp_event = []
+        for k in range(len(time_array)-1):
+            conf_ramp_event.append(ConfigureRampEvent(time_array[k] + dds_prg_time + dds_conf_time, dds_address, slope_array[k], is_last=False))
+ 
+        stop_dds_ramp_event = StopRampGeneratorEvent(time_array[len(time_array)-1] + dds_prg_time + dds_stop_time + dds_conf_time, dds_address, is_last)
+
+
+
+        self.sequence_var = program_ramp_gen_event.add_insn(self.sequence_var)
         self.sequence_var = start_dds_ramp_event.add_insn(self.sequence_var)
+        for k in range(len(time_array)-1):
+            self.sequence_var = conf_ramp_event[k].add_insn(self.sequence_var)
         self.sequence_var = stop_dds_ramp_event.add_insn(self.sequence_var)
-
-
-
-
-
-
-
-
-
+        
 
 
 
@@ -503,19 +505,21 @@ class DDSSwitchEvent(SeqInstruction):
 
 
 
-class InitRampGeneratorEvent(SeqInstruction):
+class ProgramRampGeneratorEvent(SeqInstruction):
     "Programs the ramp generator"
-    def __init__(self, start_time, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last=False):
+    def __init__(self, ramp_type, start_time, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last=False):
         self.start_time = start_time
+        self.duration = self.cycle_time
         self.dt_pos = dt_pos
         self.dt_neg = dt_neg
         self.dfreq_pos = dfreq_pos
         self.dfreq_neg = dfreq_neg
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
+        self.ramp_type = ramp_type
         self.is_last = is_last
         self.dds_address = dds_address
-        self.name = "Init_Ramp_Generator_Event"
+        self.name = "Program_Ramp_Generator_Event"
 
     def handle_instruction(self, api):
         "generate API events"
@@ -524,12 +528,13 @@ class InitRampGeneratorEvent(SeqInstruction):
             dds_instance = api.dds_list[self.dds_address]
         except IndexError:
             raise RuntimeError("No DDS known with address: "+str(self.dds_address))
-        api.init_digital_ramp_generator(dds_instance, self.dt_pos, self.dt_neg, self.dfreq_pos, self.dfreq_neg, self.lower_limit, self.upper_limit)
+        api.init_digital_ramp_generator(self.ramp_type, dds_instance, self.dt_pos, self.dt_neg, self.dfreq_pos, self.dfreq_neg, self.lower_limit, self.upper_limit)
 
     def __str__(self):
         return str(self.name) + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | dds_addr: "+ str(self.dds_address) \
+            + " | rmp_type: "+ self.ramp_type \
             + " | dt_pos: "+ str(self.dt_pos) \
             + " | dt_neg: "+ str(self.dt_neg) \
             + " | dfreq_pos: "+ str(self.dfreq_pos) \
@@ -538,10 +543,38 @@ class InitRampGeneratorEvent(SeqInstruction):
             + " | upr_limit: "+ str(self.upper_limit)
 
 
+class ConfigureRampEvent(SeqInstruction):
+    "Configures the ramp"
+    def __init__(self, start_time, dds_address, slope_direction, is_last=False):
+        self.start_time = start_time
+        self.duration = self.cycle_time
+        self.is_last = is_last
+        self.dds_address = dds_address
+        self.name = "ConfigureRamp_Event"
+        self.slope_direction = slope_direction
+
+    def handle_instruction(self, api):
+        "generate API events"
+       # Get the right dds object
+        try:
+            dds_instance = api.dds_list[self.dds_address]
+        except IndexError:
+            raise RuntimeError("No DDS known with address: "+str(self.dds_address))
+        api.configure_ramping(dds_instance, self.slope_direction)
+
+    def __str__(self):
+        return str(self.name) + " | start: " + str(self.start_time) \
+            + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
+            + " | dds_addr: "+ str(self.dds_address) \
+            + " | slp: "+ str(self.slope_direction)
+
+
+
 class StartRampGeneratorEvent(SeqInstruction):
     "Programs the ramp generator"
     def __init__(self, start_time, dds_address, is_last=False):
         self.start_time = start_time
+        self.duration = self.cycle_time
         self.is_last = is_last
         self.dds_address = dds_address
         self.name = "Start_Ramp_Generator_Event"
@@ -565,6 +598,7 @@ class StopRampGeneratorEvent(SeqInstruction):
     "Programs the ramp generator"
     def __init__(self, start_time, dds_address, is_last=False):
         self.start_time = start_time
+        self.duration = self.cycle_time
         self.is_last = is_last
         self.dds_address = dds_address
         self.name = "Stop_Ramp_Generator_Event"

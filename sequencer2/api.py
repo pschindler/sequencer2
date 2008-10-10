@@ -409,14 +409,15 @@ class api:
 
 
     # digital ramp generator
-    def init_digital_ramp_generator(self, dds_instance, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit):
+    def init_digital_ramp_generator(self, ramp_type, dds_instance, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit):
         """Initializes the digital ramp generator registers"""
 
-        dds_instance.set_ramp_configuration_registers(dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit) 
+        dds_instance.set_ramp_configuration_registers(ramp_type, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit) 
 
         DRLreg = dds_instance.DRL
         DRSreg = dds_instance.DRS
         DRRreg = dds_instance.DRR
+        CFR2reg = dds_instance.CFR2
 
         reg_value = dds_instance.reg_value_dict[DRLreg]
         self.dds_to_serial(reg_value, DRLreg[1], DRLreg[0], dds_instance.device_addr)
@@ -424,77 +425,62 @@ class api:
         self.dds_to_serial(reg_value, DRSreg[1], DRSreg[0], dds_instance.device_addr)
         reg_value = dds_instance.reg_value_dict[DRRreg]
         self.dds_to_serial(reg_value, DRRreg[1], DRRreg[0], dds_instance.device_addr)
+        reg_value = dds_instance.reg_value_dict[CFR2reg]
+        self.dds_to_serial(reg_value, CFR2reg[1], CFR2reg[0], dds_instance.device_addr)
 
 
-#        self.update_dds(dds_instance)
-
- 
-#        dds_instance.switch_autoclear_register()
-
-#        CFR1reg = dds_instance.CFR1
-#        reg_value = dds_instance.reg_value_dict[CFR1reg]
-#        self.dds_to_serial(reg_value, CFR1reg[1], CFR1reg[0], dds_instance.device_addr)
-
-#        self.update_dds(dds_instance)
-
-
-    def configure_ramping(self, dds_instance, slope_direction, hold_ramp_time=0):
-        """hold_ramp_time in mus"""
+    def configure_ramping(self, dds_instance, slope_direction):        
+        """slope_direction, +1 = positive slope, 0 = hold generator, -1 = negative slope
+        """
         ramp_conf   = 1
-        drctl       = slope_direction
-        if hold_ramp_time>0:
-            drhold  = 1
-        else:
-            drhold  = 0
+
+        if slope_direction==-1:
+            drctl = 0
+            drhold = 0
+        if slope_direction==0:
+            drctl = 0
+            drhold = 1
+        if slope_direction==1:
+            drctl = 1
+            drhold = 0
 
         # since the ramp_conf, drctl and drhold is bit 16:18 we use the phase_profile variable to send it over the lvds bus
         val = 0
         phase_profile = ramp_conf << self.DDSRAMPCONF_bit | drctl << self.DRCTL_bit | drhold << self.DRHOLD_bit
         phase_profile = phase_profile >> 16
-        self.__lvds_cmd(self.dds_up_opcode, dds_instance.device_addr, val, phase_profile, wait=10+hold_ramp_time)
+        self.__lvds_cmd(self.dds_up_opcode, dds_instance.device_addr, val, phase_profile, wait=0)
  
 
-    def start_digital_ramp_generator(self, dds_instance, slope_direction=1):
+    def start_digital_ramp_generator(self, dds_instance):
         """Starts the digital ramp generator"""
-        # check for initialisation of all ramp generators
 
-        val = 0
-        self.configure_ramping(dds_instance, slope_direction, hold_ramp_time=0)
-
-        dds_instance.switch_digital_ramp_enable_register()
+        dds_instance.switch_digital_ramp_enable_register(1)
         CFR2reg = dds_instance.CFR2
         reg_value = dds_instance.reg_value_dict[CFR2reg]
         self.dds_to_serial(reg_value, CFR2reg[1], CFR2reg[0], dds_instance.device_addr)
 
         self.update_dds(dds_instance)
 
-#        dds_instance.switch_digital_ramp_enable_register()
-#        CFR2reg = dds_instance.CFR2
-#        reg_value = dds_instance.reg_value_dict[CFR2reg]
-#        self.dds_to_serial(reg_value, CFR2reg[1], CFR2reg[0], dds_instance.device_addr)
-
 
     def stop_digital_ramp_generator(self, dds_instance):
-        """Starts the digital ramp generator"""
+        """Stops the digital ramp generator
+        by switching off the ramp_enable_register bit
+        and setting the ramping slope to negative
+        and autoclearing the the register"""
 
-
-        dds_instance.switch_digital_ramp_enable_register()
-
+        dds_instance.switch_digital_ramp_enable_register(0)
         CFR2reg = dds_instance.CFR2
         reg_value = dds_instance.reg_value_dict[CFR2reg]
         self.dds_to_serial(reg_value, CFR2reg[1], CFR2reg[0], dds_instance.device_addr)
 
-
-        self.configure_ramping(dds_instance, 0, 0)
- 
-        dds_instance.switch_autoclear_register()
-
+        dds_instance.switch_autoclear_register(1)
         CFR1reg = dds_instance.CFR1
         reg_value = dds_instance.reg_value_dict[CFR1reg]
         self.dds_to_serial(reg_value, CFR1reg[1], CFR1reg[0], dds_instance.device_addr)
 
-        self.update_dds(dds_instance)
+        self.configure_ramping(dds_instance, -1)
 
+        self.update_dds(dds_instance)
 
 
     

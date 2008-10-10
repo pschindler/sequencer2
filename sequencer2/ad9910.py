@@ -92,7 +92,9 @@ class AD9910:
 
     DRL = (0x0B, 64) # Digital Ramp Limit Register
     DRS = (0x0C, 64) # Digital Ramp Step Register
-    DRR = (0x0D, 32) # Digital Ramp Rate Register
+    DRR = (0x0D, 32) # Digital Ramp Rate Register    
+
+    Ifs = 0xff # full-scale output current of the DDS DAC
 
     # Bitmasks for the configuration
     auto_clr = Bitmask(label="auto_clr", width=1, shift=13)
@@ -183,7 +185,7 @@ class AD9910:
 # check input parameters for max and min
 
 
-    def set_ramp_configuration_registers(self, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit):
+    def set_ramp_configuration_registers(self, ramp_type, dt_pos, dt_neg, dstep_pos, dstep_neg, lower_limit, upper_limit):
         """sets the registers for the digital ramp controller
         ramp = (dfreq/dt_(pos,neg)) * t + current_frequency
         min(ramp) = lower_limit
@@ -193,40 +195,76 @@ class AD9910:
         if (lower_limit>upper_limit):
             raise("Can't programm ramp generator because lower limit > upper limit")
 
-        reg_lower_limit   = int(2**(32) * lower_limit / self.ref_freq) + 1
-        reg_upper_limit   = int(2**(32) * upper_limit / self.ref_freq) + 1
-        reg_upper_limit   = reg_upper_limit << 32
-        
-        reg_ramp_rate_pos = int(dt_pos/4.0 * self.ref_freq)
-        reg_ramp_rate_neg = int(dt_neg/4.0 * self.ref_freq)
+       
+        reg_ramp_rate_pos = int(dt_pos/4.0 * self.ref_freq) + 1
+        reg_ramp_rate_neg = int(dt_neg/4.0 * self.ref_freq) + 1
         reg_ramp_rate_neg = reg_ramp_rate_neg << 16
         
-        reg_ramp_step_pos     = int(2**(32) * dfreq_pos / self.ref_freq) + 1   # only valid for frequency ramping
-        reg_ramp_step_neg     = int(2**(32) * dfreq_neg / self.ref_freq) + 1   # only valid for frequency ramping
-        reg_ramp_step_neg     = reg_ramp_step_neg << 32        
+        if ramp_type=='freq': 
+            reg_lower_limit   = int(2**(32) * lower_limit / self.ref_freq) + 1
+            reg_upper_limit   = int(2**(32) * upper_limit / self.ref_freq) + 1
+            reg_upper_limit   = reg_upper_limit << 32
+
+            reg_ramp_step_pos     = int(2**(32) * dstep_pos / self.ref_freq) + 1
+            reg_ramp_step_neg     = int(2**(32) * dstep_neg / self.ref_freq) + 1
+            reg_ramp_step_neg     = reg_ramp_step_neg << 32        
+            # change the bits for the frequency sweep, bit 20:21 in cfr2 while keeping the rest the same
+            self.reg_value_dict[self.CFR2] = self.set_bit_state(self.reg_value_dict[self.CFR2], 0, 20, 2)
+
+        if ramp_type=='phase':
+            reg_lower_limit   = int(2**(13) * lower_limit / 45.0) + 1
+            reg_upper_limit   = int(2**(13) * upper_limit / 45.0) + 1
+            reg_upper_limit   = reg_upper_limit << 32
+
+            reg_ramp_step_pos     = int(2**(13) * dstep_pos / 45.0) + 1   
+            reg_ramp_step_neg     = int(2**(13) * dstep_neg / 45.0) + 1   
+            reg_ramp_step_neg     = reg_ramp_step_neg << 32        
+            # change the bits for the phase sweep, bit 20:21 in cfr2 while keeping the rest the same
+            self.reg_value_dict[self.CFR2] = self.set_bit_state(self.reg_value_dict[self.CFR2], 1, 20, 2)
+
+        if ramp_type=='ampl':
+            reg_lower_limit   = int(2**(18) * lower_limit / self.Ifs) + 1
+            reg_upper_limit   = int(2**(18) * upper_limit / self.Ifs) + 1
+            reg_upper_limit   = reg_upper_limit << 32
+
+            reg_ramp_step_pos     = int(2**(18) * dstep_pos / self.Ifs) + 1
+            reg_ramp_step_neg     = int(2**(18) * dstep_neg / self.Ifs) + 1 
+            reg_ramp_step_neg     = reg_ramp_step_neg << 32        
+            # change the bits for the ampl sweep, bit 20:21 in cfr2 while keeping the rest the same
+            self.reg_value_dict[self.CFR2] = self.set_bit_state(self.reg_value_dict[self.CFR2], 2, 20, 2)
 
         self.reg_value_dict[self.DRL] = reg_lower_limit | reg_upper_limit
         self.reg_value_dict[self.DRS] = reg_ramp_step_pos | reg_ramp_step_neg
         self.reg_value_dict[self.DRR] = reg_ramp_rate_pos | reg_ramp_rate_neg
 
 
-    def switch_digital_ramp_enable_register(self):
-        """sets the Digital Ramp Enable bit in register CFR2
+
+
+
+
+    def switch_digital_ramp_enable_register(self, val):
+        """Switches the Digital Ramp Enable bit in register CFR2
         Digital Ramp Enable bit 19 in CFR2
         """
-        self.reg_value_dict[self.CFR2] = (self.reg_value_dict[self.CFR2] ^ (1<<19))  # parallel pin activated at the same time?!?!?
+        self.reg_value_dict[self.CFR2] = self.set_bit_state(self.reg_value_dict[self.CFR2], val, 19, 1)  # parallel pin activated at the same time?!?!?
        
 
 
-    def switch_autoclear_register(self):
-        """sets the Digital Ramp Enable bit in register CFR2
-        Digital Ramp Enable bit 19 in CFR2
+    def switch_autoclear_register(self, val):
+        """Switches the Digital Ramp Autoclear bit in register CFR1
+        Digital Ramp Enable bit 14 in CFR1
         """
-        self.reg_value_dict[self.CFR1] = (self.reg_value_dict[self.CFR1] ^ (1<<14)) 
+        self.reg_value_dict[self.CFR1] = self.set_bit_state(self.reg_value_dict[self.CFR1], val, 14, 1) 
        
 
 
+    def set_bit_state(self, n, val, pos, bit_size):
+        """This function sets certain bits to the value given while keeping the rest the same
+        watch out: pos starts to count at zero
+        e.g. n = 1001010101, val = 2, pos = 4, bit_size = 3
+        -> ret = 1000100101"""
 
+        return ( (n - (n & ((2**bit_size - 1)<<pos))) ^ (val<<pos) )
 
 
 # ad9910.py ends here
