@@ -172,6 +172,10 @@ class api:
             raise RuntimeError("Cannot pop from empty loop stack")
         self.sequencer.bdec_register.pop()
 
+
+        nop_insn = instructions.nop(val=(register_addr<<23))
+        self.sequencer.add_insn(nop_insn)
+
         bdec_insn = instructions.bdec(target_name, register_addr)
 
         nop_insn = instructions.nop()
@@ -184,15 +188,27 @@ class api:
 
 
 
+    def instructions_nop(self, val):
+        nop_insn = instructions.nop(val=(val<<23))
+        self.sequencer.add_insn(nop_insn)
 
     def instructions_bdec(self, target_name, reg_addr):
+        nop_insn = instructions.nop(val=(reg_addr<<23))
+        self.sequencer.add_insn(nop_insn)
+
         bdec_insn = instructions.bdec(target_name, reg_addr)
         nop_insn = instructions.nop()
+
         self.sequencer.add_insn(bdec_insn)
+        for i in range(5):
+            self.sequencer.add_insn(nop_insn)
+
 
     def instructions_ldc(self, reg_addr, loop_count):
         ldc_insn = instructions.ldc(reg_addr, loop_count)
         nop_insn = instructions.nop()
+#        for i in range(4):
+#            self.sequencer.add_insn(nop_insn)
         self.sequencer.add_insn(ldc_insn)
 
 

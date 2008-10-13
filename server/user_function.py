@@ -81,7 +81,8 @@ Include Files:
 """
 
 import logging
-from math import *
+#from math import *
+import math
 
 from  sequencer2 import sequencer
 from  sequencer2 import api
@@ -135,17 +136,43 @@ class multiple_pulses():
         self.no_of_pulses = no_of_pulses
               
 
-        # loops bigger than max_no_of_cycles will be split in several loops               
-        self.add_no_of_loops = int(self.no_of_pulses - 1) / int(self.max_no_of_cycles)   # == 0, if no_of_pulses<=255
-        self.rest_cycles = int(self.no_of_pulses - 1) % int(self.max_no_of_cycles) + 1
+        # x * 255^n + r = no_of_pulses
+        if self.no_of_pulses<=self.max_no_of_cycles:
+            self.n = 0
+            self.x = 0
+            self.r = self.no_of_pulses
+            self.no_of_n_loops = 0
+            self.no_of_x_loops = 0
+            self.no_of_r_loops = 1
 
-        self.counter = 0
+        else:
+            if self.no_of_pulses<=2*self.max_no_of_cycles:
+                self.n = 0
+                self.x = 255
+                self.r = self.no_of_pulses - self.max_no_of_cycles
+                self.no_of_n_loops = 0
+                self.no_of_x_loops = 1
+                self.no_of_r_loops = 1
 
-        self.label = []
-        for i in range(self.add_no_of_loops+1):
+            else:
+                self.n = int(math.log(self.no_of_pulses)/math.log(self.max_no_of_cycles))       
+                self.x = int(self.no_of_pulses) / int(self.max_no_of_cycles**(self.n))
+                self.r = int(self.no_of_pulses) % int(self.max_no_of_cycles**(self.n))
+                self.no_of_n_loops = self.n
+                self.no_of_x_loops = int(self.x>0)
+                self.no_of_r_loops = int(self.r>0)
+
+
+        self.counter = 0  # 0 = in full loop, 1 = in last full loop, 2 = in rest loop, 3 = end of all loops
+
+        self.loop_labels = []
+        for i in range(self.no_of_n_loops+self.no_of_x_loops+self.no_of_r_loops):
             self.last_label_index = len(automatic_label_list)-1
-            self.label.append(automatic_label_list[self.last_label_index])
+            self.loop_labels.append(automatic_label_list[self.last_label_index])
             automatic_label_list.append('aut_label_' + str(self.last_label_index+2))
+
+        print automatic_label_list
+        print self.loop_labels
 
     def __iter__(self):
         return self
@@ -153,17 +180,33 @@ class multiple_pulses():
     def next(self):
         if self.counter == 0:
             self.counter = 1
-            # add additional loops which go up to 255 and one loop for the rest cycles            
-            for i in range(self.add_no_of_loops):
-                self.start_finite(self.label[i], self.max_no_of_cycles)
-            self.start_finite(self.label[self.add_no_of_loops], self.rest_cycles)
-            return 0
+
+            for i in range(self.no_of_n_loops):
+                self.start_finite(self.loop_labels[i], self.max_no_of_cycles)
+
+            if self.no_of_x_loops>0:
+                self.start_finite(self.loop_labels[self.no_of_n_loops], self.x)
+
         else:
-            self.end_finite(self.label[self.add_no_of_loops])
-            for i in range(self.add_no_of_loops-1, -1, -1):
-                self.end_finite(self.label[i])
-            raise StopIteration()
-            return 0
+            if self.counter == 1:
+
+                self.counter = 2
+                if self.no_of_x_loops>0:
+                    self.end_finite(self.loop_labels[self.no_of_n_loops])
+
+                for i in range(self.no_of_n_loops-1, -1, -1):
+                    self.end_finite(self.loop_labels[i])
+ 
+                if self.no_of_r_loops>0:
+                    self.start_finite(self.loop_labels[self.no_of_n_loops + self.no_of_x_loops], self.r)
+
+            else:
+                if self.no_of_r_loops>0:
+                    self.end_finite(self.loop_labels[self.no_of_n_loops + self.no_of_x_loops])
+                raise StopIteration()
+
+        return 0
+
 
     def start_finite(self, target_name, loop_counts):
         global sequence_var

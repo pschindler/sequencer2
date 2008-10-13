@@ -439,6 +439,47 @@ class HardwareTests:
         self.compile(my_sequencer, 0)
 
 
+    def test_looping(self):
+        my_sequencer = sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+
+
+        my_api.ttl_value(0x0)
+        my_api.label("go")
+
+        my_api.ttl_value(0x11)
+        my_api.wait(2)
+        my_api.ttl_value(0x0)
+        my_api.wait(50)
+       
+
+
+        reg_addr = 5
+        reg_addr2 = 3
+        my_api.ttl_value(0x0)
+        my_api.instructions_ldc(reg_addr, 5)
+        my_api.label("test1")
+
+        my_api.instructions_ldc(reg_addr2, 3)
+        my_api.label("innerloop")
+
+        my_api.ttl_value(0x10)
+        my_api.wait(10)
+        my_api.ttl_value(0x0)
+        my_api.wait(20)
+
+        my_api.instructions_bdec("innerloop", reg_addr2)
+
+#        my_api.wait(50)
+
+        my_api.instructions_bdec("test1", reg_addr)
+
+
+        my_api.jump("go")
+
+
+        self.compile(my_sequencer, 1)
+
 
     def compile(self, my_sequencer, show_debug=0):
         "compile and send the sequence"
@@ -446,6 +487,6 @@ class HardwareTests:
         ptp1 = comm.PTPComm(self.nonet)
         ptp1.send_code(my_sequencer.word_list)
         if show_debug:
-            my_sequencer.debug_sequence()
+            my_sequencer.debug_sequence(show_word_list=True)
 
 # test_lvds_bus.py ends here

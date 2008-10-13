@@ -41,9 +41,20 @@ class InsnClass:
 class nop(InsnClass):
     """No operation
     """
-    def __init__(self):
+    def __init__(self, val=0x0):
         self.name = "nop"
         self.opcode = 0x0
+        self.val = val
+
+    def get_value(self):
+        """returns the hex value"""
+        return self.opcode << 28 | self.val
+
+    def __str__(self):
+        return " add: "+str(self.address) + \
+               " -- op:  "+str(hex(self.opcode)) + \
+               " -- nam: "+str(self.name) +\
+               " -- val: "+str(hex(self.val))
 
 class halt(InsnClass):
     """stop the processor
