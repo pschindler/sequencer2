@@ -38,7 +38,9 @@ def PMTDetection(pmt_detect_length):
 #        seq_wait(10)
 
 
-#    dds_freq_sweep(5, [0, 10, 30, 50], [1, 0, -1], 1, 1, 10, 20, 10, 60, is_last=True)
+    dds_freq_sweep(5, [0, 10, 30, 50], [1, 0, -1], 1, 1, 10, 20, 10, 60, is_last=True)
+
+
 
 #    dds_ampl_sweep(5, [0, 10, 20, 30], [1, 0, -1], 0.1, 0.1, 10, 10, 10, 100, is_last=False)
 

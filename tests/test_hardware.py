@@ -481,6 +481,8 @@ class HardwareTests:
         self.compile(my_sequencer, 1)
 
 
+
+
     def compile(self, my_sequencer, show_debug=0):
         "compile and send the sequence"
         my_sequencer.compile_sequence()

@@ -184,41 +184,6 @@ class api:
             self.sequencer.add_insn(copy.copy(nop_insn))
 
 
-
-
-
-
-    def instructions_nop(self, val):
-        nop_insn = instructions.nop(val=(val<<23))
-        self.sequencer.add_insn(nop_insn)
-
-    def instructions_bdec(self, target_name, reg_addr):
-        nop_insn = instructions.nop(val=(reg_addr<<23))
-        self.sequencer.add_insn(nop_insn)
-
-        bdec_insn = instructions.bdec(target_name, reg_addr)
-        nop_insn = instructions.nop()
-
-        self.sequencer.add_insn(bdec_insn)
-        for i in range(5):
-            self.sequencer.add_insn(nop_insn)
-
-
-    def instructions_ldc(self, reg_addr, loop_count):
-        ldc_insn = instructions.ldc(reg_addr, loop_count)
-        nop_insn = instructions.nop()
-#        for i in range(4):
-#            self.sequencer.add_insn(nop_insn)
-        self.sequencer.add_insn(ldc_insn)
-
-
-
-
-
-
-
-
-
     def begin_subroutine(self, sub_name):
         """inserts a label for a subroutine
         It has to be called with an empty sequencer.current_sequence

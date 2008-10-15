@@ -15,7 +15,7 @@ import re
 class Config:
     """Simple wrapper class for the Config Parser module
     """
-    def __init__(self, filename="./config/sequencer2.ini"):
+    def __init__(self, filename=["./config/sequencer2.ini", "./config/user_sequencer2.ini"]):
         self.config = ConfigParser.ConfigParser()
         self.config.read(filename)
         self.item_dict = {}
