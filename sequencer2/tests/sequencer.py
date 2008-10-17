@@ -108,7 +108,7 @@ class Test_Sequencer(unittest.TestCase):
     my_api = api.api(my_sequencer)
     my_api.dac_value(-12, 1)
     current_seq = my_sequencer.current_sequence
-    self.assertEquals(len(current_seq),4)
+    self.assertEquals(len(current_seq),7)
     del(my_sequencer)
 
   def test_p_insn(self):

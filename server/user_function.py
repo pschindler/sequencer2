@@ -148,7 +148,7 @@ class multiple_pulses():
         else:
             if self.no_of_pulses<=2*self.max_no_of_cycles:
                 self.n = 0
-                self.x = 255
+                self.x = self.max_no_of_cycles
                 self.r = self.no_of_pulses - self.max_no_of_cycles
                 self.no_of_n_loops = 0
                 self.no_of_x_loops = 1
@@ -171,39 +171,38 @@ class multiple_pulses():
             self.loop_labels.append(automatic_label_list[self.last_label_index])
             automatic_label_list.append('aut_label_' + str(self.last_label_index+2))
 
-        print automatic_label_list
-        print self.loop_labels
+
+        self.counter = 1
+
+        for i in range(self.no_of_n_loops):
+             self.start_finite(self.loop_labels[i], self.max_no_of_cycles)
+
+        if self.no_of_x_loops>0:
+             self.start_finite(self.loop_labels[self.no_of_n_loops], self.x)
+
+
 
     def __iter__(self):
         return self
 
     def next(self):
-        if self.counter == 0:
-            self.counter = 1
+        if self.counter == 1:
 
-            for i in range(self.no_of_n_loops):
-                self.start_finite(self.loop_labels[i], self.max_no_of_cycles)
-
+            self.counter = 2
             if self.no_of_x_loops>0:
-                self.start_finite(self.loop_labels[self.no_of_n_loops], self.x)
+                self.end_finite(self.loop_labels[self.no_of_n_loops])
+
+            for i in range(self.no_of_n_loops-1, -1, -1):
+                self.end_finite(self.loop_labels[i])
+ 
+            if self.no_of_r_loops>0:
+                self.start_finite(self.loop_labels[self.no_of_n_loops + self.no_of_x_loops], self.r)
 
         else:
-            if self.counter == 1:
 
-                self.counter = 2
-                if self.no_of_x_loops>0:
-                    self.end_finite(self.loop_labels[self.no_of_n_loops])
-
-                for i in range(self.no_of_n_loops-1, -1, -1):
-                    self.end_finite(self.loop_labels[i])
- 
-                if self.no_of_r_loops>0:
-                    self.start_finite(self.loop_labels[self.no_of_n_loops + self.no_of_x_loops], self.r)
-
-            else:
-                if self.no_of_r_loops>0:
-                    self.end_finite(self.loop_labels[self.no_of_n_loops + self.no_of_x_loops])
-                raise StopIteration()
+            if self.no_of_r_loops>0:
+                self.end_finite(self.loop_labels[self.no_of_n_loops + self.no_of_x_loops])
+            raise StopIteration()
 
         return 0
 
@@ -222,24 +221,24 @@ class multiple_pulses():
 
 
 
-def dds_freq_sweep(dds_address, time_array, slope_array, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last=False):
+def dds_freq_sweep(dds_address, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, is_last=False):
 
     global sequence_var
-    ramp_init = DDSSweep('freq', time_array, slope_array, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last)
+    ramp_init = DDSSweep('freq', time_array, slope_array, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last)
  
     sequence_var.append(ramp_init.sequence_var)
 
-def dds_phase_sweep(dds_address, time_array, slope_array, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last=False):
+def dds_phase_sweep(dds_address, time_array, slope_array, dphase_pos, dphase_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, is_last=False):
 
     global sequence_var
-    ramp_init = DDSSweep('phase', time_array, slope_array, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last)
+    ramp_init = DDSSweep('phase', time_array, slope_array, dds_address, dphase_pos, dphase_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last)
  
     sequence_var.append(ramp_init.sequence_var)
 
-def dds_ampl_sweep(dds_address, time_array, slope_array, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last=False):
+def dds_ampl_sweep(dds_address, time_array, slope_array, dampl_pos, dampl_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, is_last=False):
 
     global sequence_var
-    ramp_init = DDSSweep('ampl', time_array, slope_array, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last)
+    ramp_init = DDSSweep('ampl', time_array, slope_array, dds_address, dampl_pos, dampl_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last)
  
     sequence_var.append(ramp_init.sequence_var)
 

@@ -120,6 +120,7 @@ class j(InsnClass):
         """returns the hex value for j insns"""
         self.target_address = target_address
         return self.opcode << 28 | target_address
+
     def __str__(self):
         return " add: "+str(self.address) + \
                " -- op:  "+str(hex(self.opcode)) + \
@@ -171,13 +172,24 @@ class call(j):
     """
     name = "call"
     opcode = 0x5
-
+    
+    def __str__(self):
+        return " add: "+str(self.address) + \
+               " -- op:  "+str(hex(self.opcode)) + \
+               " -- nam: "+str(self.name) + \
+               " -- tar: "+str(self.target_address)
+   
 class ret(InsnClass):
     """returns from the last subroutine
     """
     name = "ret"
     opcode = 0x6
 
+    def __str__(self):
+        return " add: "+str(self.address) + \
+               " -- op:  "+str(hex(self.opcode)) + \
+               " -- nam: "+str(self.name)
+ 
 class wait(InsnClass):
     """inserts a wait insn
     """

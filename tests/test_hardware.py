@@ -121,7 +121,7 @@ class HardwareTests:
 
         my_api.update_dds(dds_device)
         my_api.dac_value(amplitude, my_device)
-        my_api.wait(10)
+        my_api.wait(1000)
         my_api.jump("beginseq")
 
         self.compile(my_sequencer)
@@ -333,11 +333,13 @@ class HardwareTests:
 
 
 
-
-    def test_all_dds_loops(self, frequency=10, amplitude=-15, no_of_boards=6, clock=800):
-        "Just sets a single profile of the dds and activates it"
+    def test_all_dds_loops(self, frequency=10, amplitude=-15, clock=800):
+        """Tests all the number of DDS boards that is given in the config file
+        via putting out the frequency and amplitude given with the paramters"""
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
+
+        
 
         dds_device = []
         for k in range(no_of_boards):
@@ -366,6 +368,25 @@ class HardwareTests:
 
         self.compile(my_sequencer)
 
+
+    def test_dac(self, frequency=10, amplitude=-15, clock=800):
+        """Tests all the number of DDS boards that is given in the config file
+        via putting out the frequency and amplitude given with the paramters"""
+        my_sequencer = sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+
+        
+
+        dds_device = []
+        k = 0
+        dds_device.append(ad9910.AD9910(k, clock))
+        my_api.init_dds(dds_device[k])
+
+        my_api.label("a")
+        my_api.dac_value(amplitude, k)            
+        my_api.label("b")
+
+        self.compile(my_sequencer, 1)
 
 
 

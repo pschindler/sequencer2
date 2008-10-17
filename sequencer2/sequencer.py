@@ -84,7 +84,7 @@ class sequencer:
         self.is_subroutine = True
 
     def end_subroutine(self):
-        """ends the current subroutine#
+        """ends the current subroutine
         appends current_sequence to sub_list
         flushes current_sequence"""
         self.sub_list.append(copy.copy(self.current_sequence))

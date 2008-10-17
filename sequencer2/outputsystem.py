@@ -21,7 +21,7 @@ class TTLChannel:
         self.is_inverted = is_inverted
 
     def __str__(self):
-        return "nam: "+str(self.name)+" bit_nr: "+str(self.bit_nr)+\
+        return "nam: "+str(self.name) + (15-len(self.name))*' ' + " bit_nr: "+ (2-len(str(self.bit_nr)))*' ' +str(self.bit_nr)+\
                " sel: "+str(self.select) + " inv: " + str(self.is_inverted)
 
 class OutputSystem:

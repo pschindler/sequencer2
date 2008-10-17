@@ -65,6 +65,7 @@ class Start_Finite(SeqInstruction):
         self.target_name = target_name
         self.loop_counts = loop_counts
         self.start_time = 0.0
+        self.duration = 0.01
         self.is_last = True
         self.name = "StartLoopEvent"
         self.sequence_var = []
@@ -85,6 +86,7 @@ class End_Finite(SeqInstruction):
     def __init__(self, target_name):
         self.target_name = target_name
         self.start_time = 0.0
+        self.duration = 0.01
         self.is_last = True
         self.name = "EndLoopEvent"
         self.sequence_var = []
@@ -330,7 +332,7 @@ class DDSSweep(SeqInstruction):
     ramp_type = 'freq', 'ampl', 'phase'
     the non-ramped parameters will be taken from the current profile settings
     """
-    def __init__(self, ramp_type, time_array, slope_array, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last):
+    def __init__(self, ramp_type, time_array, slope_array, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last):
 
         self.sequence_var = []
         dds_prg_time = 0.1
@@ -339,7 +341,7 @@ class DDSSweep(SeqInstruction):
 
         start_time = time_array[0]
 
-        program_ramp_gen_event = ProgramRampGeneratorEvent(ramp_type, start_time, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last=False)
+        program_ramp_gen_event = ProgramRampGeneratorEvent(ramp_type, start_time, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last=False)
 
         start_dds_ramp_event = StartRampGeneratorEvent(start_time + dds_prg_time, dds_address, is_last=False)
 
@@ -507,7 +509,7 @@ class DDSSwitchEvent(SeqInstruction):
 
 class ProgramRampGeneratorEvent(SeqInstruction):
     "Programs the ramp generator"
-    def __init__(self, ramp_type, start_time, dds_address, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit, is_last=False):
+    def __init__(self, ramp_type, start_time, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last=False):
         self.start_time = start_time
         self.duration = self.cycle_time
         self.dt_pos = dt_pos
