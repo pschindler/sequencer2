@@ -27,7 +27,7 @@ def PMTDetection(pmt_detect_length):
 #    rf_pulse(15,0,1,"sb_cooling_3", 100.0, is_last=False, address=1)
 
 
-#    PMT_trigger_length = 10
+    PMT_trigger_length = 10
 #    ttl_pulse("PMT trigger", PMT_trigger_length)
 #    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=pmt_detect_length)
 #    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=pmt_detect_length)
@@ -39,8 +39,15 @@ def PMTDetection(pmt_detect_length):
 #        seq_wait(10)
 
 
-#    dds_freq_sweep(5, [0, 10, 30, 50], [1, 0, -1], 10, 20, 10, 60, 1, 1, is_last=True)
 
+    ttl_pulse("PMT trigger", PMT_trigger_length)
+    dds_freq_sweep(5, [0, 10, 30, 50], [1, 0, -1], 10, 20, 10, 60, loop_counts=25)
+
+    ttl_pulse("PMT trigger", PMT_trigger_length, is_last=False)
+
+    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=5.0, is_last=False)
+
+    #ttl_pulse("PMT trigger", PMT_trigger_length, is_last=False)
 #    dds_freq_sweep(4, [0, 10, 30, 50], [1, 0, -1], 10, 20, 10, 60, 1, 1, is_last=True)
 
 
@@ -52,9 +59,9 @@ def PMTDetection(pmt_detect_length):
 
 #    for i in multiple_pulses(3):
 #        seq_wait(10)
-    for i in multiple_pulses(255**15 + 255):
-        ttl_pulse("PMT trigger", 5)
-        seq_wait(5)
+#    for i in multiple_pulses(255**3*5 + 255):
+#        ttl_pulse("PMT trigger", 5)
+#        seq_wait(5)
 
     
 

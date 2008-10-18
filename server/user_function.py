@@ -251,28 +251,38 @@ class multiple_pulses():
 
 
 
-def dds_freq_sweep(dds_address, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, is_last=False):
+
+def dds_freq_sweep(dds_address, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, loop_counts=0, is_last=True):
 
     global sequence_var
-    ramp_init = DDSSweep('freq', time_array, slope_array, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last)
- 
-    sequence_var.append(ramp_init.sequence_var)
+    global automatic_label_list
 
-def dds_phase_sweep(dds_address, time_array, slope_array, dphase_pos, dphase_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, is_last=False):
+    if loop_counts==0:
+        new_loop_label = None
+    else:
+        new_loop_label =  automatic_label_list[len(automatic_label_list)-1]
+        automatic_label_list.append('aut_label_' + str(len(automatic_label_list)+2))
 
-    global sequence_var
-    ramp_init = DDSSweep('phase', time_array, slope_array, dds_address, dphase_pos, dphase_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last)
- 
-    sequence_var.append(ramp_init.sequence_var)
-
-def dds_ampl_sweep(dds_address, time_array, slope_array, dampl_pos, dampl_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, is_last=False):
-
-    global sequence_var
-    ramp_init = DDSSweep('ampl', time_array, slope_array, dds_address, dampl_pos, dampl_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last)
+    ramp_init = DDSSweep('freq', time_array, slope_array, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, new_loop_label, is_last)
  
     sequence_var.append(ramp_init.sequence_var)
 
 
+
+def dds_ampl_sweep(dds_address, time_array, slope_array, dampl_pos, dampl_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, loop_counts=0, is_last=True):
+
+    global sequence_var
+    global automatic_label_list
+
+    if loop_counts==0:
+        new_loop_label = None
+    else:
+        new_loop_label =  automatic_label_list[len(automatic_label_list)-1]
+        automatic_label_list.append('aut_label_' + str(len(automatic_label_list)+2))
+
+    ramp_init = DDSSweep('ampl', time_array, slope_array, dds_address, dampl_pos, dampl_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, new_loop_label, is_last)
+ 
+    sequence_var.append(ramp_init.sequence_var)
 
 
 
