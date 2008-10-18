@@ -122,78 +122,64 @@ class Config:
         array = content.split("\n")
 
         for i in range(len(array)):
-            is_PB_device = array[i].find('.dev name=PB')
-            is_invPB_device = array[i].find('.dev name=!PB')
-            is_inverted = False
-            if (is_invPB_device != -1):
-                is_inverted = True
-#                raise RuntimeError("No inverted digital channels supported yet")
-            if (is_PB_device != -1) or (is_invPB_device!=-1):
-                split_ch_name = array[i-2].split(".")
-                split_ch_name = split_ch_name[1].split("=")
-                ch_name       = split_ch_name[1]
-                # check for quotation marks in the channel name
-                m = re.search('"?([^"]*)"?',ch_name)
-                ch_name=m.group(1)
+
+            if self.get_str('OTHER','how_to_parse_hardware_settings')=='qfp_new':
+
+                is_PB_device = array[i].find('.dev name=PB')
+                is_invPB_device = array[i].find('.dev name=!PB')
+                is_inverted = False
+                if (is_invPB_device != -1):
+                    is_inverted = True
+                if (is_PB_device != -1) or (is_invPB_device!=-1):
+                    split_ch_name = array[i-2].split(".")
+                    split_ch_name = split_ch_name[1].split("=")
+                    ch_name       = split_ch_name[1]
+                    # check for quotation marks in the channel name
+                    m = re.search('"?([^"]*)"?',ch_name)
+                    ch_name=m.group(1)
 
 
-                split_ch_number = array[i+2].split(".")
-                split_ch_number = split_ch_number[1].split("=")
-                ch_number       = split_ch_number[1]
+                    split_ch_number = array[i+2].split(".")
+                    split_ch_number = split_ch_number[1].split("=")
+                    ch_number       = split_ch_number[1]
                 
-                try:
-                    if int(ch_number) <= 15:
-                        select = 2
-                    else:
-                        select = 3
-                    dictionary[ch_name] = TTLChannel(ch_name, int(ch_number) % 16, select, is_inverted)
-                    self.logger.debug(str(dictionary[ch_name]))
+                    try:
+                        if int(ch_number) <= 15:
+                            select = 2
+                        else:
+                            select = 3
+                        dictionary[ch_name] = TTLChannel(ch_name, int(ch_number) % 16, select, is_inverted)
+                        self.logger.debug(str(dictionary[ch_name]))
  
-                except SyntaxError:
-                    self.logger.warn("got a non int channel number"+split2[1])
+                    except SyntaxError:
+                        self.logger.warn("got a non int channel number"+split2[1])
 
+            if self.get_str('OTHER','how_to_parse_hardware_settings')=='qfp_old':
+                is_PB_device = array[i].find('.Device=PB')
+                is_invPB_device = array[i].find('.Device=!PB')
+                is_inverted = False
+                if (is_invPB_device != -1):
+                    is_inverted = True
+                if (is_PB_device != -1) or (is_invPB_device!=-1):
+                    to_test = [array[i-1], array[i+1]]
+                    split1 = array[i].split(".")
+                    ch_name = split1[0]
+                    for item in to_test:
+                        split2 = item.split(".")
+                        if split2[0] == ch_name:
+                            split3 = split2[1].split("=")
+                            try:
+                                if int(split3[1]) < 15:
+                                    select = 2
+                                else:
+                                    select = 3
+                                dictionary[split1[0]] = TTLChannel(split1[0], \
+                                                                   int(split3[1]), select, is_inverted)
+                                self.logger.debug(str(dictionary[split1[0]]))
 
-
-
-#        for i in range(len(array)):
-#            is_PB_device = array[i].find('.Device=PB')
-#            is_invPB_device = array[i].find('.Device=!PB')
-#            is_inverted = False
-#            if (is_invPB_device != -1):
-#                is_inverted = True
-##                raise RuntimeError("No inverted digital channels supported yet")
-#            if (is_PB_device != -1) or (is_invPB_device!=-1):
-#                to_test = [array[i-1], array[i+1]]
-#                split1 = array[i].split(".")
-#                ch_name = split1[0]
-#                for item in to_test:
-#                    split2 = item.split(".")
-#                    if split2[0] == ch_name:
-#                        split3 = split2[1].split("=")
-#                        try:
-#                            if int(split3[1]) < 15:
-#                                select = 2
-#                            else:
-#                                select = 3
-#                            dictionary[split1[0]] = TTLChannel(split1[0], \
-#                                                               int(split3[1]), select, is_inverted)
-#                            self.logger.debug(str(dictionary[split1[0]]))
-#
-#                        except SyntaxError:
-#                            self.logger.warn("got a non int channel number"\
-#                                                 +split2[1])
-
-
-
-
-
-
-
-
-
-
-
-
+                            except SyntaxError:
+                                self.logger.warn("got a non int channel number"\
+                                                     +split2[1])
 
         return dictionary
 

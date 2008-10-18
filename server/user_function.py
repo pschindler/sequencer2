@@ -128,6 +128,11 @@ class multiple_pulses():
                 ttl_pulse(...)
                 rf_pulse(...)
                 ttl_pulse(...)
+
+    the maximum number of loop cycles is 255**15 + 255 ... 1mus ttl pulses this corresponds to 7e26 years pulse time ... should be enough :-)
+
+    development note:
+            the class is initialized and then the next() method is called. After that the code in the loop is executed and the next next() method called.
     """
     def __init__(self, no_of_pulses):
 
@@ -145,6 +150,8 @@ class multiple_pulses():
             self.no_of_x_loops = 0
             self.no_of_r_loops = 1
 
+            self.case = 1
+
         else:
             if self.no_of_pulses<=2*self.max_no_of_cycles:
                 self.n = 0
@@ -154,16 +161,19 @@ class multiple_pulses():
                 self.no_of_x_loops = 1
                 self.no_of_r_loops = 1
 
+                self.case = 2
+
             else:
                 self.n = int(math.log(self.no_of_pulses)/math.log(self.max_no_of_cycles))       
-                self.x = int(self.no_of_pulses) / int(self.max_no_of_cycles**(self.n))
+                self.x = int(self.no_of_pulses / self.max_no_of_cycles**(self.n))
                 self.r = int(self.no_of_pulses) % int(self.max_no_of_cycles**(self.n))
                 self.no_of_n_loops = self.n
-                self.no_of_x_loops = int(self.x>0)
+                self.no_of_x_loops = int(self.x>1) # only one loop cycle doesn't make sense here
                 self.no_of_r_loops = int(self.r>0)
 
+                self.case = 3
 
-        self.counter = 0  # 0 = in full loop, 1 = in last full loop, 2 = in rest loop, 3 = end of all loops
+        self.counter = 1  # 0 = in full loop, 1 = in last full loop, 2 = in rest loop, 3 = end of all loops
 
         self.loop_labels = []
         for i in range(self.no_of_n_loops+self.no_of_x_loops+self.no_of_r_loops):
@@ -171,38 +181,58 @@ class multiple_pulses():
             self.loop_labels.append(automatic_label_list[self.last_label_index])
             automatic_label_list.append('aut_label_' + str(self.last_label_index+2))
 
-
-        self.counter = 1
-
-        for i in range(self.no_of_n_loops):
-             self.start_finite(self.loop_labels[i], self.max_no_of_cycles)
-
-        if self.no_of_x_loops>0:
-             self.start_finite(self.loop_labels[self.no_of_n_loops], self.x)
-
-
-
     def __iter__(self):
         return self
 
     def next(self):
-        if self.counter == 1:
 
-            self.counter = 2
-            if self.no_of_x_loops>0:
-                self.end_finite(self.loop_labels[self.no_of_n_loops])
-
-            for i in range(self.no_of_n_loops-1, -1, -1):
-                self.end_finite(self.loop_labels[i])
- 
-            if self.no_of_r_loops>0:
-                self.start_finite(self.loop_labels[self.no_of_n_loops + self.no_of_x_loops], self.r)
+        if self.case==1:
+            # only one for loop
+            if self.counter==1:
+                self.start_finite(self.loop_labels[0], self.r)
+                self.counter = 0
+            else:
+                self.end_finite(self.loop_labels[0])
+                raise StopIteration()
 
         else:
+            if self.case==2:
+                # two for loops
+                if self.counter==1:
+                    self.start_finite(self.loop_labels[0], self.x)
+                    self.counter=2                    
+                else:
+                    if self.counter==2:                        
+                        self.end_finite(self.loop_labels[0])
+                        self.start_finite(self.loop_labels[1], self.r)
+                        self.counter=0                        
+                    else:
+                        self.end_finite(self.loop_labels[1])
+                        raise StopIteration()
+            else:
+                # more than two loops
+                if self.counter==1:
+                    for i in range(self.no_of_n_loops):
+                       self.start_finite(self.loop_labels[i], self.max_no_of_cycles)
+                    if (self.no_of_x_loops>0):
+                      self.start_finite(self.loop_labels[self.no_of_n_loops], self.x)
+                    self.counter=2
+                else:
+                    if self.counter==2:
+                        if (self.no_of_x_loops>0):
+                           self.end_finite(self.loop_labels[self.no_of_n_loops])
+                        for i in range(self.no_of_n_loops-1, -1, -1):
+                           self.end_finite(self.loop_labels[i])
 
-            if self.no_of_r_loops>0:
-                self.end_finite(self.loop_labels[self.no_of_n_loops + self.no_of_x_loops])
-            raise StopIteration()
+                        if (self.no_of_r_loops>0):
+                            self.start_finite(self.loop_labels[self.no_of_n_loops+self.no_of_x_loops], self.r)
+                            self.counter=0
+                        else:
+                            raise StopIteration()
+                    else:
+                        if (self.no_of_r_loops>0):
+                            self.end_finite(self.loop_labels[self.no_of_n_loops+self.no_of_x_loops])
+                            raise StopIteration()
 
         return 0
 

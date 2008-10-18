@@ -5,7 +5,7 @@
 
 
 <VARIABLES>
-#det_time=self.set_variable("float","det_time",100000.000000,0.01,2e7)
+det_time=self.set_variable("float","det_time",100000.000000,0.01,2e7)
 #freq729=self.set_variable("float","freq729",482.750000,400,600)
 #power729=self.set_variable("float","power729",0.000000,-100,1)
 #freqRaman=self.set_variable("float","freqRaman",260.000000,230,400)
@@ -30,7 +30,7 @@ Cycles 1
 </PARAMS OVERRIDE>
 
 <SEQUENCE>
-print det_time
+#print det_time
 #test_global("Juhu")
 #test_include("123")
 #for i in range(1):
@@ -46,7 +46,7 @@ print det_time
 # if switchRaman: rf_setRaman(freqRaman,powerRaman)
 # else: rf_setRaman(freqRaman,-100)
 
-# incl.PMTDetection(det_time,gl_cam_time,no_lasers=True)
+PMTDetection(det_time)
 </SEQUENCE>
 
 <AUTHORED BY LABVIEW>

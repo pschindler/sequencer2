@@ -52,14 +52,11 @@ def PMTDetection(pmt_detect_length):
 
 #    for i in multiple_pulses(3):
 #        seq_wait(10)
-    for i in multiple_pulses(255+1):
+    for i in multiple_pulses(255**15 + 255):
         ttl_pulse("PMT trigger", 5)
         seq_wait(5)
 
     
-#    for i in multiple_pulses(3):
-#        ttl_pulse("PMT trigger", 5)
-#        seq_wait(5)
 
 
 

@@ -167,9 +167,9 @@ class sequencer:
                 insn_str += str(insn) + "\n"
             else:
                 if insn.is_branch==True:
-                    insn_str += str(insn) + (70 - len(str(insn)))*' ' + "word: " + hex(insn.get_jump_value(insn.target_address)) + "\n"
+                    insn_str += str(insn) + (71 - len(str(insn)))*' ' + "word: " + hex(insn.get_jump_value(insn.target_address)) + "\n"
                 else:
-                    insn_str += str(insn) + (70 - len(str(insn)))*' ' + "word: " + hex(insn.get_value()) + "\n"
+                    insn_str += str(insn) + (71 - len(str(insn)))*' ' + "word: " + hex(insn.get_value()) + "\n"
 
         self.logger.debug(insn_str)
         if force:
