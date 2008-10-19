@@ -62,13 +62,14 @@ class DDSSweep(SeqInstruction):
     ramp_type = 'freq', 'ampl', 'phase'
     the non-ramped parameters will be taken from the current profile settings
     """
-    def __init__(self, ramp_type, time_array, slope_array, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, loop_label, is_last):
+    def __init__(self, ramp_type, time_array, slope_array, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last):
 
         self.sequence_var = []
         dds_prg_time = 0.1
         dds_stop_time = 0.1
         dds_conf_time = 0.1
 
+        # if dt_pos/neg=0. then take the lowest value possible
         if dt_pos==0:
             dt_pos = 4/GLOBAL_CONFIG.get_float("SERVER","reference_frequency")
         if dt_neg==0:
@@ -78,13 +79,13 @@ class DDSSweep(SeqInstruction):
 
         program_ramp_gen_event = ProgramRampGeneratorEvent(ramp_type, start_time, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last=False)
 
-        start_dds_ramp_event = StartRampGeneratorEvent(start_time + dds_prg_time, dds_address, loop_counts, loop_label, is_last=False)
+        start_dds_ramp_event = StartRampGeneratorEvent(start_time + dds_prg_time, dds_address, loop_counts, is_last=False)
 
         conf_ramp_event = []
         for k in range(len(time_array)-1):
             conf_ramp_event.append(ConfigureRampEvent(time_array[k] + dds_prg_time + dds_conf_time, dds_address, slope_array[k], is_last=False))
 
-        stop_dds_ramp_event = StopRampGeneratorEvent(time_array[len(time_array)-1] + dds_prg_time + dds_stop_time + dds_conf_time, dds_address, loop_counts, loop_label, is_last)
+        stop_dds_ramp_event = StopRampGeneratorEvent(time_array[len(time_array)-1] + dds_prg_time + dds_stop_time + dds_conf_time, dds_address, loop_counts, is_last)
 
 
 
@@ -106,18 +107,19 @@ class Start_Finite(SeqInstruction):
     @param target_name:  String identifier of the label to jump to
     @param loop_count: Desired number of loops
     """
-    def __init__(self, target_name, loop_counts=1):
+    def __init__(self, target_name, loop_counts=1, automatic_label=False):
         self.target_name = target_name
         self.loop_counts = loop_counts
+        self.automatic_label = automatic_label
         self.start_time = 0.0
         self.duration = self.cycle_time
-        self.is_last = True
+        self.is_last = True        
         self.name = "StartLoopEvent"
         self.sequence_var = []
         self.sequence_var = self.add_insn(self.sequence_var)
 
     def handle_instruction(self, api):
-        api.start_finite(self.target_name, self.loop_counts)
+        api.start_finite(self.target_name, self.loop_counts, self.automatic_label)
 
     def __str__(self):
         return str(self.name) + " | start: " + str(self.start_time) \
@@ -128,8 +130,9 @@ class End_Finite(SeqInstruction):
     Adds a bdec instruction and fills the branch delay slots
     @param target_name:  String identifier of the label to jump to
     """
-    def __init__(self, target_name):
+    def __init__(self, target_name, automatic_label=False):
         self.target_name = target_name
+        self.automatic_label = automatic_label
         self.start_time = 0.0
         self.duration = self.cycle_time
         self.is_last = True
@@ -138,7 +141,7 @@ class End_Finite(SeqInstruction):
         self.sequence_var = self.add_insn(self.sequence_var)
 
     def handle_instruction(self, api):
-        api.end_finite(self.target_name)
+        api.end_finite(self.target_name, self.automatic_label)
 
     def __str__(self):
         return str(self.name) + " | start: " + str(self.start_time) \
@@ -584,13 +587,12 @@ class ConfigureRampEvent(SeqInstruction):
 
 class StartRampGeneratorEvent(SeqInstruction):
     "Programs the ramp generator"
-    def __init__(self, start_time, dds_address, loop_counts, loop_label, is_last=False):
+    def __init__(self, start_time, dds_address, loop_counts, is_last=False):
         self.start_time = start_time
         self.duration = self.cycle_time
         self.is_last = is_last
         self.dds_address = dds_address
         self.loop_counts = loop_counts
-        self.loop_label = loop_label
         self.name = "Start_Ramp_Generator_Event"
 
     def handle_instruction(self, api):
@@ -602,7 +604,7 @@ class StartRampGeneratorEvent(SeqInstruction):
             raise RuntimeError("No DDS known with address: "+str(self.dds_address))
         api.start_digital_ramp_generator(dds_instance)
         if self.loop_counts>0:
-            api.start_finite(self.loop_label, self.loop_counts)
+            api.start_finite('', self.loop_counts, automatic_label=True)
 
     def __str__(self):
         return str(self.name) + " | start: " + str(self.start_time) \
@@ -612,13 +614,12 @@ class StartRampGeneratorEvent(SeqInstruction):
 
 class StopRampGeneratorEvent(SeqInstruction):
     "Programs the ramp generator"
-    def __init__(self, start_time, dds_address, loop_counts, loop_label, is_last=False):
+    def __init__(self, start_time, dds_address, loop_counts, is_last=False):
         self.start_time = start_time
         self.duration = self.cycle_time
         self.is_last = is_last
         self.dds_address = dds_address
         self.loop_counts = loop_counts
-        self.loop_label = loop_label
         self.name = "Stop_Ramp_Generator_Event"
 
     def handle_instruction(self, api):
@@ -629,7 +630,7 @@ class StopRampGeneratorEvent(SeqInstruction):
         except IndexError:
             raise RuntimeError("No DDS known with address: "+str(self.dds_address))
         if self.loop_counts>0:
-            api.end_finite(self.loop_label)
+            api.end_finite('', automatic_label=True)
         api.stop_digital_ramp_generator(dds_instance)
 
     def __str__(self):

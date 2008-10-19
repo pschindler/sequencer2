@@ -53,7 +53,7 @@ class nop(InsnClass):
     def __str__(self):
         return " add: "+str(self.address) + \
                " -- op:  "+str(hex(self.opcode)) + \
-               " -- nam: "+str(self.name) +\
+               " -- nam: "+str(self.name) + "  " + \
                " -- val: "+str(hex(self.val))
 
 class halt(InsnClass):
@@ -98,8 +98,8 @@ class p(InsnClass):
     def __str__(self):
         return " add: "+str(self.address) + \
                " -- op:  "+str(hex(self.opcode)) + \
-               " -- nam: "+str(self.name) +\
-               " -- sel: "+str(hex(self.change_state)) +\
+               " -- nam: "+str(self.name) + "    " + \
+               " -- sel: "+str(hex(self.change_state)) + \
                " -- val: "+str(hex(self.output_state))
 
 class j(InsnClass):
@@ -124,7 +124,7 @@ class j(InsnClass):
     def __str__(self):
         return " add: "+str(self.address) + \
                " -- op:  "+str(hex(self.opcode)) + \
-               " -- nam: "+str(self.name) + \
+               " -- nam: "+str(self.name) + "    " + \
                " -- tar: "+str(self.target_address)
 
 class btr(j):
@@ -163,7 +163,7 @@ class bdec(j):
     def __str__(self):
         return " add: "+str(self.address) + \
                " -- op:  "+str(hex(self.opcode)) + \
-               " -- nam: "+str(self.name) + \
+               " -- nam: "+str(self.name) + " " + \
                " -- tar: "+str(self.target_address) + \
                " -- reg addr: "+str(self.register_address)
 
@@ -204,7 +204,7 @@ class wait(InsnClass):
     def __str__(self):
         return " add: "+str(self.address) + \
                " -- op:  "+str(hex(self.opcode)) + \
-               " -- nam: "+str(self.name) + \
+               " -- nam: "+str(self.name) + " " + \
                " -- val: "+str(hex(self.wait_cycles))
 
 class ldc(InsnClass):

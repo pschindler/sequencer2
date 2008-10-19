@@ -30,6 +30,11 @@ class sequencer:
         self.logger = logging.getLogger("sequencer2")
         self.current_output = [0,0,0,0]
         self.bdec_register = []
+        # global list for automatically labeling finite loops and stuff like that
+        # last element contains the next label which will be used
+        self.automatic_label_list = ['aut_label_1']
+        self.open_automatic_labels = []
+
         self.config = config.Config()
         self.branch_delay_slots = self.config.get_int("PCP", "branch_delay_slots")
         self.max_sequence_length = self.config.get_int("PCP", "max_sequence_length")

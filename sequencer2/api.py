@@ -147,7 +147,7 @@ class api:
         for index in range(self.branch_delay_slots):
             self.sequencer.add_insn(copy.copy(nop_insn))
 
-    def start_finite(self, target_name, loop_count):
+    def start_finite(self, target_name, loop_count, automatic_label=False):
         """at the beginning of a finite loop
         adds a ldc instruction and a label intruction
         @param target_name: String identifier of the label to jump to
@@ -159,10 +159,23 @@ class api:
         ldc_insn = instructions.ldc(register_addr, loop_count)
         self.sequencer.add_insn(ldc_insn)
 
-        label_insn = instructions.label(target_name)
+        if automatic_label==False:            
+            label_insn = instructions.label(target_name)
+        else:
+            # take last label out of the automatic list
+            l = len(self.sequencer.automatic_label_list) - 1
+            aut_target_name = self.sequencer.automatic_label_list[l]
+            self.sequencer.automatic_label_list.append('aut_label_' + str(l+2))
+            self.sequencer.open_automatic_labels.append(aut_target_name)
+
+            label_insn = instructions.label(aut_target_name)
+
+
         self.sequencer.add_insn(label_insn)
 
-    def end_finite(self, target_name):
+
+
+    def end_finite(self, target_name, automatic_label=False):
         """At the ending of a finite loop
         Adds a bdec instruction and fills the branch delay slots
         @param target_name: String identifier of the label to jump to
@@ -172,11 +185,17 @@ class api:
             raise RuntimeError("Cannot pop from empty loop stack")
         self.sequencer.bdec_register.pop()
 
-
+        # apply address of register earlier to prevent timing problems in the bus
         nop_insn = instructions.nop(val=(register_addr<<23))
         self.sequencer.add_insn(nop_insn)
 
-        bdec_insn = instructions.bdec(target_name, register_addr)
+        if automatic_label==False:
+            bdec_insn = instructions.bdec(target_name, register_addr)
+        else:
+            l = len(self.sequencer.open_automatic_labels) - 1
+            aut_target_name = self.sequencer.open_automatic_labels[l]
+            self.sequencer.open_automatic_labels.pop()
+            bdec_insn = instructions.bdec(aut_target_name, register_addr)
 
         nop_insn = instructions.nop()
         self.sequencer.add_insn(bdec_insn)
