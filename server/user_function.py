@@ -125,258 +125,83 @@ class multiple_pulses():
                 rf_pulse(...)
                 ttl_pulse(...)
 
-    the maximum number of loop cycles is 255**15 + 255 ... 1mus ttl pulses this corresponds to 7e26 years pulse time ... should be enough :-)
+    the maximum number of loop cycles is 255**15 ... 1mus ttl pulses this corresponds to 7e26 years pulse time ... should be enough :-)
 
     development note:
             the class is initialized and then the next() method is called. After that the code in the loop is executed and the next next() method called.
-            the whole thing is a big mess at the moment (but it works) since I couldn't figure out how to recursively use this method
     """
     def __init__(self, no_of_pulses):
 
         global automatic_label_list
         self.max_no_of_cycles = 255
         self.no_of_pulses = no_of_pulses
-              
 
-        # x * 255^n + r = no_of_pulses
-        if self.no_of_pulses<=self.max_no_of_cycles:
-            self.n = 0
-            self.x = 0
-            self.r = self.no_of_pulses
-            self.no_of_n_loops = 0
-            self.no_of_x_loops = 0
-            self.no_of_r_loops = 1
+        self.loop_list_counts = self.base10toN(self.no_of_pulses, self.max_no_of_cycles)
 
-            self.case = 1
+        self.last_counter = len(self.loop_list_counts) - 1
+        self.new_counter  = self.last_counter
+        
+        print self.loop_list_counts
 
-        else:
-            if self.no_of_pulses<=2*self.max_no_of_cycles:
-                self.n = 0
-                self.x = self.max_no_of_cycles
-                self.r = self.no_of_pulses - self.max_no_of_cycles
-                self.no_of_n_loops = 0
-                self.no_of_x_loops = 1
-                self.no_of_r_loops = 1
-
-                self.case = 2
-
-            else:
-                self.n = int(math.log(self.no_of_pulses)/math.log(self.max_no_of_cycles))       
-                self.x = int(self.no_of_pulses / self.max_no_of_cycles**(self.n))
-                self.r = int(self.no_of_pulses) % int(self.max_no_of_cycles**(self.n))
-                self.no_of_n_loops = self.n
-                self.no_of_x_loops = int(self.x>1) # only one loop cycle doesn't make sense here
-                self.no_of_r_loops = int(self.r>0)
-
-                self.case = 3
-
-                if self.r>self.max_no_of_cycles:
-                    self.rest_pulses = self.r - self.max_no_of_cycles
-
-                    self.r = self.max_no_of_cycles
-
-
-                    if self.rest_pulses<=self.max_no_of_cycles:
-                        self.n_extra = 0
-                        self.x_extra = 0
-                        self.r_extra = self.rest_pulses
-                        self.no_of_n_extra_loops = 0
-                        self.no_of_x_extra_loops = 0
-                        self.no_of_r_extra_loops = 1
-
-                        self.case = 4
-
-                    else:
-                        if self.rest_pulses<=2*self.max_no_of_cycles:
-                            self.n_extra = 0
-                            self.x_extra = self.max_no_of_cycles
-                            self.r_extra = self.rest_pulses - self.max_no_of_cycles
-                            self.no_of_n_extra_loops = 0
-                            self.no_of_x_extra_loops = 1
-                            self.no_of_r_extra_loops = 1
-
-                            self.case = 5
-
-                        else:
-                            self.n_extra = int(math.log(self.rest_pulses)/math.log(self.max_no_of_cycles))
-                            self.x_extra = int(self.rest_pulses / self.max_no_of_cycles**(self.n))
-                            self.r_extra = int(self.rest_pulses) % int(self.max_no_of_cycles**(self.n))
-                            self.no_of_n_extra_loops = self.n_extra
-                            self.no_of_x_extra_loops = int(self.x_extra>1) # only one loop cycle doesn't make sense here
-                            self.no_of_r_extra_loops = int(self.r_extra>0)
-
-                            self.case = 6
-
-                    if self.r_extra>self.max_no_of_cycles:
-                        raise RunTimeError("The number of cycles is currently not provided")
-
-        self.counter = 1  # 0 = in full loop, 1 = in last full loop, 2 = in rest loop, 3 = end of all loops
+    def base10toN(self, num, n):
+        """Change a  to a base-n number.
+        Gives out a list with the number in the new system
+        e.g. 255**3+10 = [10, 0, 0, 1] = 10*255^0 + 1*255^3
+        """
+        converted_number = []
+        current = num
+        while current != 0:
+            remainder = current % n
+            converted_number.append(remainder)
+            current = current / n
+        return converted_number
 
     def __iter__(self):
         return self
 
     def next(self):
 
-        if self.case==1:
-            # only one for loop
-            if self.counter==1:
-                self.loop_start_finite(self.r)
-                self.counter = 0
-            else:
+        if self.last_counter == 0:
+            if (self.loop_list_counts[0]>0):
                 self.loop_end_finite()
-                raise StopIteration()
-
+            raise StopIteration()
         else:
-            if self.case==2:
-                # two for loops
-                if self.counter==1:
-                    self.loop_start_finite(self.x)
-                    self.counter=2                    
-                else:
-                    if self.counter==2:                        
+            if self.new_counter == len(self.loop_list_counts) - 1:
+                # first loops, always there since the base change function gives a non-zero value for the last element
+                for k in range(self.last_counter):
+                    self.loop_start_finite(self.max_no_of_cycles)
+                if self.loop_list_counts[self.last_counter]>1:
+                    self.loop_start_finite(self.loop_list_counts[self.last_counter])
+
+                # search for the next non-zero number
+                self.new_counter = self.last_counter - 1
+                while (self.loop_list_counts[self.new_counter]==0 and self.new_counter>0):
+                    self.new_counter = self.new_counter - 1
+
+            else:       
+                # close last loops for 255^(n-1)
+                if self.loop_list_counts[self.last_counter]>1:
+                    self.loop_end_finite()
+                if (self.loop_list_counts[self.last_counter]>0):
+                    for k in range(self.last_counter):
                         self.loop_end_finite()
-                        self.loop_start_finite(self.r)
-                        self.counter=0                        
-                    else:
-                        self.loop_end_finite()
-                        raise StopIteration()
-            else:
-                # more than two loops
-                if self.case==3:                    
-                    if self.counter==1:
-                        for i in range(self.no_of_n_loops):
-                           self.loop_start_finite(self.max_no_of_cycles)
-                        if (self.no_of_x_loops>0):
-                          self.loop_start_finite(self.x)
-                        self.counter=2
-                    else:
-                        if self.counter==2:
-                            if (self.no_of_x_loops>0):
-                               self.loop_end_finite()
-                            for i in range(self.no_of_n_loops-1, -1, -1):
-                               self.loop_end_finite()
 
-                            if (self.no_of_r_loops>0):
-                                self.loop_start_finite(self.r)
-                                self.counter=0
-                            else:
-                                raise StopIteration()
-                        else:
-                            if (self.no_of_r_loops>0):
-                                self.loop_end_finite()
-                                raise StopIteration()
-                else:
-                    # self.case == 4
-                    # in this case the number was not given by 255^n * x + r, meaning: r>255
-                    if self.case==4:
-                        if self.counter==1:
-                            for i in range(self.no_of_n_loops):
-                               self.loop_start_finite(self.max_no_of_cycles)
-                            if (self.no_of_x_loops>0):
-                              self.loop_start_finite(self.x)
-                            self.counter=2
-                        else:
-                            if self.counter==2:
-                                if (self.no_of_x_loops>0):
-                                   self.loop_end_finite()
-                                for i in range(self.no_of_n_loops-1, -1, -1):
-                                   self.loop_end_finite()
+                # open next loops
+                if (self.loop_list_counts[self.new_counter]>0) or (self.new_counter==0):
+                    for k in range(self.new_counter):
+                        self.loop_start_finite(self.max_no_of_cycles)
+                    if (self.loop_list_counts[self.new_counter]>1) or (self.new_counter==0 and self.loop_list_counts[0]>0):
+                        self.loop_start_finite(self.loop_list_counts[self.new_counter])
 
-                                self.loop_start_finite(self.r)
-                                self.counter=3
-                            else:
-                                if self.counter==3:
-                                    self.loop_end_finite()
-                                    self.loop_start_finite(self.r_extra)
-                                    self.counter=4
-                                else:
-                                    self.loop_end_finite()
-                                    raise StopIteration()
-                    else:
-                        if self.case==5:
-                            if self.counter==1:
-                                for i in range(self.no_of_n_loops):
-                                   self.loop_start_finite(self.max_no_of_cycles)
-                                if (self.no_of_x_loops>0):
-                                   self.loop_start_finite(self.x)
-                                self.counter=2
-                            else:
-                                if self.counter==2:
-                                    if (self.no_of_x_loops>0):
-                                       self.loop_end_finite()
-                                    for i in range(self.no_of_n_loops-1, -1, -1):
-                                       self.loop_end_finite()
+                self.last_counter = self.new_counter
+                if (self.last_counter>0):
+                    self.new_counter = self.new_counter - 1
+                    while (self.loop_list_counts[self.new_counter]==0 and self.new_counter>0):
+                        self.new_counter = self.new_counter - 1
 
-                                    if (self.no_of_r_loops>0):
-                                        self.loop_start_finite(self.r)
-                                    self.counter=3
-                                else:
-                                    if self.counter==3:
-                                        if (self.no_of_r_loops>0):
-                                            self.loop_end_finite()
+                if (self.new_counter==0 and self.loop_list_counts[self.new_counter]==0):
+                    raise StopIteration()
 
-                                        if (self.no_of_x_extra_loops>0):
-                                            self.loop_start_finite(self.x_extra)
-
-                                        self.counter = 4
-                                    else:
-                                        if self.counter==4:
-                                            if (self.no_of_x_extra_loops>0):
-                                               self.loop_end_finite()
-
-                                            if (self.no_of_r_extra_loops>0):
-                                                self.loop_start_finite(self.r_extra)
-                                                self.counter=5
-                                            else:
-                                                raise StopIteration
-                                        else:
-                                            self.loop_end_finite()
-                                            raise StopIteration()
-
-                        else:
-                            if self.counter==1:
-                                for i in range(self.no_of_n_loops):
-                                   self.loop_start_finite(self.max_no_of_cycles)
-                                if (self.no_of_x_loops>0):
-                                  self.loop_start_finite(self.x)
-                                self.counter=2
-                            else:
-                                if self.counter==2:
-                                    if (self.no_of_x_loops>0):
-                                       self.loop_end_finite()
-                                    for i in range(self.no_of_n_loops-1, -1, -1):
-                                       self.loop_end_finite()
-
-                                    self.loop_start_finite(self.r)
-                                    self.counter=3
-                                else:
-                                    if self.counter==3:
-                                        self.loop_end_finite()
-    
-                                        for i in range(self.no_of_n_extra_loops):
-                                            self.loop_start_finite(self.max_no_of_cycles)
-                                        if (self.no_of_x_extra_loops>0):
-                                            self.loop_start_finite(self.x_extra)
-
-                                        self.counter = 4
-                                    else:
-                                        if self.counter==4:
-                                            if (self.no_of_x_extra_loops>0):
-                                               self.loop_end_finite()
-                                            for i in range(self.no_of_n_extra_loops-1, -1, -1):
-                                               self.loop_end_finite()
-
-                                            if (self.no_of_r_extra_loops>0):
-                                                self.loop_start_finite(self.r_extra)
-                                                self.counter=5
-                                            else:
-                                                raise StopIteration
-                                        else:
-                                            self.loop_end_finite()
-                                            raise StopIteration()
-
-
- 
         return 0
 
 
