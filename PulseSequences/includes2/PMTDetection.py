@@ -24,7 +24,7 @@ def PMTDetection(pmt_detect_length):
 #    rf_pulse(15,0,1,"carrier", 1.0, is_last=False, address=5)
 #    seq_wait(10)
 
-#    rf_pulse(5,0,1,"carrier", 100.0, is_last=False, address=5)
+    rf_pulse(5,0,1,"carrier", 100.0, is_last=False, address=5)
 
 
     PMT_trigger_length = 10
@@ -47,13 +47,19 @@ def PMTDetection(pmt_detect_length):
 
     seq_wait(30)
 
-    for i in multiple_pulses(0*255**2+3):
+    for i in multiple_pulses(200):
         ttl_pulse("PMT trigger", 3)
         seq_wait(3)
 
 
 #    ttl_pulse("PMT trigger", PMT_trigger_length)
-#    dds_freq_sweep(5, [0, 6, 12, 18, 24, 30], [1, -1, 0, 1, -1], 0.010, 0.010, 1, 10, loop_counts=5)
+    dds_freq_sweep(5, [0, 10, 15, 18, 24, 30], [1, -1, 0, 1, -1], 0.0030, 0.006250, 1, 10, loop_counts=0)
+
+    ttl_pulse("PMT trigger", 3)
+    seq_wait(2)
+
+
+    dds_ampl_sweep(5, [0, 70, 72, 100, 130], [1, 0, -1, 1], 0.001, 0.001, 0.0, 1.5, loop_counts=0)
 
 #    ttl_pulse("PMT trigger", PMT_trigger_length, is_last=False)
 

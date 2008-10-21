@@ -545,6 +545,8 @@ class ProgramRampGeneratorEvent(SeqInstruction):
             raise RuntimeError("No DDS known with address: "+str(self.dds_address))
         api.init_digital_ramp_generator(self.ramp_type, dds_instance, self.dt_pos, self.dt_neg, self.dfreq_pos, self.dfreq_neg, self.lower_limit, self.upper_limit)
 
+        api.switch_frequency(dds_instance, 0, 0)
+
     def __str__(self):
         return str(self.name) + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
@@ -587,12 +589,13 @@ class ConfigureRampEvent(SeqInstruction):
 
 class StartRampGeneratorEvent(SeqInstruction):
     "Programs the ramp generator"
-    def __init__(self, start_time, dds_address, loop_counts, is_last=False):
+    def __init__(self, start_time, dds_address, loop_counts, amplitude=-15, is_last=False):
         self.start_time = start_time
         self.duration = self.cycle_time
         self.is_last = is_last
         self.dds_address = dds_address
         self.loop_counts = loop_counts
+        self.amplitude = amplitude
         self.name = "Start_Ramp_Generator_Event"
 
     def handle_instruction(self, api):
@@ -602,7 +605,7 @@ class StartRampGeneratorEvent(SeqInstruction):
             dds_instance = api.dds_list[self.dds_address]
         except IndexError:
             raise RuntimeError("No DDS known with address: "+str(self.dds_address))
-        api.dac_value(-15, self.dds_address)
+        api.dac_value(self.amplitude, self.dds_address)
         api.start_digital_ramp_generator(dds_instance)
         if self.loop_counts>0:
             api.start_finite('', self.loop_counts, automatic_label=True)
@@ -633,6 +636,9 @@ class StopRampGeneratorEvent(SeqInstruction):
         if self.loop_counts>0:
             api.end_finite('', automatic_label=True)
         api.stop_digital_ramp_generator(dds_instance)
+
+        api.switch_frequency(dds_instance, 1, 0)
+
 
     def __str__(self):
         return str(self.name) + " | start: " + str(self.start_time) \
