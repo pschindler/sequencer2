@@ -602,6 +602,7 @@ class StartRampGeneratorEvent(SeqInstruction):
             dds_instance = api.dds_list[self.dds_address]
         except IndexError:
             raise RuntimeError("No DDS known with address: "+str(self.dds_address))
+        api.dac_value(-15, self.dds_address)
         api.start_digital_ramp_generator(dds_instance)
         if self.loop_counts>0:
             api.start_finite('', self.loop_counts, automatic_label=True)

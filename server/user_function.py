@@ -140,9 +140,7 @@ class multiple_pulses():
 
         self.last_counter = len(self.loop_list_counts) - 1
         self.new_counter  = self.last_counter
-        
-        print self.loop_list_counts
-
+       
     def base10toN(self, num, n):
         """Change a  to a base-n number.
         Gives out a list with the number in the new system
@@ -156,51 +154,49 @@ class multiple_pulses():
             current = current / n
         return converted_number
 
+    def open_full_loops(self, cnt):
+        for k in range(cnt):
+           self.loop_start_finite(self.max_no_of_cycles)
+        if self.loop_list_counts[cnt]>1:
+           self.loop_start_finite(self.loop_list_counts[cnt])
+
+    def close_full_loops(self, cnt):
+        if self.loop_list_counts[cnt]>1:
+            self.loop_end_finite()
+        for k in range(cnt):
+            self.loop_end_finite()
+
+    def find_next_counter(self):
+        # searches for the next non-zero value in loop_list_counts
+        self.new_counter = self.last_counter - 1
+        while (self.loop_list_counts[self.new_counter]==0 and self.new_counter>0):
+            self.new_counter = self.new_counter - 1
+
     def __iter__(self):
         return self
 
     def next(self):
+        if self.new_counter > 0:
+            # close last loops if not in first loop
+            if self.new_counter < len(self.loop_list_counts) - 1:
+                self.close_full_loops(self.last_counter)
 
-        if self.last_counter == 0:
-            if (self.loop_list_counts[0]>0):
-                self.loop_end_finite()
-            raise StopIteration()
+            self.open_full_loops(self.new_counter)            
+            self.last_counter = self.new_counter
+            self.find_next_counter()            
+
         else:
-            if self.new_counter == len(self.loop_list_counts) - 1:
-                # first loops, always there since the base change function gives a non-zero value for the last element
-                for k in range(self.last_counter):
-                    self.loop_start_finite(self.max_no_of_cycles)
-                if self.loop_list_counts[self.last_counter]>1:
-                    self.loop_start_finite(self.loop_list_counts[self.last_counter])
-
-                # search for the next non-zero number
-                self.new_counter = self.last_counter - 1
-                while (self.loop_list_counts[self.new_counter]==0 and self.new_counter>0):
-                    self.new_counter = self.new_counter - 1
-
-            else:       
-                # close last loops for 255^(n-1)
-                if self.loop_list_counts[self.last_counter]>1:
-                    self.loop_end_finite()
-                if (self.loop_list_counts[self.last_counter]>0):
-                    for k in range(self.last_counter):
-                        self.loop_end_finite()
-
-                # open next loops
-                if (self.loop_list_counts[self.new_counter]>0) or (self.new_counter==0):
-                    for k in range(self.new_counter):
-                        self.loop_start_finite(self.max_no_of_cycles)
-                    if (self.loop_list_counts[self.new_counter]>1) or (self.new_counter==0 and self.loop_list_counts[0]>0):
-                        self.loop_start_finite(self.loop_list_counts[self.new_counter])
-
-                self.last_counter = self.new_counter
-                if (self.last_counter>0):
-                    self.new_counter = self.new_counter - 1
-                    while (self.loop_list_counts[self.new_counter]==0 and self.new_counter>0):
-                        self.new_counter = self.new_counter - 1
-
-                if (self.new_counter==0 and self.loop_list_counts[self.new_counter]==0):
+            if self.new_counter==0:
+                if len(self.loop_list_counts)>1:
+                    self.close_full_loops(self.last_counter)
+                if self.loop_list_counts[0]>0:
+                    self.open_full_loops(0)
+                else:
                     raise StopIteration()
+                self.new_counter = -1
+            else:
+                self.close_full_loops(0)
+                raise StopIteration()
 
         return 0
 

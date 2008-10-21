@@ -24,29 +24,36 @@ def PMTDetection(pmt_detect_length):
 #    rf_pulse(15,0,1,"carrier", 1.0, is_last=False, address=5)
 #    seq_wait(10)
 
-#    rf_pulse(15,0,1,"sb_cooling_3", 100.0, is_last=False, address=1)
+#    rf_pulse(5,0,1,"carrier", 100.0, is_last=False, address=5)
 
 
     PMT_trigger_length = 10
-#    ttl_pulse("PMT trigger", PMT_trigger_length)
-#    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=pmt_detect_length)
-#    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=pmt_detect_length)
-
-
-
-    for i in multiple_pulses(255**15+28394):
-        ttl_pulse("PMT trigger", 10)
-        seq_wait(10)
-
-
-#    for i in multiple_pulses(255**2*3+256):
-#        ttl_pulse("PMT trigger", 10)
-#        seq_wait(10)
-
-
 
 #    ttl_pulse("PMT trigger", PMT_trigger_length)
-#    dds_freq_sweep(5, [0, 10, 30, 50], [1, 0, -1], 10, 20, 10, 60, loop_counts=0)
+#    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=15.0)
+
+#    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=pmt_detect_length)
+
+#    seq_wait(5)
+
+#    for i in multiple_pulses(10):
+#        ttl_pulse("PMT trigger", 3)
+#        seq_wait(3)
+
+#    ttl_pulse("PMT trigger", PMT_trigger_length)
+#    seq_wait(10)
+#    ttl_pulse("PMT trigger", PMT_trigger_length)
+
+
+    seq_wait(30)
+
+    for i in multiple_pulses(0*255**2+3):
+        ttl_pulse("PMT trigger", 3)
+        seq_wait(3)
+
+
+#    ttl_pulse("PMT trigger", PMT_trigger_length)
+#    dds_freq_sweep(5, [0, 6, 12, 18, 24, 30], [1, -1, 0, 1, -1], 0.010, 0.010, 1, 10, loop_counts=5)
 
 #    ttl_pulse("PMT trigger", PMT_trigger_length, is_last=False)
 
@@ -56,7 +63,10 @@ def PMTDetection(pmt_detect_length):
 #    dds_freq_sweep(4, [0, 10, 30, 50], [1, 0, -1], 10, 20, 10, 60, 1, 1, is_last=True)
 
 
-#    dds_ampl_sweep(5, [0, 10, 20, 30], [1, 0, -1], 0.1, 0.1, 10, 10, 10, 100, is_last=False)
+#    dds_ampl_sweep(5, [0, 10, 20, 30], [1, 0, -1], 10, 10, 1, 100)
+
+#    dds_phase_sweep(5, [100, 110, 120, 130], [1, 0, -1], 10, 10, 1, 100)
+   
 
 #    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=70, is_last=True)
 
