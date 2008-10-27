@@ -108,20 +108,21 @@ class HardwareTests:
 #        my_api.dac_value(amplitude, my_device)
         self.compile(my_sequencer)
 
-    def test_dds_loop(self, frequency=10, amplitude=0, my_device=0, clock=800):
+    def test_dds_loop(self, frequency=10, amplitude=-15, my_device=0, wait=1000, clock=800):
         "Just sets a loop profile of the dds and activates it"
         my_sequencer = sequencer.sequencer()
         my_api = api.api(my_sequencer)
         dds_device = ad9910.AD9910(my_device, clock)
-        my_api.label("beginseq")
-
+ 
         my_api.init_dds(dds_device)
         my_api.init_frequency(dds_device, frequency, 0)
         my_api.set_dds_profile(dds_device, 0)
-
         my_api.update_dds(dds_device)
         my_api.dac_value(amplitude, my_device)
-        my_api.wait(1000)
+        my_api.wait(wait)
+ 
+        my_api.label("beginseq")
+
         my_api.jump("beginseq")
 
         self.compile(my_sequencer)

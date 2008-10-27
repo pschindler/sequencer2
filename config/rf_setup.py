@@ -22,9 +22,9 @@ multiplier = {}
 
 #This is for Ca43 right now:
 offset["729"] = 0
-multiplier["729"] = 0.5
+multiplier["729"] = 1
 
-offset["Raman"] = 285.0
+offset["Raman"] = 0
 multiplier["Raman"] = 1
 
 offset["RF"] = 285.0

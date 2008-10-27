@@ -24,10 +24,11 @@ def PMTDetection(pmt_detect_length):
 #    rf_pulse(15,0,1,"carrier", 1.0, is_last=False, address=5)
 #    seq_wait(10)
 
-    rf_pulse(5,0,1,"carrier", 100.0, is_last=False, address=5)
+#    rf_pulse(1990,0,1,"carrier", 10.0, is_last=False, address=5)
 
+#    rf_pulse(10,0,1,"clock1", 10.0, is_last=False, address=5)
 
-    PMT_trigger_length = 10
+#    PMT_trigger_length = 10
 
 #    ttl_pulse("PMT trigger", PMT_trigger_length)
 #    ttl_pulse("PMT trigger", PMT_trigger_length, start_time=15.0)
@@ -45,21 +46,38 @@ def PMTDetection(pmt_detect_length):
 #    ttl_pulse("PMT trigger", PMT_trigger_length)
 
 
-    seq_wait(30)
+#    seq_wait(30)
 
-    for i in multiple_pulses(200):
+    for i in multiple_pulses(5):
         ttl_pulse("PMT trigger", 3)
         seq_wait(3)
 
 
 #    ttl_pulse("PMT trigger", PMT_trigger_length)
-    dds_freq_sweep(5, [0, 10, 15, 18, 24, 30], [1, -1, 0, 1, -1], 0.0030, 0.006250, 1, 10, loop_counts=0)
-
-    ttl_pulse("PMT trigger", 3)
-    seq_wait(2)
+#    dds_freq_sweep(5, [0, 1000000, 3000000], [1, -1], 0.00000019, 0.00000019, 80, 220, loop_counts=0)
 
 
-    dds_ampl_sweep(5, [0, 70, 72, 100, 130], [1, 0, -1, 1], 0.001, 0.001, 0.0, 1.5, loop_counts=0)
+
+#    dds_freq_sweep(5, [0, 1000000, 3000000], [1, -1], 0.00000019, 0.00000019, 80, 220, loop_counts=0)
+
+
+#    rf_pulse(100,0,1,"carrier", 10.0, is_last=True, address=5)
+#    dds_freq_sweep(5, [1, 50, 100], [1, -1], 0.00089, 0.00089, 1, 100, loop_counts=0, is_last=False)
+#    dds_ampl_sweep(5, [0, 70, 72, 100, 130], [1, 0, -1, 1], 0.0001, 0.1, 0.0, 1.0, loop_counts=0)
+    dds_phase_sweep(5, [50, 100, 200], [1, -1], 45, 45, 0.0, 360.0, dt_pos=5, dt_neg=1, loop_counts=0, is_last=False)
+    rf_pulse(500,0,1,"carrier", 0.0, is_last=False, address=4)
+
+
+
+#    rf_pulse(100,0,1,"carrier", 10.0, is_last=True, address=5)
+
+
+
+
+#    ttl_pulse("PMT trigger", 3)
+#    seq_wait(2)
+
+
 
 #    ttl_pulse("PMT trigger", PMT_trigger_length, is_last=False)
 

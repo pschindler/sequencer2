@@ -195,9 +195,8 @@ class AD9910:
         if (lower_limit>upper_limit):
             raise("Can't programm ramp generator because lower limit > upper limit")
 
-       
-        reg_ramp_rate_pos = int(dt_pos/4.0 * self.ref_freq) + 1
-        reg_ramp_rate_neg = int(dt_neg/4.0 * self.ref_freq) + 1
+        reg_ramp_rate_pos = int(dt_pos/4.0 * self.ref_freq)
+        reg_ramp_rate_neg = int(dt_neg/4.0 * self.ref_freq)
         reg_ramp_rate_neg = reg_ramp_rate_neg << 16
         
         if ramp_type=='freq': 
@@ -212,25 +211,25 @@ class AD9910:
             self.reg_value_dict[self.CFR2] = self.set_bit_state(self.reg_value_dict[self.CFR2], 0, 20, 2)
 
         if ramp_type=='phase':
-            reg_lower_limit   = int(2**(13) * lower_limit / 45.0) + 1
-            reg_upper_limit   = int(2**(13) * upper_limit / 45.0) + 1
+            reg_lower_limit   = int( (2**(16)-1) * lower_limit/360.0 ) << 16
+            reg_upper_limit   = int( (2**(16)-1) * upper_limit/360.0 ) << 16
             reg_upper_limit   = reg_upper_limit << 32
 
-            reg_ramp_step_pos     = int(2**(13) * dstep_pos / 45.0) + 1   
-            reg_ramp_step_neg     = int(2**(13) * dstep_neg / 45.0) + 1   
-            reg_ramp_step_neg     = reg_ramp_step_neg << 32        
+            reg_ramp_step_pos     = int( (2**(16)-1) * dstep_pos/360.0 ) << 16
+            reg_ramp_step_neg     = int( (2**(16)-1) * dstep_neg/360.0 ) << 16
+            reg_ramp_step_neg     = reg_ramp_step_neg << 32
             # change the bits for the phase sweep, bit 20:21 in cfr2 while keeping the rest the same
             self.reg_value_dict[self.CFR2] = self.set_bit_state(self.reg_value_dict[self.CFR2], 1, 20, 2)
 
-        if ramp_type=='ampl':
-            reg_lower_limit   = int(1.8*2**(18) * lower_limit / self.Ifs) << 20
-            reg_upper_limit   = int(1.8*2**(18) * upper_limit / self.Ifs) << 20
+            print hex(self.reg_value_dict[self.CFR2])
 
-            print hex(reg_upper_limit)
+        if ramp_type=='ampl':
+            reg_lower_limit   = int( (2**(16)-1) * lower_limit ) << 16
+            reg_upper_limit   = int( (2**(16)-1) * upper_limit ) << 16
             reg_upper_limit   = reg_upper_limit << 32
 
-            reg_ramp_step_pos     = int(1.8*2**(18) * dstep_pos / self.Ifs) << 20
-            reg_ramp_step_neg     = int(1.8*2**(18) * dstep_neg / self.Ifs) << 20
+            reg_ramp_step_pos     = int( (2**(16)-1) * dstep_pos ) << 16
+            reg_ramp_step_neg     = int( (2**(16)-1) * dstep_neg ) << 16
             reg_ramp_step_neg     = reg_ramp_step_neg << 32
             # change the bits for the ampl sweep, bit 20:21 in cfr2 while keeping the rest the same
             self.reg_value_dict[self.CFR2] = self.set_bit_state(self.reg_value_dict[self.CFR2], 2, 20, 2)
@@ -239,9 +238,6 @@ class AD9910:
         self.reg_value_dict[self.DRS] = reg_ramp_step_pos | reg_ramp_step_neg
         self.reg_value_dict[self.DRR] = reg_ramp_rate_pos | reg_ramp_rate_neg
 
-        print hex(self.reg_value_dict[self.DRL])
-        print hex(self.reg_value_dict[self.DRS])
-        print hex(self.reg_value_dict[self.DRR])
 
 
 

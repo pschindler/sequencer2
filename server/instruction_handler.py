@@ -71,9 +71,10 @@ class DDSSweep(SeqInstruction):
 
         # if dt_pos/neg=0. then take the lowest value possible
         if dt_pos==0:
-            dt_pos = 4/GLOBAL_CONFIG.get_float("SERVER","reference_frequency")
+            dt_pos = 4.0/GLOBAL_CONFIG.get_float("SERVER","reference_frequency")
+            print dt_pos
         if dt_neg==0:
-            dt_neg = 4/GLOBAL_CONFIG.get_float("SERVER","reference_frequency")
+            dt_neg = 4.0/GLOBAL_CONFIG.get_float("SERVER","reference_frequency")
 
         start_time = time_array[0]
 
@@ -607,6 +608,7 @@ class StartRampGeneratorEvent(SeqInstruction):
             raise RuntimeError("No DDS known with address: "+str(self.dds_address))
         api.dac_value(self.amplitude, self.dds_address)
         api.start_digital_ramp_generator(dds_instance)
+
         if self.loop_counts>0:
             api.start_finite('', self.loop_counts, automatic_label=True)
 
@@ -635,6 +637,7 @@ class StopRampGeneratorEvent(SeqInstruction):
             raise RuntimeError("No DDS known with address: "+str(self.dds_address))
         if self.loop_counts>0:
             api.end_finite('', automatic_label=True)
+
         api.stop_digital_ramp_generator(dds_instance)
 
         api.switch_frequency(dds_instance, 1, 0)
