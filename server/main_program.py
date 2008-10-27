@@ -154,7 +154,9 @@ class MainProgram:
         try:
             user_api.compile_sequence()
             sequence_length = len(user_api.sequencer.current_sequence)
-            user_api.sequencer.debug_sequence(show_word_list=True)
+
+#           user_api.sequencer.debug_sequence(show_word_list=True)
+
             self.logger.info("sequence length: "+str(hex(sequence_length))+" ("+str(1/100.0*int(10000.0*sequence_length/self.config.get_int("PCP", "max_sequence_length")))+"% of maximum sequence length)")
         except:
             self.logger.exception("Error while compiling sequence")

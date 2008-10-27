@@ -62,10 +62,17 @@ def PMTDetection(pmt_detect_length):
 
 
 #    rf_pulse(100,0,1,"carrier", 10.0, is_last=True, address=5)
-#    dds_freq_sweep(5, [1, 50, 100], [1, -1], 0.00089, 0.00089, 1, 100, loop_counts=0, is_last=False)
-#    dds_ampl_sweep(5, [0, 70, 72, 100, 130], [1, 0, -1, 1], 0.0001, 0.1, 0.0, 1.0, loop_counts=0)
-    dds_phase_sweep(5, [50, 100, 200], [1, -1], 45, 45, 0.0, 360.0, dt_pos=5, dt_neg=1, loop_counts=0, is_last=False)
-    rf_pulse(500,0,1,"carrier", 0.0, is_last=False, address=4)
+    dds_freq_sweep(5, "carrier", [1, 50, 100], [1, -1], 0.00089, 0.00089, 1, 100, loop_counts=5, is_last=True)
+
+    seq_wait(10)
+        
+    dds_ampl_sweep(5, "carrier", [0, 70, 72, 100, 130], [1, 0, -1, 1], 0.0001, 0.1, 0.0, 1.0, loop_counts=0)
+
+    seq_wait(10)
+
+    dds_phase_sweep(5, "carrier", [50, 100], [1], 45, 45, 0.0, 360.0, dt_pos=5, dt_neg=1, loop_counts=0, is_last=False)
+
+#    rf_pulse(500,0,1,"carrier", 0.0, is_last=False, address=4)
 
 
 

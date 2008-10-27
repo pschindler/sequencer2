@@ -216,27 +216,55 @@ class multiple_pulses():
 
 
 
-def dds_freq_sweep(dds_address, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, loop_counts=0, is_last=True):
+def dds_freq_sweep(dds_address, transition_param, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, phi=0, loop_counts=0, is_last=True):
 
     global sequence_var
+    global transitions
 
-    ramp_init = DDSSweep('freq', time_array, slope_array, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last)
+    if str(transition_param) == transition_param:
+        transitions.make_current(transition_param)
+        transition_obj = transitions
+    else:
+        transitions.add_transition(transition_param)
+        transitions.make_current(transition_param.name)
+        transition_obj = transitions
+
+    ramp_init = DDSSweep('freq', time_array, slope_array, dds_address, transitions, phi, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last)
  
     sequence_var.append(ramp_init.sequence_var)
 
-def dds_ampl_sweep(dds_address, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, loop_counts=0, is_last=True):
+def dds_ampl_sweep(dds_address, transition_param, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, phi=0, loop_counts=0, is_last=True):
 
     global sequence_var
+    global transitions
 
-    ramp_init = DDSSweep('ampl', time_array, slope_array, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last)
+    if str(transition_param) == transition_param:
+        transitions.make_current(transition_param)
+        transition_obj = transitions
+    else:
+        transitions.add_transition(transition_param)
+        transitions.make_current(transition_param.name)
+        transition_obj = transitions
+
+
+    ramp_init = DDSSweep('ampl', time_array, slope_array, dds_address, transitions, phi, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last)
  
     sequence_var.append(ramp_init.sequence_var)
 
-def dds_phase_sweep(dds_address, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, loop_counts=0, is_last=True):
+def dds_phase_sweep(dds_address, transition_param, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, phi=0,  loop_counts=0, is_last=True):
 
     global sequence_var
+    global transitions
 
-    ramp_init = DDSSweep('phase', time_array, slope_array, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last)
+    if str(transition_param) == transition_param:
+        transitions.make_current(transition_param)
+        transition_obj = transitions
+    else:
+        transitions.add_transition(transition_param)
+        transitions.make_current(transition_param.name)
+        transition_obj = transitions
+
+    ramp_init = DDSSweep('phase', time_array, slope_array, dds_address, transitions, phi, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last)
  
     sequence_var.append(ramp_init.sequence_var)
 

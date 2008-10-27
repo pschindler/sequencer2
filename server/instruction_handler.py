@@ -33,6 +33,7 @@ class SeqInstruction:
     is_added = False
     sequence_var = []
     name = "generic Instruction"
+    max_name_length = 20
 
     def add_insn(self, sequence_var):
         "Adds the instructions to the sequence dictionary"
@@ -47,7 +48,7 @@ class SeqInstruction:
         return self.duration
 
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last)
 
     def resolve_conflict(self, other_item):
@@ -62,44 +63,91 @@ class DDSSweep(SeqInstruction):
     ramp_type = 'freq', 'ampl', 'phase'
     the non-ramped parameters will be taken from the current profile settings
     """
-    def __init__(self, ramp_type, time_array, slope_array, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last):
+    def __init__(self, ramp_type, time_array, slope_array, dds_address, transitions, phi, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last):
 
         self.sequence_var = []
-        dds_prg_time = 0.1
-        dds_stop_time = 0.1
-        dds_conf_time = 0.1
+
+        dac_switch_time = self.get_hardware_duration("dac_duration")
+        dds_switch_time = self.get_hardware_duration("dds_duration")
+        # Init the logger
+        self.logger = logging.getLogger("server")
+#        self.logger.debug("Switching frequency to: "+str(transitions))
+        # Extract the transition object and the pulse duration
+        try:
+            transition_obj = transitions[transitions.current_transition]
+        except KeyError:
+            raise RuntimeError("Transition name not found: " + \
+                                   str(transitions.current_transition))
+            
+        self.logger.debug("Switching frequency to: "+str(transition_obj))
+            
+        # Set the real phase
+        phi = transition_obj.get_phase(phi)
+        transition_name = transition_obj.name
+        # Set the Amplitudes
+        amplitude = transition_obj.amplitude
+        amplitude_off = -100.0
+        # Set the slope duration
+        slope_duration = 0
+        # Set the start and stop times
+        # Switch the DDS on before the DAC
+        drg_prg_time = time_array[0]
+        drg_start_time = drg_prg_time + 3*self.cycle_time
+        dds_start_time = drg_start_time + 3*self.cycle_time
+        dac_start_time = dds_start_time + dds_switch_time
+        drg_conf_time = [dac_start_time + dac_switch_time]
+        for k in range(1, len(time_array)-1):
+            drg_conf_time.append(drg_conf_time[0] + time_array[k])
+       # Switch the DAC of berfore the DDS
+        dac_stop_time = drg_conf_time[len(drg_conf_time)-1] + time_array[len(time_array)-1] + 3*self.cycle_time
+        dds_stop_time = dac_stop_time + dac_switch_time
+
+        drg_stop_time = dds_stop_time + dds_switch_time
 
         # if dt_pos/neg=0. then take the lowest value possible
         if dt_pos==0:
             dt_pos = 4.0/GLOBAL_CONFIG.get_float("SERVER","reference_frequency")
-            print dt_pos
         if dt_neg==0:
             dt_neg = 4.0/GLOBAL_CONFIG.get_float("SERVER","reference_frequency")
 
-        start_time = time_array[0]
 
-        program_ramp_gen_event = ProgramRampGeneratorEvent(ramp_type, start_time, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last=False)
 
-        start_dds_ramp_event = StartRampGeneratorEvent(start_time + dds_prg_time, dds_address, loop_counts, is_last=False)
+
+        program_ramp_gen_event = ProgramRampGeneratorEvent(ramp_type, drg_prg_time, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last=False)
+        
+        start_dds_ramp_event = StartRampGeneratorEvent(drg_start_time, dds_address, loop_counts, is_last=False)        
 
         conf_ramp_event = []
-        for k in range(len(time_array)-1):
-            conf_ramp_event.append(ConfigureRampEvent(time_array[k] + dds_prg_time + dds_conf_time, dds_address, slope_array[k], is_last=False))
+        for k in range(len(drg_conf_time)):
+            conf_ramp_event.append(ConfigureRampEvent(drg_conf_time[k], dds_address, slope_array[k], is_last=False))
 
-        stop_dds_ramp_event = StopRampGeneratorEvent(time_array[len(time_array)-1] + dds_prg_time + dds_stop_time + dds_conf_time, dds_address, loop_counts, is_last)
+        stop_dds_ramp_event = StopRampGeneratorEvent(drg_stop_time, dds_address, loop_counts, is_last)
+
+        # initializing rest parameters
+        dac_start_event = DACEvent(dac_start_time, amplitude, dds_address, is_last=False)
+        dac_stop_event  = DACEvent(dac_stop_time, amplitude_off, dds_address, is_last=False)
+        dds_start_event = DDSSwitchEvent(dds_start_time, dds_address, transition_name, phi,  is_last=False)
+        dds_stop_event  = DDSSwitchEvent(dds_stop_time, dds_address, "NULL", phi, is_last=is_last)
+ 
+
 
 
 
         self.sequence_var = program_ramp_gen_event.add_insn(self.sequence_var)
+        
         self.sequence_var = start_dds_ramp_event.add_insn(self.sequence_var)
+        
+        self.sequence_var = dds_start_event.add_insn(self.sequence_var)
+        self.sequence_var = dac_start_event.add_insn(self.sequence_var)
 
         for k in range(len(time_array)-1):
             self.sequence_var = conf_ramp_event[k].add_insn(self.sequence_var)
 
+
+        self.sequence_var = dac_stop_event.add_insn(self.sequence_var)
+        self.sequence_var = dds_stop_event.add_insn(self.sequence_var)
+
         self.sequence_var = stop_dds_ramp_event.add_insn(self.sequence_var)
- 
- 
- 
  
  
 class Start_Finite(SeqInstruction):
@@ -123,7 +171,7 @@ class Start_Finite(SeqInstruction):
         api.start_finite(self.target_name, self.loop_counts, self.automatic_label)
 
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | cnt: " + str(self.loop_counts) + " | last: " + str(self.is_last)
 
 class End_Finite(SeqInstruction):
@@ -145,7 +193,7 @@ class End_Finite(SeqInstruction):
         api.end_finite(self.target_name, self.automatic_label)
 
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | last: " + str(self.is_last)
 
 class SeqWait(SeqInstruction):
@@ -163,7 +211,7 @@ class SeqWait(SeqInstruction):
         api.wait(self.duration)
 
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last)
 
 class RFOn(SeqInstruction):
@@ -196,7 +244,7 @@ class RFOn(SeqInstruction):
         api.update_dds(dds_instance)
 
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
                + " | freq" +str(self.frequency)\
                + " | amp: " + str(self.amplitude) + " | last: " + str(self.is_last)
 
@@ -417,7 +465,7 @@ class TTLEvent(SeqInstruction):
         return True
 
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | key: " +str(self.val_dict)
 
@@ -437,7 +485,7 @@ class DACEvent(SeqInstruction):
         api.dac_value(self.value, self.address)
 
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | addr: "+str(self.address) + " | val: "+str(self.value)
 
@@ -479,7 +527,7 @@ class DACShapeEvent(SeqInstruction):
                 api.wait(self.wait_time)
 
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | dac_addr: "+str(self.dac_address) + " | ampl: " + str(self.amplitude) \
             + " | slope_dur: "+str(self.slope_duration)
@@ -489,6 +537,7 @@ class DDSSwitchEvent(SeqInstruction):
     "Generates a DDS freq switching event"
     def __init__(self, start_time, dds_address, index, phase=0, is_last=False):
         self.start_time = start_time
+        self.duration = self.cycle_time * 3.0
         self.index = index
         self.phase = phase
         self.is_last = is_last
@@ -514,7 +563,7 @@ class DDSSwitchEvent(SeqInstruction):
         api.switch_frequency(dds_instance, real_index, self.phase)
 
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | dds_addr: "+ str(self.dds_address) + " | index: "+ str(self.index) + " | phase: "+ str(self.phase)
 
@@ -535,7 +584,7 @@ class ProgramRampGeneratorEvent(SeqInstruction):
         self.ramp_type = ramp_type
         self.is_last = is_last
         self.dds_address = dds_address
-        self.name = "Program_Ramp_Generator_Event"
+        self.name = "PrgRampGen_Event"
 
     def handle_instruction(self, api):
         "generate API events"
@@ -546,10 +595,9 @@ class ProgramRampGeneratorEvent(SeqInstruction):
             raise RuntimeError("No DDS known with address: "+str(self.dds_address))
         api.init_digital_ramp_generator(self.ramp_type, dds_instance, self.dt_pos, self.dt_neg, self.dfreq_pos, self.dfreq_neg, self.lower_limit, self.upper_limit)
 
-        api.switch_frequency(dds_instance, 0, 0)
 
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | dds_addr: "+ str(self.dds_address) \
             + " | rmp_type: "+ self.ramp_type \
@@ -568,7 +616,7 @@ class ConfigureRampEvent(SeqInstruction):
         self.duration = self.cycle_time
         self.is_last = is_last
         self.dds_address = dds_address
-        self.name = "ConfigureRamp_Event"
+        self.name = "ConfRamp_Event"
         self.slope_direction = slope_direction
 
     def handle_instruction(self, api):
@@ -581,7 +629,7 @@ class ConfigureRampEvent(SeqInstruction):
         api.configure_ramping(dds_instance, self.slope_direction)
 
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | dds_addr: "+ str(self.dds_address) \
             + " | slp: "+ str(self.slope_direction)
@@ -590,14 +638,13 @@ class ConfigureRampEvent(SeqInstruction):
 
 class StartRampGeneratorEvent(SeqInstruction):
     "Programs the ramp generator"
-    def __init__(self, start_time, dds_address, loop_counts, amplitude=-15, is_last=False):
+    def __init__(self, start_time, dds_address, loop_counts, is_last=False):
         self.start_time = start_time
         self.duration = self.cycle_time
         self.is_last = is_last
         self.dds_address = dds_address
         self.loop_counts = loop_counts
-        self.amplitude = amplitude
-        self.name = "Start_Ramp_Generator_Event"
+        self.name = "StartRampGen_Event"
 
     def handle_instruction(self, api):
         "generate API events"
@@ -606,14 +653,13 @@ class StartRampGeneratorEvent(SeqInstruction):
             dds_instance = api.dds_list[self.dds_address]
         except IndexError:
             raise RuntimeError("No DDS known with address: "+str(self.dds_address))
-        api.dac_value(self.amplitude, self.dds_address)
         api.start_digital_ramp_generator(dds_instance)
 
         if self.loop_counts>0:
             api.start_finite('', self.loop_counts, automatic_label=True)
 
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | dds_addr: "+ str(self.dds_address) + " | loop_cnts: "+ str(self.loop_counts)
 
@@ -626,7 +672,7 @@ class StopRampGeneratorEvent(SeqInstruction):
         self.is_last = is_last
         self.dds_address = dds_address
         self.loop_counts = loop_counts
-        self.name = "Stop_Ramp_Generator_Event"
+        self.name = "StopRampGen_Event"
 
     def handle_instruction(self, api):
         "generate API events"
@@ -637,14 +683,10 @@ class StopRampGeneratorEvent(SeqInstruction):
             raise RuntimeError("No DDS known with address: "+str(self.dds_address))
         if self.loop_counts>0:
             api.end_finite('', automatic_label=True)
-
         api.stop_digital_ramp_generator(dds_instance)
 
-        api.switch_frequency(dds_instance, 1, 0)
-
-
     def __str__(self):
-        return str(self.name) + " | start: " + str(self.start_time) \
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | dur: " + str(self.duration) + " | last: " + str(self.is_last) \
             + " | dds_addr: "+ str(self.dds_address) \
 

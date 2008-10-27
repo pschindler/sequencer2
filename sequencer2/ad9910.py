@@ -221,8 +221,6 @@ class AD9910:
             # change the bits for the phase sweep, bit 20:21 in cfr2 while keeping the rest the same
             self.reg_value_dict[self.CFR2] = self.set_bit_state(self.reg_value_dict[self.CFR2], 1, 20, 2)
 
-            print hex(self.reg_value_dict[self.CFR2])
-
         if ramp_type=='ampl':
             reg_lower_limit   = int( (2**(16)-1) * lower_limit ) << 16
             reg_upper_limit   = int( (2**(16)-1) * upper_limit ) << 16
