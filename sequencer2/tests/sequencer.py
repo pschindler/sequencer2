@@ -131,6 +131,7 @@ class Test_Sequencer(unittest.TestCase):
     my_api = api.api(my_sequencer)
     my_api.wait((2**14+100)*0.01)
     current_seq = my_sequencer.current_sequence
+    my_sequencer.debug_sequence(force=True)
     insn1 = current_seq[0]
     insn2 = current_seq[1]
     value = 0x9 << 28 | 2**14-1
@@ -143,7 +144,7 @@ class Test_Sequencer(unittest.TestCase):
     """
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
-    print my_sequencer.current_sequence
+
     my_api.begin_subroutine("test")
     my_api.dac_value(-12,1)
     my_api.dac_value(-12,1)
@@ -163,17 +164,16 @@ class Test_Sequencer(unittest.TestCase):
     my_api.call_subroutine("test")
     my_api.dac_value(-12,1)
     my_sequencer.compile_sequence()
-    my_sequencer.debug_sequence()
-#    print "\n\n"
-    target=my_sequencer.current_sequence[8].target_address
+    my_sequencer.debug_sequence(force=False)
+    target=my_sequencer.current_sequence[14].target_address
     label=my_sequencer.current_sequence[target].label
 
-    self.assertEquals(target,30)
+    self.assertEquals(target,39)
     self.assertEquals(label,"test")
 
-    target=my_sequencer.current_sequence[12].target_address
+    target=my_sequencer.current_sequence[18].target_address
     label=my_sequencer.current_sequence[target].label
-    self.assertEquals(target,44)
+    self.assertEquals(target,62)
     self.assertEquals(label,"test1")
 
 
@@ -203,13 +203,13 @@ class Test_Sequencer(unittest.TestCase):
     my_sequencer.current_sequence.pop()
     my_sequencer.current_sequence.pop()
     my_sequencer.current_sequence.pop()
-    my_sequencer.debug_sequence()
-    j_insn=my_sequencer.current_sequence[9]
-    label_insn=my_sequencer.current_sequence[4]
-    self.assertEquals(label_insn.address,4)
+    my_sequencer.debug_sequence(force=False)
+    j_insn=my_sequencer.current_sequence[15]
+    label_insn=my_sequencer.current_sequence[7]
+    self.assertEquals(label_insn.address,7)
     self.assertEquals(label_insn.name,"label")
     self.assertEquals(j_insn.name,"j")
-    self.assertEquals(j_insn.target_address,4)
+    self.assertEquals(j_insn.target_address,7)
     del(my_sequencer)
 
   def test_compile_speed(self):
@@ -270,9 +270,9 @@ class Test_Sequencer(unittest.TestCase):
     my_api.end_finite("finite2")
     my_api.end_finite("finite1")
     my_sequencer.compile_sequence()
-    my_sequencer.debug_sequence()
+    my_sequencer.debug_sequence(force=False)
     ldc_insn1 = my_sequencer.current_sequence[0]
-    bdec_insn1 = my_sequencer.current_sequence[13]
+    bdec_insn1 = my_sequencer.current_sequence[15]
     self.assertEquals(ldc_insn1.name,"load const")
     self.assertEquals(ldc_insn1.value,100)
     self.assertEquals(bdec_insn1.name,"bdec")

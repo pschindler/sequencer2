@@ -56,8 +56,10 @@ class OutputSystem:
         try:
             channel_var = self.ttl_dict[key]
         except KeyError:
+            print self.ttl_dict
             raise RuntimeError("Can not find TTL channel " + str(key))
-
+            
+        
         if channel_var.is_inverted:
             value = abs(value - 1)
         current_state = output_status[channel_var.select]

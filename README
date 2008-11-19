@@ -32,7 +32,13 @@ link:http://python.org[http://python.org]
 
 The default configration is stored in the file config/sequencer2.ini. Do not edit his file. 
 The site configuration is stored in the file user_sequencer2.ini. 
-If this file does not exist on your setup copy the sequencer2.ini file and remove all but the following entries.
+
+
+To generate this file run the interactive script configure.py:
+
+....................
+python configure.py
+....................
 
 For a new setup make sure that at least following settings are correct:
 
