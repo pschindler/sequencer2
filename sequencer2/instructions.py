@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-22 10:38:08 c704271"
+# Time-stamp: "21-Dec-2008 18:13:00 viellieb"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -172,13 +172,13 @@ class call(j):
     """
     name = "call"
     opcode = 0x5
-    
+
     def __str__(self):
         return " add: "+str(self.address) + \
                " -- op:  "+str(hex(self.opcode)) + \
                " -- nam: "+str(self.name) + \
                " -- tar: "+str(self.target_address)
-   
+
 class ret(InsnClass):
     """returns from the last subroutine
     """
@@ -189,7 +189,7 @@ class ret(InsnClass):
         return " add: "+str(self.address) + \
                " -- op:  "+str(hex(self.opcode)) + \
                " -- nam: "+str(self.name)
- 
+
 class wait(InsnClass):
     """inserts a wait insn
     """
@@ -206,6 +206,25 @@ class wait(InsnClass):
                " -- op:  "+str(hex(self.opcode)) + \
                " -- nam: "+str(self.name) + " " + \
                " -- val: "+str(hex(self.wait_cycles))
+
+
+class wtr(InsnClass):
+    """waits until the trigger condition is satisfied
+    trigger is the trigger state in HEX
+    """
+    name = "wtr"
+    opcode = 0xD
+    def __init__(self,  trigger):
+        self.trigger = trigger
+
+    def get_value(self):
+        return self.opcode << 28 | self.trigger
+
+    def __str__(self):
+        return " add: "+str(self.address) + \
+               " -- op:  "+str(hex(self.opcode)) + \
+               " -- nam: "+str(self.name) + " " + \
+               " -- val: "+str(hex(self.trigger))
 
 class ldc(InsnClass):
     "Loads constant into register for bdec"

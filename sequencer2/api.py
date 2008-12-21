@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-09-15 13:04:42 c704271"
+# Time-stamp: "21-Dec-2008 18:17:51 viellieb"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -118,6 +118,13 @@ class api:
             for i in range(wait_cycles):
                 self.sequencer.add_insn(copy.copy(nop_insn))
 
+    def wait_trigger(self, trigger):
+        """Inserts a wait on trigger operation
+        @param trigger: trigger state in hex
+        """
+        wtr_insn = instructions.wtr(trigger)
+        self.sequencer.add_insn(wtr_insn)
+
     def label(self, label_name):
         """inserts a label and a NOP
         @param label_name: String identifier for the Label
@@ -159,7 +166,7 @@ class api:
         ldc_insn = instructions.ldc(register_addr, loop_count)
         self.sequencer.add_insn(ldc_insn)
 
-        if automatic_label==False:            
+        if automatic_label==False:
             label_insn = instructions.label(target_name)
         else:
             # take last label out of the automatic list
@@ -412,7 +419,7 @@ class api:
     def init_digital_ramp_generator(self, ramp_type, dds_instance, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit):
         """Initializes the digital ramp generator registers"""
 
-        dds_instance.set_ramp_configuration_registers(ramp_type, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit) 
+        dds_instance.set_ramp_configuration_registers(ramp_type, dt_pos, dt_neg, dfreq_pos, dfreq_neg, lower_limit, upper_limit)
 
         DRLreg = dds_instance.DRL
         DRSreg = dds_instance.DRS
@@ -429,7 +436,7 @@ class api:
         self.dds_to_serial(reg_value, CFR2reg[1], CFR2reg[0], dds_instance.device_addr)
 
 
-    def configure_ramping(self, dds_instance, slope_direction):        
+    def configure_ramping(self, dds_instance, slope_direction):
         """slope_direction, +1 = positive slope, 0 = hold generator, -1 = negative slope
         """
         ramp_conf   = 1
@@ -449,7 +456,7 @@ class api:
         phase_profile = ramp_conf << self.DDSRAMPCONF_bit | drctl << self.DRCTL_bit | drhold << self.DRHOLD_bit
         phase_profile = phase_profile >> 16
         self.__lvds_cmd(self.dds_up_opcode, dds_instance.device_addr, val, phase_profile, wait=0)
- 
+
 
     def start_digital_ramp_generator(self, dds_instance):
         """Starts the digital ramp generator"""
@@ -483,7 +490,7 @@ class api:
         self.update_dds(dds_instance)
 
 
-    
+
 
 
 
