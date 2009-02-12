@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-09-16 15:16:33 c704271"
+# Time-stamp: "2008-12-29 10:26:17 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -140,7 +140,7 @@ class multiple_pulses():
 
         self.last_counter = len(self.loop_list_counts) - 1
         self.new_counter  = self.last_counter
-       
+
     def base10toN(self, num, n):
         """Change a  to a base-n number.
         Gives out a list with the number in the new system
@@ -181,9 +181,9 @@ class multiple_pulses():
             if self.new_counter < len(self.loop_list_counts) - 1:
                 self.close_full_loops(self.last_counter)
 
-            self.open_full_loops(self.new_counter)            
+            self.open_full_loops(self.new_counter)
             self.last_counter = self.new_counter
-            self.find_next_counter()            
+            self.find_next_counter()
 
         else:
             if self.new_counter==0:
@@ -230,7 +230,7 @@ def dds_freq_sweep(dds_address, transition_param, time_array, slope_array, dfreq
         transition_obj = transitions
 
     ramp_init = DDSSweep('freq', time_array, slope_array, dds_address, transitions, phi, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last)
- 
+
     sequence_var.append(ramp_init.sequence_var)
 
 def dds_ampl_sweep(dds_address, transition_param, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, phi=0, loop_counts=0, is_last=True):
@@ -248,7 +248,7 @@ def dds_ampl_sweep(dds_address, transition_param, time_array, slope_array, dfreq
 
 
     ramp_init = DDSSweep('ampl', time_array, slope_array, dds_address, transitions, phi, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last)
- 
+
     sequence_var.append(ramp_init.sequence_var)
 
 def dds_phase_sweep(dds_address, transition_param, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, phi=0,  loop_counts=0, is_last=True):
@@ -265,7 +265,7 @@ def dds_phase_sweep(dds_address, transition_param, time_array, slope_array, dfre
         transition_obj = transitions
 
     ramp_init = DDSSweep('phase', time_array, slope_array, dds_address, transitions, phi, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last)
- 
+
     sequence_var.append(ramp_init.sequence_var)
 
 
@@ -577,8 +577,8 @@ class userAPI(SequenceHandler):
         # see sequence_handler.py for details
         assert len(sequence_var) > 0, "Empty sequence"
         self.final_array = self.get_sequence_array(sequence_var)
-        return_str = self.get_return_string(return_list)
-        return return_str
+        local_return_str = self.get_return_string(return_list)
+        return local_return_str
 
     def compile_sequence(self):
         "Generates the bytecode for the sequence"
