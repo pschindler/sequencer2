@@ -111,9 +111,9 @@ class Config:
         try:
             file = open(filename, 'r')
         except IOError:
-            self.logger.error("error while openinng hardware settings file:" \
+            self.logger.error("error while opening hardware settings file:" \
                                   + str(filename) )
-            raise RuntimeError("error while openinng hardware settings file:" \
+            raise RuntimeError("error while opening hardware settings file:" \
                                   + str(filename) )
 
         dictionary = {}
@@ -151,7 +151,7 @@ class Config:
                         dictionary[ch_name] = TTLChannel(ch_name, int(ch_number) % 16, select, is_inverted)
                         self.logger.debug(str(dictionary[ch_name]))
  
-                    except SyntaxError:
+                    except:
                         self.logger.warn("got a non int channel number"+split2[1])
 
             if self.get_str('OTHER','how_to_parse_hardware_settings')=='qfp_old':

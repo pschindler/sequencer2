@@ -332,7 +332,8 @@ def rf_on(frequency, amplitude, dds_address=0):
     @param amplitude: amplitude in dB
     @param dds_address: integer dds address
     """
-    rf_on_insn = RFOn()
+    start_time = 0.0
+    rf_on_insn = RFOn(start_time, frequency, amplitude, dds_address)
     sequence_var.append(rf_on_insn.sequence_var)
 
 def rf_bichro_pulse(theta, phi, ion, transition_param, transition2_param, \
