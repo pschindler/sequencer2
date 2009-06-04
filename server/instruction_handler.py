@@ -252,6 +252,48 @@ class RFOn(SeqInstruction):
                + " | add: "   + str(self.dds_address) \
                + " | last: "  + str(self.is_last)
 
+class TTLOn(SeqInstruction):
+    "generates a TTL pulse"
+    def __init__(self, start_time, device_key, is_last=True):
+        start_time = float(start_time)
+        duration = self.cycle_time
+
+        if str(device_key) == device_key:
+            device_key = [device_key]
+
+        self.start_time = float(start_time)
+        self.duration = self.cycle_time
+        self.name = "TTL_On"
+        self.is_last = is_last
+        self.sequence_var = []
+
+        start_event = TTLEvent(start_time, device_key, [1], is_last=False)
+
+        self.sequence_var = []
+        self.sequence_var = start_event.add_insn(self.sequence_var)
+
+class TTLOff(SeqInstruction):
+    "generates a TTL pulse"
+    def __init__(self, start_time, device_key, is_last=True):
+        start_time = float(start_time)
+        duration = self.cycle_time
+
+        if str(device_key) == device_key:
+            device_key = [device_key]
+
+        self.start_time = float(start_time)
+        self.duration = self.cycle_time
+        self.name = "TTL_Off"
+        self.is_last = is_last
+        self.sequence_var = []
+
+        start_event = TTLEvent(start_time, device_key, [0], is_last=False)
+
+        self.sequence_var = []
+        self.sequence_var = start_event.add_insn(self.sequence_var)
+
+
+
 class TTLPulse(SeqInstruction):
     "generates a TTL pulse"
     def __init__(self, start_time, duration, device_key, is_last=True):

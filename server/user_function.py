@@ -271,7 +271,33 @@ def dds_phase_sweep(dds_address, transition_param, time_array, slope_array, dfre
 
 
 
+def ttl_on(device_key, start_time=0.0, is_last=True):
+    """switches on a ttl channel
+    device_key may be a string or a list of strings indicating
+    the used TTL channels
 
+    @param device_key: string identifier of TTL channels or a list of string identifiers
+    @param start_time: pulse start time with respect to the current frame
+    @param is_last: If True a new frame is generated after this event
+    """
+
+    global sequence_var
+    pulse1 = TTLOn(start_time, device_key, is_last)
+    sequence_var.append(pulse1.sequence_var)
+
+def ttl_off(device_key, start_time=0.0, is_last=True):
+    """switches off a ttl channel
+    device_key may be a string or a list of strings indicating
+    the used TTL channels
+
+    @param device_key: string identifier of TTL channels or a list of string identifiers
+    @param start_time: pulse start time with respect to the current frame
+    @param is_last: If True a new frame is generated after this event
+    """
+
+    global sequence_var
+    pulse1 = TTLOff(start_time, device_key, is_last)
+    sequence_var.append(pulse1.sequence_var)
 
 
 
