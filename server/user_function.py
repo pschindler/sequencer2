@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-12-29 10:26:17 c704271"
+# Time-stamp: "2009-06-03 15:51:32 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -562,7 +562,7 @@ class userAPI(SequenceHandler):
             raise RuntimeError("Error while loading sequence:" +str(filename))
         # Parse sequence
         seq_str = self.sequence_parser(sequence_string)
-        self.logger.debug(seq_str)
+        self.logger.debug("Received sequence: \n" + seq_str)
         # Generate dictionary for sorting the files
         global sequence_var
         sequence_var = []

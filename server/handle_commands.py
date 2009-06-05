@@ -29,7 +29,7 @@ class CommandHandler:
         self.dac_voltarrays = {}
         self.variables = {}
         splitted_list = []
-
+        self.logger.debug("command_string: + \n" + var_string)
         frame = var_string.split(";")
 
         for frame_item in frame:
