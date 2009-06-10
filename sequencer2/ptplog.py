@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-06-04 12:01:39 c704271"
+# Time-stamp: "2009-06-10 16:06:36 c704271"
 
 #  file       logging.py
 #  copyright  (c) Philipp Schindler 2008
@@ -46,22 +46,23 @@ class ptplog:
             self.logger = logger
             logger.info("restart")
 
-       # Also init a global logger
-        formatter = logging.Formatter(": %(levelname)s - %(name)s - %(message)s")
-        glob_logger = logging.getLogger()
-        stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(formatter)
-        stream_handler.setLevel(combine_level)
-        mem_stream  = logging.handlers.RotatingFileHandler(filename + "_all.log",
-                                                           maxBytes=1e6, backupCount=5)
-        formatter2 = logging.Formatter("!#%(levelname)s || %(name)s || %(message)s", )
-        mem_stream.setFormatter(formatter2)
-        memory_handler = logging.handlers.MemoryHandler(1e6, target=mem_stream)
-        memory_handler.setLevel(logging.DEBUG)
-        #add stream_handler to logger
-        glob_logger.setLevel(combine_level)
-        glob_logger.addHandler(stream_handler)
-        glob_logger.addHandler(memory_handler)
+        if filename:
+           # Also init a global logger
+            formatter = logging.Formatter(": %(levelname)s - %(name)s - %(message)s")
+            glob_logger = logging.getLogger()
+            stream_handler = logging.StreamHandler()
+            stream_handler.setFormatter(formatter)
+            stream_handler.setLevel(combine_level)
+            mem_stream  = logging.handlers.RotatingFileHandler(filename + "_all.log",
+                                                               maxBytes=1e6, backupCount=5)
+            formatter2 = logging.Formatter("!#%(levelname)s || %(name)s || %(message)s", )
+            mem_stream.setFormatter(formatter2)
+            memory_handler = logging.handlers.MemoryHandler(1e6, target=mem_stream)
+            memory_handler.setLevel(logging.DEBUG)
+            #add stream_handler to logger
+            glob_logger.setLevel(combine_level)
+            glob_logger.addHandler(stream_handler)
+            glob_logger.addHandler(memory_handler)
 
 
 # logging.py ends here

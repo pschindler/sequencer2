@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "21-Dec-2008 18:27:46 viellieb"
+# Time-stamp: "2009-06-10 16:07:37 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -96,7 +96,7 @@ class api:
             wait_cycles = int(wait_time/self.cycle_time)
 
         if wait_cycles < 1.0:
-            self.logger.info("Cannot wait for less than one cycle")
+            self.logger.debug("Cannot wait for less than one cycle")
             return
 
         nop_insn = instructions.nop()
