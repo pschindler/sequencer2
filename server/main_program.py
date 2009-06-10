@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-06-04 10:29:57 c704271"
+# Time-stamp: "2009-06-05 16:10:53 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -176,6 +176,7 @@ class MainProgram:
         return_var.return_string = generate_str
 
         # Let's save the last logs to a single file
+        # TODO: better check if we are using the right handler
         log1 = logging.getLogger()
         handler = log1.handlers[1]
         handler.target.doRollover()
