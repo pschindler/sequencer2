@@ -46,7 +46,7 @@ Cycles 1
 # if switchRaman: rf_setRaman(freqRaman,powerRaman)
 # else: rf_setRaman(freqRaman,-100)
 
-PMTDetection(det_time)
+PMTDetection2(det_time)
 </SEQUENCE>
 
 <AUTHORED BY LABVIEW>

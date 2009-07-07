@@ -196,7 +196,7 @@ class CommandHandler:
 
     def init_transitions(self):
         "Generates a transition with frequency 0 for switching off the DDS"
-        trans_obj = transition("NULL", 0, 0)
+        trans_obj = transition("NULL", {1 : 0}, 0)
         self.transitions["NULL"] = trans_obj
 
 

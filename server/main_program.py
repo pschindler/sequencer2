@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-06-10 16:09:43 c704271"
+# Time-stamp: "2009-06-15 13:10:46 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -183,7 +183,7 @@ class MainProgram:
             handler.target.doRollover()
             handler.flush()
         except IndexError:
-            self.logger.error("Error while trying to log actual sequence")
+            self.logger.warn("Error while trying to log actual sequence")
             return return_var
 
 

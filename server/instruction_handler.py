@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "26-Aug-2008 22:13:48 viellieb"
+# Time-stamp: "2009-06-15 13:28:54 c704271"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -78,9 +78,9 @@ class DDSSweep(SeqInstruction):
         except KeyError:
             raise RuntimeError("Transition name not found: " + \
                                    str(transitions.current_transition))
-            
+
         self.logger.debug("Switching frequency to: "+str(transition_obj))
-            
+
         # Set the real phase
         phi = transition_obj.get_phase(phi)
         transition_name = transition_obj.name
@@ -114,8 +114,8 @@ class DDSSweep(SeqInstruction):
 
 
         program_ramp_gen_event = ProgramRampGeneratorEvent(ramp_type, drg_prg_time, dds_address, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, is_last=False)
-        
-        start_dds_ramp_event = StartRampGeneratorEvent(drg_start_time, dds_address, loop_counts, is_last=False)        
+
+        start_dds_ramp_event = StartRampGeneratorEvent(drg_start_time, dds_address, loop_counts, is_last=False)
 
         conf_ramp_event = []
         for k in range(len(drg_conf_time)):
@@ -128,15 +128,15 @@ class DDSSweep(SeqInstruction):
         dac_stop_event  = DACEvent(dac_stop_time, amplitude_off, dds_address, is_last=False)
         dds_start_event = DDSSwitchEvent(dds_start_time, dds_address, transition_name, phi,  is_last=False)
         dds_stop_event  = DDSSwitchEvent(dds_stop_time, dds_address, "NULL", phi, is_last=is_last)
- 
+
 
 
 
 
         self.sequence_var = program_ramp_gen_event.add_insn(self.sequence_var)
-        
+
         self.sequence_var = start_dds_ramp_event.add_insn(self.sequence_var)
-        
+
         self.sequence_var = dds_start_event.add_insn(self.sequence_var)
         self.sequence_var = dac_start_event.add_insn(self.sequence_var)
 
@@ -148,8 +148,8 @@ class DDSSweep(SeqInstruction):
         self.sequence_var = dds_stop_event.add_insn(self.sequence_var)
 
         self.sequence_var = stop_dds_ramp_event.add_insn(self.sequence_var)
- 
- 
+
+
 class Start_Finite(SeqInstruction):
     """at the beginning of a finite loop
     adds a ldc instruction and a label intruction
@@ -162,7 +162,7 @@ class Start_Finite(SeqInstruction):
         self.automatic_label = automatic_label
         self.start_time = 0.0
         self.duration = self.cycle_time
-        self.is_last = True        
+        self.is_last = True
         self.name = "StartLoopEvent"
         self.sequence_var = []
         self.sequence_var = self.add_insn(self.sequence_var)
@@ -295,9 +295,7 @@ class RFPulse(SeqInstruction):
             raise RuntimeError("Transition name not found: " + \
                                    str(transitions.current_transition))
 
-            
         self.logger.debug("Switching frequency to: "+str(transition_obj))
-            
         # Set the real phase
         phi = transition_obj.get_phase(phi)
         try:
@@ -424,10 +422,10 @@ class RFBichroPulse(SeqInstruction):
 
 
 
-       
 
 
-  
+
+
 
 
 
