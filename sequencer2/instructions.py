@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "21-Dec-2008 18:13:00 viellieb"
+# Time-stamp: "2009-05-28 13:18:05 c704271"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -211,6 +211,7 @@ class wait(InsnClass):
 class wtr(InsnClass):
     """waits until the trigger condition is satisfied
     trigger is the trigger state in HEX
+    NOT implemented yet in the firmware
     """
     name = "wtr"
     opcode = 0xD

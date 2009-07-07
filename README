@@ -30,8 +30,8 @@ link:http://python.org[http://python.org]
 
 == Configuring the server ==
 
-The default configration is stored in the file config/sequencer2.ini. Do not edit his file. 
-The site configuration is stored in the file user_sequencer2.ini. 
+The default configration is stored in the file config/sequencer2.ini. Do not edit his file.
+The site configuration is stored in the file user_sequencer2.ini.
 
 
 To generate this file run the interactive script configure.py:
@@ -46,7 +46,7 @@ For a new setup make sure that at least following settings are correct:
 .-----------------------------.----------------------------------
 Setting                         Value
 -----------------------------------------------------------------
-box_ip_address                  The network address of the sequencer. 
+box_ip_address                  The network address of the sequencer.
 DIO_configuration_file          Your hardware configuration file
 sequence_dir                    The directory of your sequence files
 include_dir                     The directory of your include files
@@ -58,15 +58,15 @@ The network address of the sequencer is set by the DIP switches on the sequencer
 
 How to set up the ip address
 
-To set the ip address on the fpga board use the red dip switches. 
+To set the ip address on the fpga board use the red dip switches.
 
-The pin usage are :
+The pin usage is:
 
 |reset|ip1|ip2|ip3|ip4|dhcp|
 
 set dhcp to OFF
 
-The ip address is 192.168.0.X where X=220 + ip1 + 2 * ip2 + 4*ip3 + 8* ip4 
+The ip address is 192.168.0.X where X=220 + ip1 + 2 * ip2 + 4*ip3 + 8* ip4
 
 After that the server may be started with:
 

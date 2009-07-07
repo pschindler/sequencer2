@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-13 09:50:51 c704271"
+# Time-stamp: "2009-06-15 13:10:46 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -174,6 +174,17 @@ class MainProgram:
         user_api.clear()
         del(user_api)
         return_var.return_string = generate_str
-        return return_var
+
+        # Let's save the last logs to a single file
+        # TODO: better check if we are using the right handler
+        try:
+            log1 = logging.getLogger()
+            handler = log1.handlers[1]
+            handler.target.doRollover()
+            handler.flush()
+        except IndexError:
+            self.logger.warn("Error while trying to log actual sequence")
+            return return_var
+
 
 # main_program.py ends here

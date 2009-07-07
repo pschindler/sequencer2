@@ -29,7 +29,7 @@ class CommandHandler:
         self.dac_voltarrays = {}
         self.variables = {}
         splitted_list = []
-
+        self.logger.debug("command_string: + \n" + var_string)
         frame = var_string.split(";")
 
         for frame_item in frame:
@@ -196,7 +196,7 @@ class CommandHandler:
 
     def init_transitions(self):
         "Generates a transition with frequency 0 for switching off the DDS"
-        trans_obj = transition("NULL", 0, 0)
+        trans_obj = transition("NULL", {1 : 0}, 0)
         self.transitions["NULL"] = trans_obj
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-05-30 11:32:58 c704271"
+# Time-stamp: "2009-06-10 16:06:36 c704271"
 
 #  file       logging.py
 #  copyright  (c) Philipp Schindler 2008
@@ -8,81 +8,61 @@
 """Generates a logging object for the python logging framework"""
 
 import logging
+import logging.handlers
 
 class ptplog:
-    """Generate a Logger with the name sequencer2
+    """Generate a Logger with the names defined in logger_list
     """
-    def __init__(self, filename=None, level=logging.WARNING, apilevel=logging.DEBUG):
+    def __init__(self, filename=None, level=logging.WARNING, level_dict={},
+                 combine_level=logging.DEBUG):
 
-        logger = logging.getLogger("sequencer2")
-        logger.setLevel(level)
-        #create console handler and set level to debug
-        ch = logging.StreamHandler()
-        ch.setLevel(level)
-        #create formatter
-        if filename == None:
-            formatter = logging.Formatter("%(levelname)s - %(message)s")
-        else:
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-        #add formatter to ch
-        ch.setFormatter(formatter)
-        #add ch to logger
-        logger.addHandler(ch)
-        self.logger = logger
+        logger_list = ["sequencer2", "api", "server", "DACcontrol"]
+        for logger_name in logger_list:
+            logger = logging.getLogger(logger_name)
+            try:
+                level1 = level_dict[logger_name]
+                logger.setLevel(level1)
+            except KeyError:
+                logger.setLevel(level)
+#            if logger_name == "":
+#                logger.set_level(combine_level)
 
-        level2 = level
-#        level2 = apilevel
-        logger2 = logging.getLogger("api")
-        logger2.setLevel(apilevel)
-#        logger2.setLevel(level2)
+            if filename == None:
+                #create console handler and set level to debug
+                stream_handler = logging.StreamHandler()
+                stream_handler.setLevel(level)
+                #create formatter
+                formatter = logging.Formatter(logger_name + ": %(levelname)s - %(message)s")
+            else:
+                logger_filename = filename + "_" + logger_name + ".log"
+                stream_handler = logging.handlers.RotatingFileHandler(logger_filename,
+                                                 maxBytes=1e6, backupCount=5)
+                stream_handler.setLevel(level)
+                formatter = logging.Formatter("%(levelname)s - %(asctime)s - %(name)s - %(message)s")
+            #add formatter to stream_handler
+            stream_handler.setFormatter(formatter)
+            #add stream_handler to logger
+            logger.addHandler(stream_handler)
+            self.logger = logger
+            logger.info("restart")
+
+        if filename:
+           # Also init a global logger
+            formatter = logging.Formatter(": %(levelname)s - %(name)s - %(message)s")
+            glob_logger = logging.getLogger()
+            stream_handler = logging.StreamHandler()
+            stream_handler.setFormatter(formatter)
+            stream_handler.setLevel(combine_level)
+            mem_stream  = logging.handlers.RotatingFileHandler(filename + "_all.log",
+                                                               maxBytes=1e6, backupCount=5)
+            formatter2 = logging.Formatter("!#%(levelname)s || %(name)s || %(message)s", )
+            mem_stream.setFormatter(formatter2)
+            memory_handler = logging.handlers.MemoryHandler(1e6, target=mem_stream)
+            memory_handler.setLevel(logging.DEBUG)
+            #add stream_handler to logger
+            glob_logger.setLevel(combine_level)
+            glob_logger.addHandler(stream_handler)
+            glob_logger.addHandler(memory_handler)
 
 
-        ch2 = logging.StreamHandler()
-        ch2.setLevel(level2)
-        #create formatter
-        if filename == None:
-            formatter = logging.Formatter("API : %(levelname)s  %(message)s")
-        else:
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-        #add formatter to ch
-        ch2.setFormatter(formatter)
-        #add ch to logger
-        #create console handler and set level to debug
-        logger2.addHandler(ch2)
-        self.logger2 = logger2
-
-
-        level3 = level
-        logger3 = logging.getLogger("server")
-        logger3.setLevel(level2)
-        ch3 = logging.StreamHandler()
-        ch3.setLevel(level)
-        #create formatter
-        if filename == None:
-            formatter = logging.Formatter("SERVER : %(levelname)s  %(message)s")
-        else:
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-        #add formatter to ch
-        ch3.setFormatter(formatter)
-        #add ch to logger
-        #create console handler and set level to debug
-        logger3.addHandler(ch3)
-        self.logger3 = logger3
-
-        level4 = level
-        logger4 = logging.getLogger("DACcontrol")
-        logger4.setLevel(level3)
-        ch4 = logging.StreamHandler()
-        ch4.setLevel(level)
-        #create formatter
-        if filename == None:
-            formatter = logging.Formatter("DACcontrol : %(levelname)s  %(message)s")
-        else:
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-        #add formatter to ch
-        ch4.setFormatter(formatter)
-        #add ch to logger
-        #create console handler and set level to debug
-        logger4.addHandler(ch4)
-        self.logger4 = logger4
 # logging.py ends here

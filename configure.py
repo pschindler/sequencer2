@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-22 10:46:38 c704271"
+# Time-stamp: "2009-02-12 13:42:50 c704271"
 
 #  file       config.py
 #  copyright  (c) Philipp Schindler 2008
@@ -10,6 +10,8 @@
 # sequencer2 server.
 
 # Usage: execute script and answer questions:
+
+import os
 
 # configuration
 CONFIG_FILENAME = "config/user_sequencer2.ini"
@@ -45,7 +47,7 @@ print "Please note that not all possible configuration options are handled"
 print "with this helper program. Look into the file "
 print "config/sequencer2.ini for more information"
 
-# Generate configuration string 
+# Generate configuration string
 config_str = "#Automatically generated file\n"
 config_str += "#You can edit this - but it may be overwritten when executing"
 config_str += " configure.py\n\n"
@@ -61,9 +63,14 @@ config_str += "box_ip_address   = " + str(ip_addr_str) + "\n\n"
 print "\n\n*************************************\n\n\n\n"
 print "The configuration file: \n"
 print config_str
+#Check if the file already exists !!
+if os.path.isfile(CONFIG_FILENAME):
+    print "Warning config file exists! Should I overwrite the file? (y/n)"
+    decision = raw_input()
+    if decision != "y":
+        raise RuntimeError("Config file already exists")
 
 # Write the file to disk:
-# MISSING: ask if the file already exists
 fobj = open(CONFIG_FILENAME,"w")
 fobj.write(config_str)
 fobj.close()

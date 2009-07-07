@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-22 10:24:57 c704271"
+# Time-stamp: "2008-12-29 11:39:52 c704271"
 
 #  file       sequencer.py
 #  copyright  (c) Philipp Schindler 2008
@@ -81,11 +81,11 @@ class sequencer:
         # checl if the previous subroutine was ended
         if self.is_subroutine:
             self.logger.exception("Previous subroutine not ended")
-            raise RuntimeError, "Previous subroutine not ended"
+            raise RuntimeError("Previous subroutine not ended")
         #check if current sequence is empty
         if self.current_sequence != self.initial_sequence:
             self.logger.exception("tried to insert subroutine with a non empty sequence")
-            raise RuntimeError, "Subroutine can only be started at beginnig of sequence"
+            raise RuntimeError("Subroutine can only be started at beginnig of sequence")
         self.is_subroutine = True
 
     def end_subroutine(self):
@@ -178,7 +178,7 @@ class sequencer:
 
         self.logger.debug(insn_str)
         if force:
-            print insn_str
+            print(insn_str)
 
 
 ## sequencer.py

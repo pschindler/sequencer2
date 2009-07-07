@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "21-Dec-2008 18:17:51 viellieb"
+# Time-stamp: "2009-06-10 16:07:37 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -96,7 +96,7 @@ class api:
             wait_cycles = int(wait_time/self.cycle_time)
 
         if wait_cycles < 1.0:
-#            self.logger.info("Cannot wait for less than one cycle")
+            self.logger.debug("Cannot wait for less than one cycle")
             return
 
         nop_insn = instructions.nop()
@@ -159,6 +159,7 @@ class api:
         adds a ldc instruction and a label intruction
         @param target_name: String identifier of the label to jump to
         @param loop_count: Desired number of loops
+        @param automatic_label: Generate an automated label
         """
         self.sequencer.bdec_register.append(loop_count)
         register_addr = len(self.sequencer.bdec_register) - 1
@@ -174,10 +175,7 @@ class api:
             aut_target_name = self.sequencer.automatic_label_list[l]
             self.sequencer.automatic_label_list.append('aut_label_' + str(l+2))
             self.sequencer.open_automatic_labels.append(aut_target_name)
-
             label_insn = instructions.label(aut_target_name)
-
-
         self.sequencer.add_insn(label_insn)
 
 
@@ -186,6 +184,7 @@ class api:
         """At the ending of a finite loop
         Adds a bdec instruction and fills the branch delay slots
         @param target_name: String identifier of the label to jump to
+        @param automatic_label: Generate an automated label
         """
         register_addr = len(self.sequencer.bdec_register) - 1
         if register_addr < 0:
@@ -495,12 +494,6 @@ class api:
         self.configure_ramping(dds_instance, -1)
 
         self.update_dds(dds_instance)
-
-
-
-
-
-
 
 
     #################################################################

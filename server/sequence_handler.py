@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-26 13:20:12 c704271"
+# Time-stamp: "2009-06-04 16:37:53 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -183,7 +183,7 @@ class SequenceHandler(object):
                 final_array.append(event)
                 if self.logger.level < 11 :
                     log_str += str(event) + "\n"
-        self.logger.debug(log_str)
+        self.logger.debug("Sequence Events: \n" + log_str)
         return final_array
 
 

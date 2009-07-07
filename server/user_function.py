@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-09-16 15:16:33 c704271"
+# Time-stamp: "2009-06-23 08:14:07 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -109,15 +109,11 @@ return_list = {}
 transitions = TransitionListObject()
 logger = logging.getLogger("server")
 
-def test_global(string1):
-    "Just testing ..."
-    global return_str
-    return_str += string1
+def test_global(test_string="test"):
+    """Helper function needed for unittests"""
+    add_to_return_list("test", test_string)
 
-
-
-
-class multiple_pulses():
+class multiple_pulses:
     """generates an instruction that is repeated 'no_of_pulses' times
     @param no_of_pulses: number of repetition
     usage: for i in multiple_pulse(5):
@@ -140,7 +136,7 @@ class multiple_pulses():
 
         self.last_counter = len(self.loop_list_counts) - 1
         self.new_counter  = self.last_counter
-       
+
     def base10toN(self, num, n):
         """Change a  to a base-n number.
         Gives out a list with the number in the new system
@@ -181,9 +177,9 @@ class multiple_pulses():
             if self.new_counter < len(self.loop_list_counts) - 1:
                 self.close_full_loops(self.last_counter)
 
-            self.open_full_loops(self.new_counter)            
+            self.open_full_loops(self.new_counter)
             self.last_counter = self.new_counter
-            self.find_next_counter()            
+            self.find_next_counter()
 
         else:
             if self.new_counter==0:
@@ -200,7 +196,6 @@ class multiple_pulses():
 
         return 0
 
-
     def loop_start_finite(self, loop_counts):
         global sequence_var
         start_fin = Start_Finite('', loop_counts, automatic_label=True)
@@ -212,11 +207,29 @@ class multiple_pulses():
         sequence_var.append(end_fin.sequence_var)
 
 
+def dds_freq_sweep(dds_address, transition_param, time_array,
+                   slope_array, dfreq_pos, dfreq_neg, lower_limit,
+                   upper_limit, dt_pos=0, dt_neg=0, phi=0, loop_counts=0, is_last=True):
+    """Adds a frequency sweep from frequency upper limit to frequency lower limit"""
+    global sequence_var
+    global transitions
 
+    if str(transition_param) == transition_param:
+        transitions.make_current(transition_param)
+        transition_obj = transitions
+    else:
+        transitions.add_transition(transition_param)
+        transitions.make_current(transition_param.name)
+        transition_obj = transitions
+    ramp_init = DDSSweep('freq', time_array, slope_array, dds_address,
+                         transitions, phi, dfreq_pos, dfreq_neg, lower_limit,
+                         upper_limit, dt_pos, dt_neg, loop_counts, is_last)
+    sequence_var.append(ramp_init.sequence_var)
 
-
-
-def dds_freq_sweep(dds_address, transition_param, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, phi=0, loop_counts=0, is_last=True):
+def dds_ampl_sweep(dds_address, transition_param, time_array, slope_array,
+                   dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0,
+                   dt_neg=0, phi=0, loop_counts=0, is_last=True):
+    """Adds an amplitude sweep from amplitude upper_limit to lower_limit"""
 
     global sequence_var
     global transitions
@@ -228,13 +241,15 @@ def dds_freq_sweep(dds_address, transition_param, time_array, slope_array, dfreq
         transitions.add_transition(transition_param)
         transitions.make_current(transition_param.name)
         transition_obj = transitions
-
-    ramp_init = DDSSweep('freq', time_array, slope_array, dds_address, transitions, phi, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last)
- 
+    ramp_init = DDSSweep('ampl', time_array, slope_array, dds_address,
+                         transitions, phi, dfreq_pos, dfreq_neg, lower_limit,
+                         upper_limit, dt_pos, dt_neg, loop_counts, is_last)
     sequence_var.append(ramp_init.sequence_var)
 
-def dds_ampl_sweep(dds_address, transition_param, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, phi=0, loop_counts=0, is_last=True):
-
+def dds_phase_sweep(dds_address, transition_param, time_array, slope_array,
+                    dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0,
+                    dt_neg=0, phi=0,  loop_counts=0, is_last=True):
+    """Adds phase sweep from amplitude upper_limit to lower_limit"""
     global sequence_var
     global transitions
 
@@ -245,61 +260,10 @@ def dds_ampl_sweep(dds_address, transition_param, time_array, slope_array, dfreq
         transitions.add_transition(transition_param)
         transitions.make_current(transition_param.name)
         transition_obj = transitions
-
-
-    ramp_init = DDSSweep('ampl', time_array, slope_array, dds_address, transitions, phi, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last)
- 
+    ramp_init = DDSSweep('phase', time_array, slope_array, dds_address, transitions,
+                         phi, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos,
+                         dt_neg, loop_counts, is_last)
     sequence_var.append(ramp_init.sequence_var)
-
-def dds_phase_sweep(dds_address, transition_param, time_array, slope_array, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos=0, dt_neg=0, phi=0,  loop_counts=0, is_last=True):
-
-    global sequence_var
-    global transitions
-
-    if str(transition_param) == transition_param:
-        transitions.make_current(transition_param)
-        transition_obj = transitions
-    else:
-        transitions.add_transition(transition_param)
-        transitions.make_current(transition_param.name)
-        transition_obj = transitions
-
-    ramp_init = DDSSweep('phase', time_array, slope_array, dds_address, transitions, phi, dfreq_pos, dfreq_neg, lower_limit, upper_limit, dt_pos, dt_neg, loop_counts, is_last)
- 
-    sequence_var.append(ramp_init.sequence_var)
-
-
-
-
-def ttl_on(device_key, start_time=0.0, is_last=True):
-    """switches on a ttl channel
-    device_key may be a string or a list of strings indicating
-    the used TTL channels
-
-    @param device_key: string identifier of TTL channels or a list of string identifiers
-    @param start_time: pulse start time with respect to the current frame
-    @param is_last: If True a new frame is generated after this event
-    """
-
-    global sequence_var
-    pulse1 = TTLOn(start_time, device_key, is_last)
-    sequence_var.append(pulse1.sequence_var)
-
-def ttl_off(device_key, start_time=0.0, is_last=True):
-    """switches off a ttl channel
-    device_key may be a string or a list of strings indicating
-    the used TTL channels
-
-    @param device_key: string identifier of TTL channels or a list of string identifiers
-    @param start_time: pulse start time with respect to the current frame
-    @param is_last: If True a new frame is generated after this event
-    """
-
-    global sequence_var
-    pulse1 = TTLOff(start_time, device_key, is_last)
-    sequence_var.append(pulse1.sequence_var)
-
-
 
 
 def ttl_pulse(device_key, duration, start_time=0.0, is_last=True):
@@ -348,7 +312,7 @@ def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
 
     sequence_var.append(rf_pulse_insn.sequence_var)
 
-def rf_on(frequency, amplitude, dds_address=0):
+def rf_on(frequency, amplitude, dds_address=0, start_time = 0.0):
     """Switches on the given dds board.
 
     Has no start_time or is_last because it is intended to be used only in
@@ -358,7 +322,6 @@ def rf_on(frequency, amplitude, dds_address=0):
     @param amplitude: amplitude in dB
     @param dds_address: integer dds address
     """
-    start_time = 0.0
     rf_on_insn = RFOn(start_time, frequency, amplitude, dds_address)
     sequence_var.append(rf_on_insn.sequence_var)
 
@@ -386,8 +349,9 @@ def rf_bichro_pulse(theta, phi, ion, transition_param, transition2_param, \
 
     else:
         raise RuntimeError("Bichro Pulse does not support direct transitions")
-    rf_bichro_pulse_insn = RFBichroPulse(start_time, theta, phi, ion, transition_obj, \
-                                         is_last=is_last, address=address, address2=address2)
+    rf_bichro_pulse_insn = RFBichroPulse(start_time, theta, phi, ion, transition_obj,
+                                         is_last=is_last, address=address,
+                                         address2=address2)
 
     sequence_var.append(rf_bichro_pulse_insn.sequence_var)
 
@@ -589,13 +553,16 @@ class userAPI(SequenceHandler):
             raise RuntimeError("Error while loading sequence:" +str(filename))
         # Parse sequence
         seq_str = self.sequence_parser(sequence_string)
-        self.logger.debug(seq_str)
+        self.logger.debug("Received sequence: \n" + seq_str)
         # Generate dictionary for sorting the files
         global sequence_var
         sequence_var = []
         global transitions
         transitions.clear()
         transitions = self.chandler.transitions
+        # We have to set all known DDS devices to the NULL transition!
+        for dds_address in range(len(self.api.dds_list)):
+            rf_pulse(1, 0, 1, "NULL",  address=dds_address)
         # Execute sequence
         exec(seq_str)
         if sequence_var == []:
@@ -604,8 +571,8 @@ class userAPI(SequenceHandler):
         # see sequence_handler.py for details
         assert len(sequence_var) > 0, "Empty sequence"
         self.final_array = self.get_sequence_array(sequence_var)
-        return_str = self.get_return_string(return_list)
-        return return_str
+        local_return_str = self.get_return_string(return_list)
+        return local_return_str
 
     def compile_sequence(self):
         "Generates the bytecode for the sequence"
