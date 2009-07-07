@@ -12,7 +12,7 @@ import logging
 class ptplog:
     """Generate a Logger with the name sequencer2
     """
-    def __init__(self, filename=None, level=logging.WARNING, apilevel=logging.WARN):
+    def __init__(self, filename=None, level=logging.WARNING, apilevel=logging.DEBUG):
 
         logger = logging.getLogger("sequencer2")
         logger.setLevel(level)
@@ -31,14 +31,17 @@ class ptplog:
         self.logger = logger
 
         level2 = level
+#        level2 = apilevel
         logger2 = logging.getLogger("api")
         logger2.setLevel(apilevel)
 #        logger2.setLevel(level2)
+
+
         ch2 = logging.StreamHandler()
-        ch2.setLevel(level)
+        ch2.setLevel(level2)
         #create formatter
         if filename == None:
-            formatter = logging.Formatter("API :  %(message)s")
+            formatter = logging.Formatter("API : %(levelname)s  %(message)s")
         else:
             formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         #add formatter to ch
@@ -47,6 +50,7 @@ class ptplog:
         #create console handler and set level to debug
         logger2.addHandler(ch2)
         self.logger2 = logger2
+
 
         level3 = level
         logger3 = logging.getLogger("server")

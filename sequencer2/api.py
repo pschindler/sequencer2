@@ -96,7 +96,7 @@ class api:
             wait_cycles = int(wait_time/self.cycle_time)
 
         if wait_cycles < 1.0:
-            self.logger.info("Cannot wait for less than one cycle")
+#            self.logger.info("Cannot wait for less than one cycle")
             return
 
         nop_insn = instructions.nop()
@@ -271,9 +271,6 @@ class api:
         assert control<2**4, "LVDS: Data bigger >= 2**16!"
 
         #High Word consists of following values:
-        self.logger.debug("lvds cmd: op: "+str(hex(opcode)) +" add: "+str(hex(address)) + \
-            " prof: "+str(hex(phase_profile)) + " ctl: "+str(hex(control)) + \
-            " wait: " +str(hex(wait)))
         avail_val = 1 << 10
         opcode_val = opcode << 11
         address_val = address << 6
@@ -283,8 +280,6 @@ class api:
         high_word = opcode_val | address_val  \
             | phase_profile_val |control_val
         high_word_avail = high_word | avail_val
-        self.logger.debug("lvds cmd: highword: "+str(hex(high_word)))
-
 
         #Low Word
         data_val = data % (2**16)
@@ -304,6 +299,15 @@ class api:
         # Add a copy of high_insn
         self.sequencer.add_insn(copy.copy(high_insn))
 
+
+        # logging output
+        self.logger.debug("lvds cmd: op: "+str(hex(opcode)) +" add: "+str(hex(address)) + \
+            " prof: "+str(hex(phase_profile)) + " ctl: "+str(hex(control)) + \
+            " wait: " +str(hex(wait)) + " highword: "+str(hex(high_word)) + " lowword: "+str(hex(data_val)))
+ 
+
+
+
     def dac_value(self, val, address):
         """Sets the dac on the DDS board
         @param val: value of the dac in db
@@ -311,6 +315,9 @@ class api:
         """
         val = self.recalibration(val)
         self.__lvds_cmd(self.dac_opcode, address, val)
+        self.logger.debug("dac_value: op: "+str(hex(self.dac_opcode)) +" add: "+str(hex(address)) + \
+                " val: " +str(hex(val)))
+
 
     def reset_fifo(self, dds_instance):
         """resets the FIFO of the dds"""
