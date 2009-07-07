@@ -217,7 +217,8 @@ class SeqWait(SeqInstruction):
 class RFOn(SeqInstruction):
     "Switches on a given DDS"
     def __init__(self, start_time, frequency, amplitude, address, is_last=True):
-        start_time = float(start_time)
+        self.start_time = float(start_time)
+        self.duration = self.cycle_time
         self.frequency = float(frequency)
         self.amplitude = float(amplitude)
         self.dds_address = address
@@ -244,9 +245,54 @@ class RFOn(SeqInstruction):
         api.update_dds(dds_instance)
 
     def __str__(self):
-        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
-               + " | freq" +str(self.frequency)\
-               + " | amp: " + str(self.amplitude) + " | last: " + str(self.is_last)
+        return str(self.name) + (self.max_name_length-len(self.name))*" " \
+               + " | start: " + str(self.start_time) \
+               + " | freq: "  + str(self.frequency) \
+               + " | amp: "   + str(self.amplitude) \
+               + " | add: "   + str(self.dds_address) \
+               + " | last: "  + str(self.is_last)
+
+class TTLOn(SeqInstruction):
+    "generates a TTL pulse"
+    def __init__(self, start_time, device_key, is_last=True):
+        start_time = float(start_time)
+        duration = self.cycle_time
+
+        if str(device_key) == device_key:
+            device_key = [device_key]
+
+        self.start_time = float(start_time)
+        self.duration = self.cycle_time
+        self.name = "TTL_On"
+        self.is_last = is_last
+        self.sequence_var = []
+
+        start_event = TTLEvent(start_time, device_key, [1], is_last=False)
+
+        self.sequence_var = []
+        self.sequence_var = start_event.add_insn(self.sequence_var)
+
+class TTLOff(SeqInstruction):
+    "generates a TTL pulse"
+    def __init__(self, start_time, device_key, is_last=True):
+        start_time = float(start_time)
+        duration = self.cycle_time
+
+        if str(device_key) == device_key:
+            device_key = [device_key]
+
+        self.start_time = float(start_time)
+        self.duration = self.cycle_time
+        self.name = "TTL_Off"
+        self.is_last = is_last
+        self.sequence_var = []
+
+        start_event = TTLEvent(start_time, device_key, [0], is_last=False)
+
+        self.sequence_var = []
+        self.sequence_var = start_event.add_insn(self.sequence_var)
+
+
 
 class TTLPulse(SeqInstruction):
     "generates a TTL pulse"
