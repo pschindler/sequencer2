@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-06-10 16:07:37 c704271"
+# Time-stamp: "19-Jul-2009 13:51:59 viellieb"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -100,24 +100,26 @@ class api:
             return
 
         nop_insn = instructions.nop()
-        if wait_cycles > self.branch_delay_slots:
-            wait_cycles -= self.branch_delay_slots - 1
-            while wait_cycles > 0:
+        while wait_cycles > 0:
+            if wait_cycles > self.branch_delay_slots:
+#                wait_cycles -= self.branch_delay_slots - 1 
+                # Subtract one more cycle - we need it for the wait
+                # instruction itself
                 if wait_cycles > self.max_wait_cycles:
-                    my_wait = self.max_wait_cycles
+                    my_wait = self.max_wait_cycles 
                 else:
-                    my_wait = wait_cycles
-
+                    my_wait = wait_cycles - self.branch_delay_slots - 1
                 wait_insn = instructions.wait(my_wait)
-                # Do we really need wait_cycles - 4 ??
+                # Do we really need wait_cycles - 5 ??
+                wait_cycles -= my_wait + self.branch_delay_slots + 1
                 self.sequencer.add_insn(wait_insn)
-                wait_cycles -= my_wait
+                
                 for i in range(self.branch_delay_slots):
                     self.sequencer.add_insn(copy.copy(nop_insn))
-        else:
-            for i in range(wait_cycles):
-                self.sequencer.add_insn(copy.copy(nop_insn))
-
+            else:
+                for i in range(wait_cycles):
+                    self.sequencer.add_insn(copy.copy(nop_insn))
+                wait_cycles = 0
     def wait_trigger(self, trigger):
         """Inserts a wait on trigger operation
         @param trigger: trigger state in hex

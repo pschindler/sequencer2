@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-07-07 07:38:34 c704271"
+# Time-stamp: "19-Jul-2009 13:48:43 viellieb"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -50,21 +50,29 @@ class TestUserFunction(unittest.TestCase):
         "Simple test for error handling of an unknown sequence file"
         cmd_str = "NAME,PMTreadoutgibtsnit.py;CYCLES,1;TRIGGER,YES;"
         my_main_program = main_program.MainProgram()
-        my_main_program.execute_program(cmd_str)
+        return_var = my_main_program.execute_program(cmd_str)
+        if not return_var.is_error:
+            self.fail("server should raise an error message here")
 
     def test_nr_carrier_nr(self):
-        "Test how many transitions the server can handle - buggy?"
+        """"Test how many transitions the server can initialize 
+        without using them
+        This should run without an error
+        """
         cmd_str = generate_cmd_str("test_sequence.py", nr_of_car=9)
         my_main_program = main_program.MainProgram()
 
         return_var = my_main_program.execute_program(cmd_str)
-
-        assert(return_var.return_string == "PM Count, 2;")
+        print("return string: " + return_var.return_string)
+        assert(return_var.return_string == "test, Juhu;")
         if return_var.is_error:
             self.fail(return_var.return_string)
 
     def test_nr_carrier_many(self):
-        "Test how many transitions the server can handle"
+        """Test how many transitions the server can handle
+        This program uses too many transitions and should therefore
+        raise an error message
+        """
         cmd_str = generate_cmd_str("test_sequence_many.py", nr_of_car=9)
         my_main_program = main_program.MainProgram()
         return_var = my_main_program.execute_program(cmd_str)
@@ -72,7 +80,9 @@ class TestUserFunction(unittest.TestCase):
             self.fail(return_var.return_string)
 
     def test_pulse_shaping(self):
-        "Test if the shaping works at all"
+        """Test if the shaping works at all
+        Right now this test checks only if the length of the sequence
+        is larger than 99"""
         trans_obj = sequence_handler.transition("1", 0, 2, amplitude=-3, \
                                                 slope_duration=10.0, slope_type="sine")
         my_sequencer=sequencer.sequencer()
@@ -83,7 +93,9 @@ class TestUserFunction(unittest.TestCase):
         my_sequencer.debug_sequence()
 
     def test_bichro_pulse(self):
-        "Test the bichromatic pulse"
+        """Test the bichromatic pulse
+        This test checks only if the server runs without an error
+        There is no real functionality check in here"""
         cmd_str = generate_cmd_str("test_bichro_sequence.py", nr_of_car=5)
         my_main_program = main_program.MainProgram()
         return_var = my_main_program.execute_program(cmd_str)
@@ -91,7 +103,9 @@ class TestUserFunction(unittest.TestCase):
             self.fail(return_var.return_string)
 
     def test_conflict_handler(self):
-        "Test the conflict handler"
+        """Test the conflict handler
+        This test checks if conflicting TTL pulses are joined
+        correctly."""
         command_string = generate_cmd_str("test_sequence.py", 9)
         chandler = handle_commands.CommandHandler()
         variable_dict = chandler.get_variables(command_string)
@@ -113,7 +127,9 @@ class TestUserFunction(unittest.TestCase):
         ttl_ev2 = user_api.final_array[1]
 
     def test_conflict_handler2(self):
-        "Test the TTL conflict handling of simultanious pulses"
+        """Test the TTL conflict handling of simultanious pulses
+        This test checks whether the server raises an error if TTL
+        pulses which cannot be resolved are given"""
         command_string = generate_cmd_str("test_sequence.py", 9)
 
         chandler = handle_commands.CommandHandler()
@@ -137,37 +153,14 @@ class TestUserFunction(unittest.TestCase):
         except RuntimeError:
             pass
 
-
-
-
-    def test_conflict_handler2(self):
-        "Test the TTL conflict handling of simultanious pulses"
-        command_string = generate_cmd_str("test_sequence.py", 9)
-
-        chandler = handle_commands.CommandHandler()
-        variable_dict = chandler.get_variables(command_string)
-        user_api = user_function.userAPI(chandler, dds_count=3)
-
-        incl_list = user_api.include_handler.generate_include_list()
-        for file_name, cmd_str in incl_list:
-            exec(cmd_str)
-        transitions = chandler.transitions
-        sequence_var = []
-        pulse1 = TTLPulse(0, 10, "1", is_last=False)
-        pulse2 = TTLPulse(0, 20, "1", is_last=False)
-        pulse3 = TTLPulse(0, 30, "3")
-        sequence_var.append(pulse1.sequence_var)
-        sequence_var.append(pulse2.sequence_var)
-        sequence_var.append(pulse3.sequence_var)
-        try:
-            user_api.final_array = user_api.get_sequence_array(sequence_var)
-            self.fail("Program did not detect simulatnious TTL error")
-        except RuntimeError:
-            pass
 
 
     def test_rf_on(self):
-#        logger=ptplog.ptplog(level=logging.DEBUG)
+        """Testing RF_ON
+        This test checks if the rf_on command works correct
+        This test is doing nothing right now
+        """
+        #logger=ptplog.ptplog(level=logging.DEBUG)
 
         fobj = open("server/user_function.py")
         sequence_string = fobj.read()

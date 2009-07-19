@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-06-24 11:23:23 c704271"
+# Time-stamp: "19-Jul-2009 13:28:58 viellieb"
 
 #  file       test_log.py
 #  copyright  (c) Philipp Schindler 2008

@@ -18,6 +18,7 @@ class Test_AD9910(unittest.TestCase):
     device = ad9910.AD9910(1, 1e3)
     val_cfr1 = device.reg_value_dict[device.CFR1]
     val_cfr2 = device.reg_value_dict[device.CFR2]
+
     print ""
     print hex(val_cfr1)
     print hex(val_cfr2)
@@ -34,7 +35,7 @@ class Test_AD9910(unittest.TestCase):
     print ""
     print hex(val_prof1)
     self.assertAlmostEqual(val_prof1, 0x08B50000028F5C29, 64)
-    #def tearDown(self):
+
   def test_api_ad9910(self):
     """Tests the api functions for the ad9910
     """

@@ -5,7 +5,10 @@
 import unittest
 import time
 import logging
-#import psyco
+try:
+  import psyco
+except:
+  print("Psyco not found")
 from  sequencer2 import sequencer
 from  sequencer2 import api
 from  sequencer2 import instructions
@@ -47,23 +50,6 @@ class Test_Sequencer(unittest.TestCase):
     self.assertEquals(insn.change_state,0x3)
     self.assertEquals(insn.output_state,0x4)
 
-  def test_ttl_set_bit(self):
-    "test the set bit api function"
-    my_sequencer=sequencer.sequencer()
-    my_api = api.api(my_sequencer)
-    my_api.ttl_set_bit("1",1)
-    my_api.ttl_set_bit("6",1)
-    my_api.ttl_set_bit("18",1)
-    my_sequencer.compile_sequence()
-    my_sequencer.debug_sequence()
-    self.assertEquals(my_sequencer.current_output,[0,0,66,4])
-    insn=my_sequencer.current_sequence[1]
-    self.assertEquals(insn.output_state,0x42)
-    insn=my_sequencer.current_sequence[2]
-    self.assertEquals(insn.change_state,0x3)
-    self.assertEquals(insn.output_state,0x4)
-
-
 
   def test_ttl_multiple(self):
     "test the ttl_set_multiple api function"
@@ -72,13 +58,13 @@ class Test_Sequencer(unittest.TestCase):
 
     ttl_dict = {}
     ttl_dict["3"] = 1
-    ttl_dict["20"] = 2
+    ttl_dict["20"] = 1 #FIXME ????
     my_api.ttl_set_multiple(ttl_dict)
     my_sequencer.compile_sequence()
     my_sequencer.debug_sequence()
-    self.assertEquals(my_sequencer.current_output,[0,0,8,32])
+    self.assertEquals(my_sequencer.current_output,[0,0,8,16])
     insn=my_sequencer.current_sequence[1]
-    self.assertEquals(insn.output_state,32)
+    self.assertEquals(insn.output_state,16)
 
 
   def test_ttl_multiple_invert(self):
@@ -90,13 +76,13 @@ class Test_Sequencer(unittest.TestCase):
     ttl_dict = {}
     ttl_dict["5"] = 1
     ttl_dict["3"] = 0
-    ttl_dict["20"] = 2
+    ttl_dict["20"] = 1
     my_api.ttl_set_multiple(ttl_dict)
     my_sequencer.compile_sequence()
     my_sequencer.debug_sequence()
-    self.assertEquals(my_sequencer.current_output,[0,0,8,32])
+    self.assertEquals(my_sequencer.current_output,[0,0,8,16])
     insn=my_sequencer.current_sequence[0]
-    self.assertEquals(insn.output_state,0x20)
+    self.assertEquals(insn.output_state,0x10)
     insn=my_sequencer.current_sequence[1]
     self.assertEquals(insn.output_state,0x8)
 
@@ -128,14 +114,18 @@ class Test_Sequencer(unittest.TestCase):
     test_value = wait_insn.get_value()
     self.assertEquals(test_value,value)
     my_sequencer=sequencer.sequencer()
+    # The maximum wait time is 2^14 .
+    # So if the wait time is bigger than this the command should be splitted up into 
+    # two commands. We check this here
     my_api = api.api(my_sequencer)
-    my_api.wait((2**14+100)*0.01)
+    cycles = (2**14+100)
+    my_api.wait(cycles*0.01)
     current_seq = my_sequencer.current_sequence
-    my_sequencer.debug_sequence(force=True)
+    my_sequencer.debug_sequence(force=False)
     insn1 = current_seq[0]
-    insn2 = current_seq[1]
+    insn2 = current_seq[6]
     value = 0x9 << 28 | 2**14-1
-    value1 = 0x9 << 28 | 100 +1 -4
+    value1 = 0x9 << 28 | 100 - 1 - 2 * 5
     self.assertEquals(insn1.get_value(), value)
     self.assertEquals(insn2.get_value(), value1)
 
@@ -215,19 +205,23 @@ class Test_Sequencer(unittest.TestCase):
   def test_compile_speed(self):
     """Test if 10000 DAC events may be compiled in under 1s
     """
-#    psyco.full()
     time1=time.time()
+    try:
+      psyco.full()
+    except:
+      print("Psyco not installed")
+
     my_sequencer=sequencer.sequencer()
     my_api=api.api(my_sequencer)
     N0=10000
     my_api.dac_value(-3,1)
     my_api.jump("test")
     for i in range(N0):
-        my_api.dac_value(-3,1)
+      my_api.dac_value(-3,1)
     my_api.label("test")
     my_sequencer.compile_sequence()
     if N0 < 100:
-        my_sequencer.debug_sequence()
+      my_sequencer.debug_sequence()
     #    print my_my_sequencer.word_list
     time2=time.time()
     print str(time2-time1)
@@ -289,3 +283,7 @@ all_suites = unittest.TestSuite((
 
 def run():
   unittest.TextTestRunner(verbosity=2).run(all_suites)
+
+if __name__ == '__main__':
+  print "running: "
+  run()
