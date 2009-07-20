@@ -115,7 +115,7 @@ class Test_Sequencer(unittest.TestCase):
     self.assertEquals(test_value,value)
     my_sequencer=sequencer.sequencer()
     # The maximum wait time is 2^14 .
-    # So if the wait time is bigger than this the command should be splitted up into 
+    # So if the wait time is bigger than this the command should be splitted up into
     # two commands. We check this here
     my_api = api.api(my_sequencer)
     cycles = (2**14+100)

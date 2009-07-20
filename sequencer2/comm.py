@@ -168,3 +168,6 @@ class PTPComm:
 
         # start the processor
         self.send_frame(self.PCP_START_REQUEST)
+
+    def send_discover(self):
+        self.send_frame(self.PCP_DISCOVER_REQUEST)

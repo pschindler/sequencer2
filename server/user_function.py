@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-06-23 08:14:07 c704271"
+# Time-stamp: "2009-07-20 08:38:27 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -90,7 +90,7 @@ from  sequencer2 import ad9910
 from  sequencer2 import config
 
 import sequence_parser
-from sequence_handler import SequenceHandler, TransitionListObject
+from sequence_handler import SequenceHandler, TransitionListObject, do_discover_box
 from include_handler import IncludeHandler
 
 #Yes we need that cruel import ;-)
@@ -595,4 +595,10 @@ class userAPI(SequenceHandler):
         "adds triggers and loop events"
         #Missing everything
         pass
+
+
+
+def discover_box(nonet=False):
+    do_discover_box(nonet)
+
 # user_function.py ends here

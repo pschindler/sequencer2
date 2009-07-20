@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-06-15 13:10:46 c704271"
+# Time-stamp: "2009-07-20 08:35:58 c704271"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -94,6 +94,7 @@ class MainProgram:
 
     def start_server(self):
         "executes the main loop of the server"
+        user_function.discover_box(self.config.is_nonet())
         try:
             self.server.main_loop(self.execute_program)
         except:

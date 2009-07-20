@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-06-04 16:37:53 c704271"
+# Time-stamp: "2009-07-20 08:39:05 c704271"
 
 #  file       sequence_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -193,6 +193,7 @@ class SequenceHandler(object):
         ptp1 = comm.PTPComm(nonet=self.is_nonet)
         ptp1.send_code(self.sequencer.word_list)
 
+
     def generate_frequency(self, api, dds_list):
         "Generates the frequency events"
         # Make sure that the NULL transition is on index 0
@@ -299,5 +300,11 @@ class transition:
         my_str += " | slp_dur: " +str(self.slope_duration)
         my_str += " | port: " +str(self.port)
         return my_str
+
+
+def do_discover_box(nonet):
+        "Check if the box is online"
+        ptp1 = comm.PTPComm(nonet=nonet)
+        ptp1.send_discover()
 
 # sequence_handler.py ends here
