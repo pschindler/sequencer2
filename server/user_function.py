@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-07-20 08:38:27 c704271"
+# Time-stamp: "2009-07-20 08:56:16 c704271"
 
 #  file       user_function.py
 #  copyright  (c) Philipp Schindler 2008
@@ -417,10 +417,15 @@ def generate_triggers(my_api, trigger_value, ttl_trigger_channel, ttl_word, \
         line_trig_val = trigger_value | line_trigger_channel
         my_api.label("line_wait_label_1")
         # We branch without taking care of the QFP Trigger value
-        my_api.jump_trigger("line_wait_label_2", line_trig_val)
-        my_api.jump_trigger("line_wait_label_2", line_trigger_channel)
+        my_api.jump_trigger("line_wait_label_2", 0)
+        my_api.jump_trigger("line_wait_label_2", trigger_value)
         my_api.jump("line_wait_label_1")
         my_api.label("line_wait_label_2")
+        # We branch without taking care of the QFP Trigger value
+        my_api.jump_trigger("line_wait_label_3", line_trig_val)
+        my_api.jump_trigger("line_wait_label_3", line_trigger_channel)
+        my_api.jump("line_wait_label_2")
+        my_api.label("line_wait_label_3")
 
 def end_of_sequence(my_api, ttl_trigger_channel, ttl_word):
     """Sets ttl_trigger channel to high at the end of the sequence"""
