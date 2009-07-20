@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-06-10 16:06:36 c704271"
+# Time-stamp: "2009-07-20 12:12:55 c704271"
 
 #  file       logging.py
 #  copyright  (c) Philipp Schindler 2008
@@ -38,7 +38,8 @@ class ptplog:
                 stream_handler = logging.handlers.RotatingFileHandler(logger_filename,
                                                  maxBytes=1e6, backupCount=5)
                 stream_handler.setLevel(level)
-                formatter = logging.Formatter("%(levelname)s - %(asctime)s - %(name)s - %(message)s")
+                formatter = logging.Formatter("!#%(levelname)s || %(name)s || %(asctime)s %(message)s", )
+#                formatter = logging.Formatter("%(levelname)s - %(asctime)s - %(name)s - %(message)s")
             #add formatter to stream_handler
             stream_handler.setFormatter(formatter)
             #add stream_handler to logger

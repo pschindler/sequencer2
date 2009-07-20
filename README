@@ -6,11 +6,7 @@
 
 The sequencer2 is a compiler for the FPGA experiment control system known as Pauls Box.
 More information may be found on
-link:[http://pulse-sequencer.sf.net]
-
-or
-
-link:[http://sequencer.brainity.com]
+link:[http://pulse-programmer.org]
 
 It consists of two different modules:
 
@@ -25,7 +21,7 @@ server             A TCP server for interfacing with LabView
 For installing the server the Python programming language in
 version 2.4 or higher is required.
 
-The python programming language can be downloaded
+The python programming language can be downloaded at:
 link:http://python.org[http://python.org]
 
 == Configuring the server ==
@@ -39,6 +35,8 @@ To generate this file run the interactive script configure.py:
 ....................
 python configure.py
 ....................
+
+This script will generate the file config/user_sequencer2.ini
 
 For a new setup make sure that at least following settings are correct:
 
@@ -56,23 +54,91 @@ reference_frequency             Your DDS reference frequency
 
 The network address of the sequencer is set by the DIP switches on the sequencer PCB board
 
-How to set up the ip address
+=== How to set up the ip address ===
 
 To set the ip address on the fpga board use the red dip switches.
 
 The pin usage is:
 
+.............................
 |reset|ip1|ip2|ip3|ip4|dhcp|
+.............................
 
 set dhcp to OFF
 
-The ip address is 192.168.0.X where X=220 + ip1 + 2 * ip2 + 4*ip3 + 8* ip4
+The ip address is 192.168.0.X where
+
+............................................
+X = 220 + ip1 + 2 * ip2 + 4 * ip3 + 8 * ip4
+............................................
+
+=== Starting the server ===
 
 After that the server may be started with:
 
 .................................
  python test_sequencer2_server.py
 .................................
+
+
+=== Configuring the logging module ===
+
+Generally the logging module is set in the startup file.
+For a default installation this file is test_sequencer2_server.py
+
+The logging is enabled by the line
+
+..........................................
+logger=ptplog.ptplog(level=logging.DEBUG)
+..........................................
+
+This leads to quite a lot logging messages on the console where the serer was started.
+
+The server prints less messages if the log level is set to WARNING:
+
+...........................................
+logger=ptplog.ptplog(level=logging.WARNING)
+...........................................
+
+Possible debug levels are:
+
+.......
+DEBUG
+INFO
+WARNING
+ERROR
+.......
+
+
+=== Logging to files ===
+
+The logging facilites are also able to log to a couple of files.
+To log to files the logger should be configured as:
+
+.........................................................................
+logger=ptplog.ptplog(level=logging.WARNING, level_dict=log_dict,
+                     filename="log/sequencer2", combine_level=logging.ERROR)
+.........................................................................
+
+Now the logger will log to following files:
+.........................
+sequencer2_sequencer2.log
+sequencer2_api.log
+sequencer2_server.log
+sequencer2_DACcontrol.log
+sequencer2_all.log
+..........................
+
+The file sequencer_all.log will contain all ERROR messages from all different logging parts.
+
+=== Viewing log files ===
+
+The log files which are describd may be viewed with the help of the logtools
+The logtools are included in any sequencer2 distributin and may be invoked typing
+
+........................
+python debug/logtools.py
+........................
 
 
 == Reporting Bugs ==
@@ -91,7 +157,6 @@ The sequencer may be tested with following command:
 .................................
 
 If this finishes without any error message your sequencer2 setup should work.
-
 
 == More documentation ==
 
