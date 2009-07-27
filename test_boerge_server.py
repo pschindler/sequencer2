@@ -13,8 +13,7 @@ import logging
 log_dict = {"api" : logging.INFO ,
             "sequencer2" : logging.ERROR,
             "" : logging.ERROR}
-logger=ptplog.ptplog(level=logging.DEBUG,  filename="log/testlog",
-                     combine_level=logging.DEBUG)
+logger=ptplog.ptplog()
 
 #logger=ptplog.ptplog(level=logging.DEBUG, apilevel=logging.DEBUG)
 
@@ -32,10 +31,10 @@ print("\n########################################################\n")
 my_main_program = main_program.MainProgram()
 return_var = my_main_program.execute_program(cmd_str)
 
-log1 = logging.getLogger()
-handler = log1.handlers[1]
-handler.target.doRollover()
-handler.flush()
+#log1 = logging.getLogger()
+#handler = log1.handlers[1]
+#handler.target.doRollover()
+#handler.flush()
 
 
 #if return_var.is_error:

@@ -31,6 +31,9 @@ import outputsystem
 import instructions
 import config
 
+def dummy(dummyvar):
+    return
+
 class api:
     """api.py the api commands for sequencer2
     This class contains functions to directly access the
@@ -49,6 +52,7 @@ class api:
         self.cycle_time = self.config.get_float("SERVER", "cycle_time")
         self.branch_delay_slots = self.config.get_int("PCP", "branch_delay_slots")
         self.max_wait_cycles = self.config.get_int("PCP", "max_wait_cycles")
+        highspeed = self.config.get_bool("SERVER", "highspeed")
 
         self.sequencer = sequencer
         # The LVDS opcodes
@@ -67,9 +71,9 @@ class api:
         self.DRCTL_bit = 16
         self.DRHOLD_bit = 17
         self.DDSRAMPCONF_bit = 18
-
-
         self.logger = logging.getLogger("api")
+        if highspeed:
+            self.logger.debug = dummy
         self.ttl_sys = outputsystem.OutputSystem(ttl_dict)
 
         self.recalibration = self.config.recalibration
@@ -86,7 +90,6 @@ class api:
     #################################################################
     def wait(self, wait_time, use_cycles=False):
         """inserts a wait event
-        needs calibration !!! wait has to be > 4 ?
         @param wait_time : time in us to wait
         @param use_cycles: If set to True the wait_time will be interpreted as cycles
         """
@@ -101,7 +104,7 @@ class api:
 
         nop_insn = instructions.nop()
         while wait_cycles > 0:
-            if wait_cycles > self.branch_delay_slots:
+            if wait_cycles > self.branch_delay_slots + 2:
 #                wait_cycles -= self.branch_delay_slots - 1 
                 # Subtract one more cycle - we need it for the wait
                 # instruction itself

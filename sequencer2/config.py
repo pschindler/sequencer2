@@ -12,6 +12,12 @@ import ConfigParser
 import logging
 import re
 
+LOG_DICT = {"DEBUG" : logging.DEBUG,
+            "INFO" : logging.INFO,
+            "WARNING" : logging.WARNING,
+            "ERROR" : logging.ERROR            
+    }
+
 class Config:
     """Simple wrapper class for the Config Parser module
     """
@@ -53,6 +59,14 @@ class Config:
         """
         return str(self.config.get(section, option))
 
+    def get_log_level(self, option):
+        """returns the log level from option
+        uses only the section LOGGING
+        """
+        section = "LOGGING"
+        lvl_str = str(self.config.get(section, option))
+        return LOG_DICT[lvl_str]
+    
     def get_int(self, section, option):
         """returns an int from option
         """

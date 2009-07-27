@@ -8,6 +8,12 @@
 
 import logging
 import Tkinter, tkFileDialog
+import sys
+try:
+    sys.path.append('../sequencer2')
+    from sequencer2 import config
+except ImportError:
+    print("Cannot import sequencer2 config")
 
 LEVEL_DICT = {"ERROR": logging.ERROR,
               "DEBUG": logging.DEBUG,
@@ -147,7 +153,10 @@ class MainGui:
         self.disp_window.load_sequence(components)
 
     def open_last(self):
-        filename = "log/sequencer2_all.log.1"
+        my_config = config.Config()
+        filename = my_config.get_str("LOGGING", "log_filename")
+        
+        filename = filename.strip() + "_all.log.1"
         self.get_file(filename)
 
 

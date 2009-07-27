@@ -9,14 +9,27 @@
 
 import logging
 import logging.handlers
+import config
 
 class ptplog:
     """Generate a Logger with the names defined in logger_list
     """
     def __init__(self, filename=None, level=logging.WARNING, level_dict={},
-                 combine_level=logging.DEBUG):
-
+                 combine_level=logging.DEBUG, combine_shell_level=logging.WARNING,
+                 use_config_file = True):
+        # read the options from the configfile if sepcified
+        if use_config_file:
+            my_config = config.Config()
+            level = my_config.get_log_level("default_log_level")
+            combine_level = my_config.get_log_level("combined_log_level")
+            combine_shell_level = my_config.get_log_level("console_log_level")
+            filename = my_config.get_str("LOGGING", "log_filename")
+            if filename == "None":
+                filename = None
+    
+        dateformat ="%Y-%m-%d %H:%M:%S"
         logger_list = ["sequencer2", "api", "server", "DACcontrol"]
+        
         for logger_name in logger_list:
             logger = logging.getLogger(logger_name)
             try:
@@ -38,7 +51,7 @@ class ptplog:
                 stream_handler = logging.handlers.RotatingFileHandler(logger_filename,
                                                  maxBytes=1e6, backupCount=5)
                 stream_handler.setLevel(level)
-                formatter = logging.Formatter("!#%(levelname)s || %(name)s || %(asctime)s %(message)s", )
+                formatter = logging.Formatter("!#%(levelname)s || %(name)s || %(asctime)s -- %(message)s", datefmt = dateformat )
 #                formatter = logging.Formatter("%(levelname)s - %(asctime)s - %(name)s - %(message)s")
             #add formatter to stream_handler
             stream_handler.setFormatter(formatter)
@@ -46,14 +59,14 @@ class ptplog:
             logger.addHandler(stream_handler)
             self.logger = logger
             logger.info("restart")
-
+        
         if filename:
            # Also init a global logger
             formatter = logging.Formatter(": %(levelname)s - %(name)s - %(message)s")
             glob_logger = logging.getLogger()
             stream_handler = logging.StreamHandler()
             stream_handler.setFormatter(formatter)
-            stream_handler.setLevel(combine_level)
+            stream_handler.setLevel(combine_shell_level)
             mem_stream  = logging.handlers.RotatingFileHandler(filename + "_all.log",
                                                                maxBytes=1e6, backupCount=5)
             formatter2 = logging.Formatter("!#%(levelname)s || %(name)s || %(message)s", )

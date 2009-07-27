@@ -1,44 +1,94 @@
 = The sequencer2 server =
 
-
 == Overview ==
 
 
-The sequencer2 is a compiler for the FPGA experiment control system known as Pauls Box.
-More information may be found on
+This doucment is meant to be the manual for the sequencer2 server once it grows up.
+
+
+This document is written in the ASCIIDOC markup language. You can easily generate a 
+pdf or html version of this file. or more information see:
+
+link:[http://www.methods.co.nz/asciidoc/]
+
+
+=== About the sequencer2 ===
+
+
+The sequencer2 is a compiler for the FPGA experiment control system known as the
+
+Programmable pulse generator (PPG).
+The home page of the PPG is at:
+
+
 link:[http://pulse-programmer.org]
 
-It consists of two different modules:
+
+=== Structural overview ===
+
+
+The sequencer2 source code consists of two different modules:
+
 
 [grid="all"]
 `-----------------`----------------------------------------------
-sequencer2         The Bytecode compiler
+sequencer2         The Bytecode assembler
 server             A TCP server for interfacing with LabView
 -----------------------------------------------------------------
 
-== Installing the server ==
+
+Where the sequencer2 module generates the binary code for the PPG and transmits
+
+it via an ehternet connection.
+
+Te sequencer2 module can be used without the server module
+
+
+The server package is a high level interface for the sequencer module and handles
+
+the communication with the experiment control software. 
+
+
+== Installing the software ==
+
 
 For installing the server the Python programming language in
-version 2.4 or higher is required.
+version 2.4 to 2.6 is required.
+
+
+*The  sequencer2 does not work with python 3.0 or higher*
+
 
 The python programming language can be downloaded at:
 link:http://python.org[http://python.org]
 
+
+The sequencer2 itself does not need an installation. Just copy to files to directory
+
+and run the server from a command line.
+
+
 == Configuring the server ==
+
 
 The default configration is stored in the file config/sequencer2.ini. Do not edit his file.
 The site configuration is stored in the file user_sequencer2.ini.
 
 
+
 To generate this file run the interactive script configure.py:
+
 
 ....................
 python configure.py
 ....................
 
+
 This script will generate the file config/user_sequencer2.ini
 
+
 For a new setup make sure that at least following settings are correct:
+
 
 [grid="all"]
 .-----------------------------.----------------------------------
@@ -52,55 +102,83 @@ nonet                           False
 reference_frequency             Your DDS reference frequency
 -----------------------------------------------------------------
 
+
 The network address of the sequencer is set by the DIP switches on the sequencer PCB board
+
 
 === How to set up the ip address ===
 
-To set the ip address on the fpga board use the red dip switches.
 
-The pin usage is:
+To set the ip address on the PPG main board use the red dip switches.
+
+
+The pin usage on the board is:
+
 
 .............................
 |reset|ip1|ip2|ip3|ip4|dhcp|
 .............................
 
+
 set dhcp to OFF
 
+
 The ip address is 192.168.0.X where
+
 
 ............................................
 X = 220 + ip1 + 2 * ip2 + 4 * ip3 + 8 * ip4
 ............................................
 
-=== Starting the server ===
+
+=== Starting up the server ===
+
 
 After that the server may be started with:
+
 
 .................................
  python test_sequencer2_server.py
 .................................
 
 
+
 === Configuring the logging module ===
+
 
 Generally the logging module is set in the startup file.
 For a default installation this file is test_sequencer2_server.py
 
+
 The logging is enabled by the line
 
+
 ..........................................
-logger=ptplog.ptplog(level=logging.DEBUG)
+logger=ptplog.ptplog()
 ..........................................
 
-This leads to quite a lot logging messages on the console where the serer was started.
 
-The server prints less messages if the log level is set to WARNING:
+The log level is determined by the configuration file use_sequencer2.ini.
 
-...........................................
-logger=ptplog.ptplog(level=logging.WARNING)
-...........................................
 
-Possible debug levels are:
+Following options are allowed:
+
+
+............................
+<x-color><param>khaki</param>log_filename</x-color> = None
+<x-color><param>khaki</param>console_log_level</x-color> = WARNING
+<x-color><param>khaki</param>combined_log_level</x-color> = DEBUG
+<x-color><param>khaki</param>default_log_level</x-color> = DEBUG
+............................
+
+
+If log_filename is set to None, the sequencer logs only to the terminal
+
+with default_log_level
+
+
+Following log levels are allowed:
+
 
 .......
 DEBUG
@@ -110,15 +188,18 @@ ERROR
 .......
 
 
+
 === Logging to files ===
+
 
 The logging facilites are also able to log to a couple of files.
 To log to files the logger should be configured as:
 
-.........................................................................
-logger=ptplog.ptplog(level=logging.WARNING, level_dict=log_dict,
-                     filename="log/sequencer2", combine_level=logging.ERROR)
-.........................................................................
+
+..............................
+log_filename = log/sequencer2
+..............................
+
 
 Now the logger will log to following files:
 .........................
@@ -129,159 +210,270 @@ sequencer2_DACcontrol.log
 sequencer2_all.log
 ..........................
 
-The file sequencer_all.log will contain all ERROR messages from all different logging parts.
+
+The file sequencer_all.log will contain messages from all different logging parts with the log level set by
+combined_log_level
+
 
 === Viewing log files ===
 
+
 The log files which are describd may be viewed with the help of the logtools
-The logtools are included in any sequencer2 distributin and may be invoked typing
+The logtools are included in any sequencer2 distribution and may be invoked typing
+
 
 ........................
 python debug/logtools.py
 ........................
 
 
+== Writing pulse sequences ==
+
+
+There are 2 possibilities of generating pulse sequences:
+
+
+- Generate a pulse sequence directly from sequencer2
+
+- Use the server and high level script files to generate pulse sequences
+
+
+=== Writing pulse sequences directly in the sequencer2 ===
+
+
+A typical pulse sequence looks like:
+
+
+...............................................
+
+<x-color><param>thistle</param>from</x-color>  sequencer2 <x-color><param>thistle</param>import</x-color> sequencer
+<x-color><param>thistle</param>from</x-color>  sequencer2 <x-color><param>thistle</param>import</x-color> api
+<x-color><param>thistle</param>from</x-color>  sequencer2 <x-color><param>thistle</param>import</x-color> ptplog
+
+
+my_sequencer=sequencer.sequencer()
+my_api=api.api(my_sequencer)
+
+
+my_api.dac_value(1, 12)
+my_api.jump(<x-color><param>coral</param>"test"</x-color>)
+
+
+my_sequencer.compile_sequence()
+
+my_sequencer.send_sequence()
+
+...............................................
+
+
+This script is then directly executed in the sequencer2 root directory by typing:
+
+
+An example which is 
+
+
+....................
+
+python [script_name]
+
+....................
+
+
 == Reporting Bugs ==
+
 
 
 If you encounter any bugs in the software/hardware your experiment write an email to:
 
+
 philipp.schindler@uibk.ac.at
+
 
 == Testing the sequencer2 ==
 
+
 The sequencer may be tested with following command:
+
 
 .................................
   python sequencer2_unittest.py
 .................................
 
+
 If this finishes without any error message your sequencer2 setup should work.
+
 
 == More documentation ==
 
+
 A general talk about the Box may be found on
+
 
 link:[ttp://pulse-sequencer.sourceforge.net/innsbruck/obergurgl-box.pdf]
 
+
 A sequence programming overview may be found on:
 
+
 link:[http://pulse-sequencer.sourceforge.net/innsbruck/box-cheat.pdf]
+
 
 The LabView interface documentation and a general overview may be found in
 the old documentation:
 
+
 link:http://sourceforge.net/project/showfiles.php?group_id=129764&package_id=220283[pcp-doc.pdf]
+
 
 Please note that this manual refers to the "old" sequencer and is not generally
 valid for the sequencer2. The LabView interface is identical in the two servers.
 
+
 === API documentation ===
+
 
 The server uses the epydoc markup language inside the source code.
 
+
 An (presumably) outdated snapshot is available at:
 
+
 link:[http://pulse-sequencer.sf.net/innsbruck/sequencer2/]
+
 
 To generate the documentation the epydoc interpreter is needed.
 It is available from: link:[http://epydoc.sf.net]
 
+
 The documentation is generated with the command:
+
 
 ............................................
   epydoc -v --top=server server sequencer2
 ............................................
 
+
 == Debugging the sequencer ==
+
 
 For debugging the API commands are used.
 
+
 Simple tests are collected in the file tests/test_hardware.py
+
 
 For testing purposes an interactive python shell is needed.
 For better testing experince it is recommended to use the
 improved python shell link:[http://ipython.scipy.org].
 
+
 If python is in your system path the shell may be invoked
 in a command window by simply typing
+
 
 .........
 python
 .........
 
+
 Then the test_hardware file has to be imported:
+
 
 ..................................
 from tests.test_hardware import *
 ..................................
 
+
 After that the HardwareTests class has to instantiated
+
 
 ......................
 ht = HardwareTests()
 ......................
 
+
 To test the TTL subsystem of the Box type then:
+
 
 ...................
 ht.test_ttl_set()
 ...................
 
+
 It is advisable to play around with the commands defined in
 tests.test_hardware.py to get a feeling of how the commands
 work
 
+
 Tips for trouble shooting can be found in the general box documentation:
+
 
 link:http://sourceforge.net/project/showfiles.php?group_id=129764&package_id=220283[pcp-doc.pdf]
 
+
 == Debugging the server with ipython ==
+
 
 This debugging method is for low level debugging of the server.
 You might not need it anyway....
 
+
 For debugging the server the ipython python shell is recommended.
 Ipython is available at:
 
+
 link:http://ipython.scipy.org[http://ipython.scipy.org]
 
+
 Start the ipython shell in the root directory of the server.
-Generate the necessarry variables and includes by running folling command:
+Generate the necessary variables and includes by running followinf command:
+
 
 ........................
   %run test_ipython.py
 ........................
 
-A simple sequence consiting of two ttl pulses is then generated with the commands
+
+A simple sequence consisting of two ttl pulses is then generated with the commands
+
 
 ....................
   ttl_pulse("1",10)
   ttl_pulse("2",10)
 ....................
 
+
 The sequence list is generated with the command
+
 
 ....................................................................
   user_api.final_array = user_api.get_sequence_array(sequence_var)
 ....................................................................
 
+
 Compiling the sequence is done with the command
+
 
 ..............................
  user_api.compile_sequence()
 ..............................
 
+
 The sequence is displayed with the following command:
+
 
 .................................................
   user_api.sequencer.debug_sequence(force=True)
 .................................................
 
+
 == COPYING ==
+
 
 Copyright (C) 2008 Philipp Schindler, Max Harlander,
                    Lutz Peterson, Boerge Hemmerling
 
+
 Free use of this software is granted under the terms of the
 GNU General Public License (GPL).
+
