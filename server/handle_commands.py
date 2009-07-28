@@ -170,28 +170,20 @@ class CommandHandler:
 
     def get_dictionary(self, splitted):
         "Extract a dictionary from the command string"
-
-        dict_string = "this_dict={"
-        for i in range(1, len(splitted)):
-            dict_string += splitted[i]+" , "
-        dict_string += "}"
-        try:
-            exec(dict_string)
-        except:
-            self.logger.warn("Error while getting dictionary"+str(splitted))
-            this_dict = {}
+        this_dict ={}
+        item_array = splitted[1:]
+        # Get the items out of the dict_array
+        for item in item_array:
+            key, value = item.split(':')
+            this_dict[int(key)] = float(value)
+            
         return this_dict
 
 
     def get_array(self, splitted, start_split=1):
-        array_string = "this_array=["
-        for i in range(start_split,len(splitted)):
-            array_string += splitted[i]+" , "
-        array_string += "]"
-        try:
-            exec(array_string)
-        except:
-            self.logger.warn("Error while getting array"+str(splitted))
+        this_array = []
+        for item in splitted[start_split:]:
+            this_array.append(float(item))
         return this_array
 
     def init_transitions(self):

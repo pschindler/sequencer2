@@ -231,7 +231,7 @@ class SequenceHandler(object):
         try:
             var_val = self.chandler.variables[var_name]
             cmd_str = "var_obj = " + str(var_val)
-            exec cmd_str
+            exec(cmd_str)
         except:
             # We return the default_val if an unknown variable was asked for.
             self.logger.warn("Variable not found in comand string: " \
