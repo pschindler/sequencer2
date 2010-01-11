@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-07-20 08:35:58 c704271"
+# Time-stamp: "11-Jän-2010 22:00:38 viellieb"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
 #  url        http://pulse-sequencer.sf.net
 # pylint: disable-msg = W0702
+
 """Main Program
 ============
 
@@ -46,13 +47,14 @@ from sequencer2 import config
 import server
 import handle_commands
 import user_function
+from  sequencer2 import comm
 #import dac_function #DAC
 
 class ReturnClass:
     """Class for returning strings to LabView
     return_string : Return string without error
     error_string: Return string when an error occurred
-    is_error: Bollean which indicates that an error occurred """
+    is_error: Boolean which indicates that an error occurred """
     def __init__(self):
         self.error_string = ""
         self.return_string = ""
@@ -74,6 +76,7 @@ class MainProgram:
         self.config = config.Config()
         self.config.parse_cmd_line()
         self.server = None
+        self.discover_box()
         self.setup_server()
         self.chandler = handle_commands.CommandHandler()
         self.variable_dict = {}
@@ -83,6 +86,12 @@ class MainProgram:
         self.ttl_dict = self.config.get_digital_channels(ttl_conf_file)
         self.setup_dac() # DAC
         self.segfalle = None
+
+    def discover_box(self):
+        "Try to find the box on the network"
+        print "Trying to find box:"
+        ptp1 = comm.PTPComm(nonet=self.config.is_nonet())
+        ptp1.send_discover()
 
     def setup_server(self):
         "Reads the configurations and configures the server"

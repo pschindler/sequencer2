@@ -13,7 +13,7 @@ from  sequencer2 import sequencer
 from  sequencer2 import api
 from  sequencer2 import instructions
 from  sequencer2 import outputsystem
-
+from  sequencer2 import comm
 #------------------------------------------------------------------------------
 class Test_Sequencer(unittest.TestCase):
 
@@ -50,6 +50,33 @@ class Test_Sequencer(unittest.TestCase):
     self.assertEquals(insn.change_state,0x3)
     self.assertEquals(insn.output_state,0x4)
 
+  def test_icnt(self):
+    raise NotImplementedError
+
+  def test_wtr(self):
+    my_sequencer=sequencer.sequencer()
+    my_api = api.api(my_sequencer)
+    my_api.ttl_set_bit("18",1)
+    my_api.ttl_set_bit("12",1)
+    my_api.wait_trigger(0xf)
+    my_api.ttl_set_bit("1",1)
+    my_api.ttl_set_bit("6",1)
+    my_sequencer.compile_sequence()
+    my_sequencer.debug_sequence()
+    my_comm = comm.PTPComm(nonet=True)
+    my_comm.savebin(my_sequencer.word_list)
+
+
+  def test_save_file(self):
+    my_sequencer=sequencer.sequencer()
+    my_api = api.api(my_sequencer)
+    my_api.ttl_set_bit("1",1)
+    my_api.ttl_set_bit("6",1)
+    my_api.ttl_set_bit("18",1)
+    my_sequencer.compile_sequence()
+    my_sequencer.debug_sequence()
+    my_comm = comm.PTPComm(nonet=True)
+#    my_comm.savebin(my_sequencer.word_list)
 
   def test_ttl_multiple(self):
     "test the ttl_set_multiple api function"

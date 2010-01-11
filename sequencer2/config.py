@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-22 10:46:38 c704271"
+# Time-stamp: "11-Jän-2010 21:59:47 viellieb"
 
 #  file       config.py
 #  copyright  (c) Philipp Schindler 2008
@@ -38,6 +38,8 @@ class Config:
                               ,help="Forces the TCP connection to be inactive")
         parser.add_option("--force-net", dest="forcenet", action="store_true",\
                               help="Forces the TCP connection to be active")
+        parser.add_option("--save", dest="savebin", action="store_true",\
+                              help="saves the binary output to the file sequencer2.bin")
 
         (options, args) = parser.parse_args()
 
@@ -46,6 +48,11 @@ class Config:
         if options.forcenet:
             self.nonet = False
 
+        if options.savebin:
+            self.savebin = True
+        else:
+            self.savebin = False
+
     def is_nonet(self):
         self.parse_cmd_line()
         if self.nonet == None:
@@ -53,6 +60,9 @@ class Config:
         else:
             return self.nonet
 
+    def is_savebin(self):
+        self.parse_cmd_line()
+        return self.savebin
 
     def get_str(self, section, option):
         """returns a string from option

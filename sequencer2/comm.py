@@ -5,6 +5,9 @@ import socket
 import logging
 import config
 
+START_PORT = 8736
+STOP_PORT = 8736 + 16
+
 class PTPComm:
     """class for communication with the box over the PTP protocol
     For sending a program to the box the method send_code may be used.
@@ -45,6 +48,7 @@ class PTPComm:
         try:
             self.config = config.Config()
             self.HIS_IP = self.config.get_str("PTP","box_ip_address")
+            self.save_file = self.config.is_savebin()
         except:
             self.logger.warn("COMM: cannot read configuration file")
 
@@ -66,10 +70,15 @@ class PTPComm:
         print
 
 
-    def send_frame(self, data):
+    def send_frame(self, data, port=None):
         """Sends an already generated frame to the PCP
         @param data: Binary PTP packet
+        @param port=None: Send data frame on port if given
         """
+        if port:
+            actual_port = port
+        else:
+            actual_port = self.HIS_PORT
         # create a client_socket
         if self.nonet:
             return
@@ -96,7 +105,7 @@ class PTPComm:
         # send the frame
         retry_count = 0
         while retry_count < self.RETRY_COUNT:
-            result = self.client_socket.sendto(datastring, (self.HIS_IP, self.HIS_PORT))
+            result = self.client_socket.sendto(datastring, (self.HIS_IP, actual_port))
             if result != len(datastring):
                 raise RuntimeError, "Socket operation did not send all bytes."
             reply_data = self.recv_frame()
@@ -152,6 +161,9 @@ class PTPComm:
         """Sends a bytecode to the PCP
         @param code_list: Binary instruction word list
         """
+        
+        if self.save_file:
+            self.savebin(code_list)
         code = ""
         for code_item in code_list:
             code += code_item
@@ -170,4 +182,26 @@ class PTPComm:
         self.send_frame(self.PCP_START_REQUEST)
 
     def send_discover(self):
-        self.send_frame(self.PCP_DISCOVER_REQUEST)
+        "Tries to find the box and sets the port"
+        try:
+            self.send_frame(self.PCP_DISCOVER_REQUEST)
+        except RuntimeError:
+            for port in xrange(START_PORT, STOP_PORT):
+                try:
+                    self.send_frame(self.PCP_DISCOVER_REQUEST, port)
+                    self.logger.info("Using port: " + str(port))
+                    PTPComm.MY_PORT = port
+                    self.MY_PORT = port
+                    return
+                except RuntimeError:
+                    self.logger.debug("Failed to use port: " + str(port))
+            raise RuntimeError("Cannot find box at: " + str(self.HIS_IP))
+
+    def savebin(self, code_list):
+        """Saves a binary list to the file sequencer2.bin
+        @param code_list: a list of binary characters resembling the binary code"""
+        filename = "sequencer2.bin"
+        filehandle = open(filename, "wb")
+        for char in code_list:
+            filehandle.write(char)
+        filehandle.close()

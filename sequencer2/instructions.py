@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-05-28 13:18:05 c704271"
+# Time-stamp: "11-Jän-2010 22:48:47 viellieb"
 
 #  file       instructions.py
 #  copyright  (c) Philipp Schindler 2008
@@ -207,25 +207,6 @@ class wait(InsnClass):
                " -- nam: "+str(self.name) + " " + \
                " -- val: "+str(hex(self.wait_cycles))
 
-
-class wtr(InsnClass):
-    """waits until the trigger condition is satisfied
-    trigger is the trigger state in HEX
-    NOT implemented yet in the firmware
-    """
-    name = "wtr"
-    opcode = 0xD
-    def __init__(self,  trigger):
-        self.trigger = trigger
-
-    def get_value(self):
-        return self.opcode << 28 | self.trigger
-
-    def __str__(self):
-        return " add: "+str(self.address) + \
-               " -- op:  "+str(hex(self.opcode)) + \
-               " -- nam: "+str(self.name) + " " + \
-               " -- val: "+str(hex(self.trigger))
 
 class ldc(InsnClass):
     "Loads constant into register for bdec"

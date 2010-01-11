@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "19-Jul-2009 13:51:59 viellieb"
+# Time-stamp: "11-Jän-2010 22:51:20 viellieb"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -123,12 +123,25 @@ class api:
                 for i in range(wait_cycles):
                     self.sequencer.add_insn(copy.copy(nop_insn))
                 wait_cycles = 0
+
     def wait_trigger(self, trigger):
         """Inserts a wait on trigger operation
         @param trigger: trigger state in hex
         """
-        wtr_insn = instructions.wtr(trigger)
-        self.sequencer.add_insn(wtr_insn)
+        #generate an automatic label
+        aut_target_name = self.generate_auto_label()
+        label_insn = instructions.label(aut_target_name)
+        
+        halt_insn = instructions.halt()
+        jump_insn = instructions.btr(aut_target_name, trigger)
+        nop_insn = instructions.nop()
+        self.sequencer.add_insn(halt_insn)
+        for index in range(self.branch_delay_slots - 1):
+            self.sequencer.add_insn(copy.copy(nop_insn))
+        self.sequencer.add_insn(jump_insn)
+        for index in range(self.branch_delay_slots):
+            self.sequencer.add_insn(copy.copy(nop_insn))
+        self.sequencer.add_insn(label_insn)
 
     def label(self, label_name):
         """inserts a label and a NOP
@@ -175,11 +188,7 @@ class api:
         if automatic_label==False:
             label_insn = instructions.label(target_name)
         else:
-            # take last label out of the automatic list
-            l = len(self.sequencer.automatic_label_list) - 1
-            aut_target_name = self.sequencer.automatic_label_list[l]
-            self.sequencer.automatic_label_list.append('aut_label_' + str(l+2))
-            self.sequencer.open_automatic_labels.append(aut_target_name)
+            aut_target_name = self.generate_auto_label()
             label_insn = instructions.label(aut_target_name)
         self.sequencer.add_insn(label_insn)
 
@@ -529,6 +538,14 @@ class api:
         for select in select_list:
             value = self.sequencer.current_output[select]
             self.ttl_value(value, select)
+
+    def generate_auto_label(self):
+        # take last label out of the automatic list
+        l = len(self.sequencer.automatic_label_list) - 1
+        aut_target_name = self.sequencer.automatic_label_list[l]
+        self.sequencer.automatic_label_list.append('aut_label_' + str(l+2))
+        self.sequencer.open_automatic_labels.append(aut_target_name)
+        return aut_target_name
 ##
 ## api.py
 ## Login : <viellieb@ohm>
