@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "11-Jän-2010 22:00:38 viellieb"
+# Time-stamp: "12-Jan-2010 12:12:15 c704215"
 
 #  file       main_program.py
 #  copyright  (c) Philipp Schindler 2008
@@ -76,7 +76,6 @@ class MainProgram:
         self.config = config.Config()
         self.config.parse_cmd_line()
         self.server = None
-        self.discover_box()
         self.setup_server()
         self.chandler = handle_commands.CommandHandler()
         self.variable_dict = {}
@@ -87,11 +86,6 @@ class MainProgram:
         self.setup_dac() # DAC
         self.segfalle = None
 
-    def discover_box(self):
-        "Try to find the box on the network"
-        print "Trying to find box:"
-        ptp1 = comm.PTPComm(nonet=self.config.is_nonet())
-        ptp1.send_discover()
 
     def setup_server(self):
         "Reads the configurations and configures the server"
@@ -195,6 +189,8 @@ class MainProgram:
         except IndexError:
             self.logger.warn("Error while trying to log actual sequence")
             return return_var
+
+        return return_var
 
 
 # main_program.py ends here

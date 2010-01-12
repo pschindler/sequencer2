@@ -40,7 +40,7 @@ class CommandHandler:
 
             except KeyError:
                 if len(str(splitted)) > 4 :
-                    self.logger.info("error: cannot identify command"+str(splitted))
+                    self.logger.info("cannot identify command"+str(splitted))
 
             except SyntaxError:
                 self.logger.warn("error while executing command"+str(splitted))

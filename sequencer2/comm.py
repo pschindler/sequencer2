@@ -190,8 +190,8 @@ class PTPComm:
                 try:
                     self.send_frame(self.PCP_DISCOVER_REQUEST, port)
                     self.logger.info("Using port: " + str(port))
-                    PTPComm.MY_PORT = port
-                    self.MY_PORT = port
+                    PTPComm.HIS_PORT = port
+                    self.HIS_PORT = port
                     return
                 except RuntimeError:
                     self.logger.debug("Failed to use port: " + str(port))

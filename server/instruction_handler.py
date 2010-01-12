@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2009-06-15 13:28:54 c704271"
+# Time-stamp: "12-Jan-2010 12:13:17 c704215"
 
 #  file       instruction_handler.py
 #  copyright  (c) Philipp Schindler 2008
@@ -412,7 +412,7 @@ class RFBichroPulse(SeqInstruction):
         try:
             pulse_duration = transition_obj.t_rabi[ion] * theta
         except KeyError:
-            raise RuntimeError("Error while getting Rabi frequency for ion "+str(ion))
+            raise RuntimeError("Cannot get Rabi frequency for ion "+str(ion))
 
         amplitude = transition_obj.amplitude
         if transition_obj.slope_type != "None":
