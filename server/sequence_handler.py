@@ -228,15 +228,16 @@ class SequenceHandler(object):
     def set_variable(self, var_type, var_name, default_val, \
                          min_val=None, max_val=None):
         "sets a variable from a command string"
+        var_dict = {"float" : float, "bool": bool, "int": int}
         try:
             var_val = self.chandler.variables[var_name]
-            cmd_str = "var_obj = " + str(var_val)
-            exec(cmd_str)
-        except:
+        except KeyError:
             # We return the default_val if an unknown variable was asked for.
             self.logger.warn("Variable not found in comand string: " \
                              +str(var_name))
             var_obj = default_val
+            return var_obj
+        var_obj = var_dict[var_type]
         return var_obj
 
     def get_return_string(self, return_dict):
