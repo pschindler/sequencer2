@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "2008-08-22 12:22:57 c704271"
+# Time-stamp: "14-Jan-2010 10:57:33 c704215"
 
 #  file       test_lvds_bus.py
 #  copyright  (c) Philipp Schindler 2008
@@ -39,6 +39,24 @@ class HardwareTests:
         my_api.ttl_value(value, 2)
         my_api.ttl_value(value, 3)
         self.compile(my_sequencer, show_debug)
+
+    def test_wait_trigger(self, value=0xffff, value2=0x0000, show_debug=0, wait_trig=True):
+        "Test ttl pulses of box"
+        my_sequencer = sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+        my_api.label("start_loop")
+        my_api.ttl_value(value, 2)
+        my_api.ttl_value(value, 3)
+        my_api.wait(1000)
+        if wait_trig:
+            my_api.wait_trigger(0x0)
+            my_api.wait_trigger(0x1)
+        my_api.ttl_value(value2, 2)
+        my_api.ttl_value(value2, 3)
+        my_api.wait(1000)
+        my_api.jump("start_loop")
+        self.compile(my_sequencer, show_debug)
+
 
     def test_trigger(self):
         "Test the trigger functionality of box"
@@ -510,6 +528,7 @@ class HardwareTests:
         "compile and send the sequence"
         my_sequencer.compile_sequence()
         ptp1 = comm.PTPComm(self.nonet)
+        ptp1.send_discover()
         ptp1.send_code(my_sequencer.word_list)
         if show_debug:
             my_sequencer.debug_sequence(show_word_list=True)
