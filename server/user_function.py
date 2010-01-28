@@ -596,6 +596,8 @@ class userAPI(SequenceHandler):
         if self.logger.level < 9:
             self.sequencer.debug_sequence()
 
+#        self.sequencer.debug_sequence()
+
     def end_sequence(self):
         "adds triggers and loop events"
         #Missing everything

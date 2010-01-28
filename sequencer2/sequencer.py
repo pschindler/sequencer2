@@ -156,7 +156,7 @@ class sequencer:
                                    str(hex(len(sequence_list))))
         self.current_sequence = sequence_list
 
-#       print self.word_list
+#        print self.word_list
 
     def debug_sequence(self, force=False, show_word_list=False):
         """Prints out the current instruction list including the word that is sent to the box

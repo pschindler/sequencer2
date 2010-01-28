@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- mode: Python; coding: latin-1 -*-
-# Time-stamp: "11-Jän-2010 22:51:20 viellieb"
+# Time-stamp: "2009-06-10 16:07:37 c704271"
 
 #  file       api.py
 #  copyright  (c) Philipp Schindler 2008
@@ -90,6 +90,7 @@ class api:
     #################################################################
     def wait(self, wait_time, use_cycles=False):
         """inserts a wait event
+        needs calibration !!! wait has to be > 4 ?
         @param wait_time : time in us to wait
         @param use_cycles: If set to True the wait_time will be interpreted as cycles
         """
@@ -110,6 +111,7 @@ class api:
                 # instruction itself
                 if wait_cycles > self.max_wait_cycles:
                     my_wait = self.max_wait_cycles 
+                    my_wait = self.max_wait_cycles
                 else:
                     my_wait = wait_cycles - self.branch_delay_slots - 1
                 wait_insn = instructions.wait(my_wait)
@@ -284,9 +286,6 @@ class api:
         assert control<2**4, "LVDS: Data bigger >= 2**16!"
 
         #High Word consists of following values:
-        self.logger.debug("lvds cmd: op: "+str(hex(opcode)) +" add: "+str(hex(address)) + \
-            " prof: "+str(hex(phase_profile)) + " ctl: "+str(hex(control)) + \
-            " wait: " +str(hex(wait)))
         avail_val = 1 << 10
         opcode_val = opcode << 11
         address_val = address << 6
@@ -296,8 +295,6 @@ class api:
         high_word = opcode_val | address_val  \
             | phase_profile_val |control_val
         high_word_avail = high_word | avail_val
-        self.logger.debug("lvds cmd: highword: "+str(hex(high_word)))
-
 
         #Low Word
         data_val = data % (2**16)
@@ -317,6 +314,15 @@ class api:
         # Add a copy of high_insn
         self.sequencer.add_insn(copy.copy(high_insn))
 
+
+        # logging output
+        self.logger.debug("lvds cmd: op: "+str(hex(opcode)) +" add: "+str(hex(address)) + \
+            " prof: "+str(hex(phase_profile)) + " ctl: "+str(hex(control)) + \
+            " wait: " +str(hex(wait)) + " highword: "+str(hex(high_word)) + " lowword: "+str(hex(data_val)))
+ 
+
+
+
     def dac_value(self, val, address):
         """Sets the dac on the DDS board
         @param val: value of the dac in db
@@ -324,6 +330,9 @@ class api:
         """
         val = self.recalibration(val)
         self.__lvds_cmd(self.dac_opcode, address, val)
+        self.logger.debug("dac_value: op: "+str(hex(self.dac_opcode)) +" add: "+str(hex(address)) + \
+                " val: " +str(hex(val)))
+
 
     def reset_fifo(self, dds_instance):
         """resets the FIFO of the dds"""
