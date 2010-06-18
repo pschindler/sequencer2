@@ -21,12 +21,12 @@ LOG_DICT = {"DEBUG" : logging.DEBUG,
 class Config:
     """Simple wrapper class for the Config Parser module
     """
-    def __init__(self, filename=["./config/sequencer2.ini", "./config/user_sequencer2.ini"]):
+    def __init__(self, filename=["config/sequencer2.ini", "config/user_sequencer2.ini"]):
         self.config = ConfigParser.ConfigParser()
         self.config.read(filename)
         self.item_dict = {}
         self.logger = logging.getLogger("server")
-        self.rf_setup_file = "./config/rf_setup.py"
+        self.rf_setup_file = "config/rf_setup.py"
         self.nonet = None
 
     def parse_cmd_line(self):

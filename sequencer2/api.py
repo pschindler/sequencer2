@@ -111,7 +111,6 @@ class api:
                 # instruction itself
                 if wait_cycles > self.max_wait_cycles:
                     my_wait = self.max_wait_cycles 
-                    my_wait = self.max_wait_cycles
                 else:
                     my_wait = wait_cycles - self.branch_delay_slots - 1
                 wait_insn = instructions.wait(my_wait)
@@ -162,13 +161,13 @@ class api:
         for index in range(self.branch_delay_slots):
             self.sequencer.add_insn(copy.copy(nop_insn))
 
-    def jump_trigger(self, target_name, trigger):
+    def jump_trigger(self, target_name, trigger, invert=False):
         """branch on trigger
         Adds a conditional jump
         @param target_name:  String identifier of the label to jump to
         @param trigger : trigger state in hex
         """
-        jump_insn = instructions.btr(target_name, trigger)
+        jump_insn = instructions.btr(target_name, trigger, invert=invert)
         nop_insn = instructions.nop()
         self.sequencer.add_insn(jump_insn)
         for index in range(self.branch_delay_slots):
@@ -310,6 +309,9 @@ class api:
         self.wait(3, use_cycles=True)
 
         self.sequencer.add_insn(high_insn_avail)
+
+        if (wait < 10):
+            wait = 10
         self.wait(wait, use_cycles=True)
         # Add a copy of high_insn
         self.sequencer.add_insn(copy.copy(high_insn))
@@ -345,17 +347,17 @@ class api:
         word = value written in the register
         length = length of word or length of register, respectively
         """
-        fifo_wait = 8
-        addr_wait = 20 + 30*int(length / 16) * 2
+        fifo_wait = 50
+        addr_wait = 50 # + 10*int(length / 16)
         reg_address = reg_address << 8
         #Our upper 8 Bits are the Address bits  Duuh
         num_words = int(length) / 16
+        # Set the register address and wait until finished
+        self.__lvds_cmd(self.addr_opcode, dds_address, reg_address, wait=addr_wait)
         # Write the FIFO with the data
         for i in range(num_words):
             value = (word >>( 16*(num_words-i-1)  ))% 2**16
             self.__lvds_cmd(self.fifo_opcode, dds_address, value, wait=fifo_wait)
-        # Set the register address and wait until finished
-        self.__lvds_cmd(self.addr_opcode, dds_address, reg_address, wait=addr_wait)
 
     #################################################################
     # Functions for the AD9910 DDS
@@ -488,6 +490,9 @@ class api:
         reg_value = dds_instance.reg_value_dict[CFR2reg]
         self.dds_to_serial(reg_value, CFR2reg[1], CFR2reg[0], dds_instance.device_addr)
 
+        phase_profile = (1 << self.DDSRAMPCONF_bit) | (1 << self.DRCTL_bit) # always start with the positive slope for now
+        phase_profile = phase_profile >> 16
+        self.__lvds_cmd(self.dds_up_opcode, dds_instance.device_addr, 0, phase_profile, wait=0)
         self.update_dds(dds_instance)
 
 
