@@ -238,7 +238,7 @@ class SequenceHandler(object):
             var_obj = default_val
             return var_obj
         var_obj = var_dict[var_type]
-        return var_obj
+        return var_obj(var_val)
 
     def get_return_string(self, return_dict):
         """Generate a string from the return dictionary
