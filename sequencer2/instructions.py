@@ -125,6 +125,7 @@ class j(InsnClass):
         return " add: "+str(self.address) + \
                " -- op:  "+str(hex(self.opcode)) + \
                " -- nam: "+str(self.name) + "    " + \
+               " -- tn: "+str(self.target_name) + "    " + \
                " -- tar: "+str(self.target_address)
 
 class btr(j):
@@ -134,15 +135,19 @@ class btr(j):
 
     name = "btr"
     opcode = 0x3
-    def __init__(self, label_name, trigger):
+    def __init__(self, label_name, trigger, invert=False):
         self.target_name = label_name
         self.trigger = trigger
         self.target_address = None
+        self.invert = invert
 
     def get_jump_value(self, target_address):
         self.target_address = target_address
         """returns the hex value for j insns"""
-        return self.opcode << 28 | self.trigger << 19 | target_address
+        invert_flag = 0;
+        if (self.invert):
+          invert_flag = 1 << 18
+        return self.opcode << 28 | self.trigger << 19 | target_address | invert_flag
 
 class bdec(j):
     """Decrements the loop register and branches to label"""
