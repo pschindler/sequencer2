@@ -190,7 +190,6 @@ my_api=api.api(my_sequencer)
 my_api.dac_value(1, 12)
 my_api.jump("test")
 my_sequencer.compile_sequence()
-my_sequencer.send_sequence()
 ...............................................
 
 This script is then directly executed in the sequencer2 root directory by typing:
@@ -242,7 +241,6 @@ my_api.set_dds_freq(dds_device, frequency, 0)
 my_api.set_dds_profile(dds_device, 0)
 my_api.update_dds(0, dds_device)        
 my_sequencer.compile_sequence()
-my_sequencer.send_sequence()
 ........................................
 
 For more examples on testing the DDS see the file

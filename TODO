@@ -14,6 +14,11 @@
 - Stack for subroutines (in VHDL ???)
 - QFP variable type handling (bool, int)
 - More than 7 transitions in one sequence
+- Configuration of port number in /sequencer2/comm.py done automatically by parsing configuration files.
+- test_boerge_server: cmd_str has many unidentified inputs i.e INIT_FREQ,SWEEP, etc.
+- README should have information on:
+  setting triggered channel to start sequence, i.e set up qfp_trigger_value 1->ch1 2->ch2 4->ch3
+  proper formatting for Hardware settings.txt using new_qfp and old_qfp
 
 * Missing unitttests
 
