@@ -45,7 +45,6 @@ Cycles 1
 # else: rf_set729(freq729,-100)
 # if switchRaman: rf_setRaman(freqRaman,powerRaman)
 # else: rf_setRaman(freqRaman,-100)
-
 PMTDetection(det_time)
 </SEQUENCE>
 

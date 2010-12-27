@@ -8,6 +8,7 @@
 
 import unittest
 import time
+import sys
 import logging
 import copy
 
@@ -39,6 +40,13 @@ def generate_cmd_str(filename, nr_of_car=1):
 
 
 class TestUserFunction(unittest.TestCase):
+    def test_python_version(self):
+        "checks if we are running a proper python version"
+        print sys.version_info[0]
+        if sys.version_info[0] > 2:
+            self.fail("We are running a wrong python version !!!")
+
+
     def test_execute_program(self):
         cmd_str = generate_cmd_str("test_sequence.py", nr_of_car=2)
         my_main_program = main_program.MainProgram()
@@ -76,8 +84,8 @@ class TestUserFunction(unittest.TestCase):
         cmd_str = generate_cmd_str("test_sequence_many.py", nr_of_car=9)
         my_main_program = main_program.MainProgram()
         return_var = my_main_program.execute_program(cmd_str)
-        if return_var.is_error:
-            self.fail(return_var.return_string)
+        if not return_var.is_error:
+            self.fail("The server should return an error but it does not: " +str(return_var.return_string))
 
     def test_pulse_shaping(self):
         """Test if the shaping works at all
@@ -191,7 +199,6 @@ class TestUserFunction(unittest.TestCase):
 
     def test_direct_transition(self):
 #        logger=ptplog.ptplog(level=logging.DEBUG)
-
         fobj = open("server/user_function.py")
         sequence_string = fobj.read()
         fobj.close()

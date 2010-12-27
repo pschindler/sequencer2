@@ -52,6 +52,7 @@ class api:
         self.cycle_time = self.config.get_float("SERVER", "cycle_time")
         self.branch_delay_slots = self.config.get_int("PCP", "branch_delay_slots")
         self.max_wait_cycles = self.config.get_int("PCP", "max_wait_cycles")
+        self.dds_firmware_version = self.config.get_int('DDS','dds_firmware_version')
         highspeed = self.config.get_bool("SERVER", "highspeed")
 
         self.sequencer = sequencer
@@ -347,17 +348,35 @@ class api:
         word = value written in the register
         length = length of word or length of register, respectively
         """
-        fifo_wait = 50
-        addr_wait = 50 # + 10*int(length / 16)
-        reg_address = reg_address << 8
-        #Our upper 8 Bits are the Address bits  Duuh
-        num_words = int(length) / 16
-        # Set the register address and wait until finished
-        self.__lvds_cmd(self.addr_opcode, dds_address, reg_address, wait=addr_wait)
-        # Write the FIFO with the data
-        for i in range(num_words):
-            value = (word >>( 16*(num_words-i-1)  ))% 2**16
-            self.__lvds_cmd(self.fifo_opcode, dds_address, value, wait=fifo_wait)
+        # Check the DDS firmware version
+        if self.dds_firmware_version > 1:
+            # This is for the support of the new DDS control from Paul
+            fifo_wait = 50
+            addr_wait = 50 # + 10*int(length / 16)
+            reg_address = reg_address << 8
+            #Our upper 8 Bits are the Address bits  Duuh
+            num_words = int(length) / 16
+            # Set the register address and wait until finished
+            self.__lvds_cmd(self.addr_opcode, dds_address, reg_address, wait=addr_wait)
+            # Write the FIFO with the data
+            for i in range(num_words):
+                value = (word >>( 16*(num_words-i-1)  ))% 2**16
+                self.__lvds_cmd(self.fifo_opcode, dds_address, value, wait=fifo_wait)
+        
+        else:             
+            # The old innsbruck firmware - Send address at the end
+            fifo_wait = 10
+            addr_wait = 20 + 30*int(length / 16) * 2
+            reg_address = reg_address << 8
+            #Our upper 8 Bits are the Address bits  Duuh
+            num_words = int(length) / 16
+            # Write the FIFO with the data
+            for i in range(num_words):
+                value = (word >>( 16*(num_words-i-1)  ))% 2**16
+                self.__lvds_cmd(self.fifo_opcode, dds_address, value, wait=fifo_wait)
+            # Set the register address and wait until finished
+            self.__lvds_cmd(self.addr_opcode, dds_address, reg_address, wait=addr_wait)
+
 
     #################################################################
     # Functions for the AD9910 DDS

@@ -409,7 +409,6 @@ def generate_triggers(my_api, trigger_value, ttl_trigger_channel, ttl_word, \
     my_api.jump("wait_label_1")
     my_api.label("wait_label_2")
     my_api.ttl_set_bit(ttl_trigger_channel, 0)
-
 #    my_api.start_finite("test_label", 2)
     my_api.start_finite("finite_label", loop_count)
 

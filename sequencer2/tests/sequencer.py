@@ -3,12 +3,15 @@
 # Unit tests for Bitmask class
 
 import unittest
+import sys
 import time
 import logging
-try:
-  import psyco
-except:
-  print("Psyco not found")
+USE_PSYCO = False
+if USE_PSYCO:
+  try:
+    import psyco
+  except:
+    print("Psyco not found")
 from  sequencer2 import sequencer
 from  sequencer2 import api
 from  sequencer2 import instructions
@@ -16,6 +19,12 @@ from  sequencer2 import outputsystem
 from  sequencer2 import comm
 #------------------------------------------------------------------------------
 class Test_Sequencer(unittest.TestCase):
+
+  def test_python_version(self):
+    "checks if we are running a proper python version"
+    print sys.version_info[0]
+    if sys.version_info[0] > 2:
+      self.fail("We are running a wrong python version !!!")
 
   def test_ttl_system(self):
     "test the ttl subsystem"
@@ -121,7 +130,8 @@ class Test_Sequencer(unittest.TestCase):
     my_api = api.api(my_sequencer)
     my_api.dac_value(-12, 1)
     current_seq = my_sequencer.current_sequence
-    self.assertEquals(len(current_seq),7)
+    my_sequencer.debug_sequence(force=False)
+    self.assertEquals(len(current_seq),13)
     del(my_sequencer)
 
   def test_p_insn(self):
@@ -182,16 +192,15 @@ class Test_Sequencer(unittest.TestCase):
     my_api.dac_value(-12,1)
     my_sequencer.compile_sequence()
     my_sequencer.debug_sequence(force=False)
-    target=my_sequencer.current_sequence[14].target_address
-    label=my_sequencer.current_sequence[target].label
-
-    self.assertEquals(target,39)
-    self.assertEquals(label,"test")
-
-    target=my_sequencer.current_sequence[18].target_address
-    label=my_sequencer.current_sequence[target].label
-    self.assertEquals(target,62)
-    self.assertEquals(label,"test1")
+    target_list = []
+    for my_ins in my_sequencer.current_sequence:
+      if my_ins.name == "call":
+        target_list.append(my_ins.target_address)
+    label_list = ['test', 'test1', 'test']
+    for target in target_list:
+      print target
+      label=my_sequencer.current_sequence[target].label
+      self.assertEquals(label, label_list.pop())
 
 
   def test_subroutine_error_handler(self):
@@ -223,10 +232,15 @@ class Test_Sequencer(unittest.TestCase):
     my_sequencer.debug_sequence(force=False)
     j_insn=my_sequencer.current_sequence[15]
     label_insn=my_sequencer.current_sequence[7]
-    self.assertEquals(label_insn.address,7)
-    self.assertEquals(label_insn.name,"label")
-    self.assertEquals(j_insn.name,"j")
-    self.assertEquals(j_insn.target_address,7)
+    target_list = []
+    for my_ins in my_sequencer.current_sequence:
+      if my_ins.name == "j":
+        target_list.append(my_ins.target_address)
+    label_list = ['test']
+    for target in target_list:
+      print target
+      label=my_sequencer.current_sequence[target].label
+      self.assertEquals(label, label_list.pop())
     del(my_sequencer)
 
   def test_compile_speed(self):

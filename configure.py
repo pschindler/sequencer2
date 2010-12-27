@@ -42,6 +42,9 @@ include_path = raw_input()
 print "\nWhat is your reference frequency?"
 ref_freq = raw_input()
 
+print "\nWhat is your DDS firmware (If you are in Innsbruck its probably 1 otherwise 2)"
+dds_version = raw_input()
+
 print "\n\n************************************************************"
 print "Please note that not all possible configuration options are handled"
 print "with this helper program. Look into the file "
@@ -60,6 +63,8 @@ config_str += "include_dir = " + str(include_path) + "\n\n"
 config_str += "DDS_count = " + str(dds_count) + "\n\n"
 config_str += "[PTP]\n"
 config_str += "box_ip_address   = " + str(ip_addr_str) + "\n\n"
+config_str += "[DDS]\n"
+config_str += "dds_firmware_version = "+str(dds_version) + "\n\n"
 print "\n\n*************************************\n\n\n\n"
 print "The configuration file: \n"
 print config_str
