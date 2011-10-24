@@ -360,8 +360,25 @@ def seq_wait(wait_time, start_time=0.0):
     wait_time is given in museconds
     """
     global sequence_var
-
     wait_insn = SeqWait(wait_time, start_time)
+    sequence_var.append(wait_insn.sequence_var)
+
+def insert_label(label_name, start_time=0.0):
+    "Generates a loop target"   
+    global sequence_var
+    wait_insn = InsertLabel(label_name, start_time)
+    sequence_var.append(wait_insn.sequence_var)
+
+def jump_label(label_name, start_time=0.0):
+    "Jumps unconditionally to a previously defined label"   
+    global sequence_var
+    wait_insn = JumpToLabel(label_name, start_time)
+    sequence_var.append(wait_insn.sequence_var)
+
+def jump_trigger(label_name, trigger_val, start_time=0.0):
+    "Jumps to a previously defined label if trigger condition is met"   
+    global sequence_var
+    wait_insn = JumpOnTrigger(label_name, trigger_val, start_time)
     sequence_var.append(wait_insn.sequence_var)
 
 ################################################################

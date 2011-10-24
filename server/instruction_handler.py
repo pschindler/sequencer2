@@ -196,6 +196,65 @@ class End_Finite(SeqInstruction):
         return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
             + " | last: " + str(self.is_last)
 
+
+
+
+class InsertLabel(SeqInstruction):
+    "Inserts a label to which we can jump to"
+    def __init__(self, label_name, start_time=0.0, is_last=True):
+        self.label_name = str(label_name)
+        self.start_time = float(start_time)
+        self.is_last = is_last
+        self.name = "Label Event"
+        self.sequence_var = []
+        self.sequence_var = self.add_insn(self.sequence_var)
+
+    def handle_instruction(self, api):
+        "Adds a jump target"
+        api.label(self.label_name)
+
+    def __str__(self):
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
+            + " | tar: " + str(self.label_name) + " | last: " + str(self.is_last)
+
+class JumpToLabel(SeqInstruction):
+    "Jumps unconditionally to a given target"
+    def __init__(self, label_name, start_time=0.0, is_last=True):
+        self.label_name = str(label_name)
+        self.start_time = float(start_time)
+        self.is_last = is_last
+        self.name = "Jump Event"
+        self.sequence_var = []
+        self.sequence_var = self.add_insn(self.sequence_var)
+
+    def handle_instruction(self, api):
+        "Adds a jump target"
+        api.jump(self.label_name)
+
+    def __str__(self):
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
+            + " | tar: " + str(self.label_name) + " | last: " + str(self.is_last)
+
+class JumpOnTrigger(SeqInstruction):
+    "Jumps to a given target if the trigger value is met"
+    def __init__(self, label_name, trigger_value, start_time=0.0, is_last=True):
+        self.label_name = str(label_name)
+        self.trigger_value = trigger_value
+        self.start_time = float(start_time)
+        self.is_last = is_last
+        self.name = "Jump Trigger Event"
+        self.sequence_var = []
+        self.sequence_var = self.add_insn(self.sequence_var)
+
+    def handle_instruction(self, api):
+        "Adds a branch on trigger target"
+        api.jump_trigger(self.label_name, self.trigger_value)
+
+    def __str__(self):
+        return str(self.name) + (self.max_name_length-len(self.name))*" " + " | start: " + str(self.start_time) \
+            + " | tar: " + str(self.label_name) + " | last: " + str(self.is_last)
+
+
 class SeqWait(SeqInstruction):
     "generates a waiting time from a certain (optional) start time"
     def __init__(self, wait_time, start_time=0.0, is_last=True):

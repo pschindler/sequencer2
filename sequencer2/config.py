@@ -168,7 +168,7 @@ class Config:
                     ch_number       = split_ch_number[1]
                 
                     try:
-                        if int(ch_number) <= 15:
+                        if int(ch_number) <= 16:
                             select = 2
                         else:
                             select = 3
@@ -193,7 +193,7 @@ class Config:
                         if split2[0] == ch_name:
                             split3 = split2[1].split("=")
                             try:
-                                if int(split3[1]) < 15:
+                                if int(split3[1]) < 16:
                                     select = 2
                                 else:
                                     select = 3
