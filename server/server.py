@@ -67,7 +67,7 @@ class TcpServer:
                             if return_var.is_error:
                                 time_str = "ERROR"
                             else:
-                                time_str = "OK, sequence_duration, " + str(used_time) + ";\n"
+                                time_str = "OK, compile_time, " + str(used_time) + ";\n"
                         except AttributeError:
                             self.logger.warn("The main loop returned a wrong object type")
 

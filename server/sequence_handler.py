@@ -184,7 +184,7 @@ class SequenceHandler(object):
                 if self.logger.level < 11 :
                     log_str += str(event) + "\n"
         self.logger.debug("Sequence Events: \n" + log_str)
-        return final_array
+        return final_array, current_time
 
 
     def send_sequence(self):

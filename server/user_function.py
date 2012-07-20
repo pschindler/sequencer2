@@ -591,9 +591,9 @@ class userAPI(SequenceHandler):
         # Here all the magic of sequence creation is done
         # see sequence_handler.py for details
         assert len(sequence_var) > 0, "Empty sequence"
-        self.final_array = self.get_sequence_array(sequence_var)
+        self.final_array, sequence_duration = self.get_sequence_array(sequence_var)
         local_return_str = self.get_return_string(return_list)
-        return local_return_str
+        return local_return_str + 'sequence_duration,'+str(sequence_duration)+';'
 
     def compile_sequence(self):
         "Generates the bytecode for the sequence"
