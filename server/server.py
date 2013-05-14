@@ -6,6 +6,7 @@
 #  email     : philipp DOT emacs DOT schindler AT uibk DOT ac DOT at
 #            : remove the "One And Only Editor"
 #  copyright : (c) 2006 Philipp Schindler
+#              (c) 2013 Thomas W. Holleis <thomas AT fsfe DOT org>
 # pylint: disable-msg=E1101
 #_* Code
 
@@ -36,15 +37,18 @@ class TcpServer:
             sock.listen(5)
             try:
                 while True:
+                    self.logger.info("Waiting for client to connect to port " + str(self.port) + " ...")
                     newSocket, address = sock.accept()
-                    self.logger.debug("ip address: "+str(address))
+                    self.logger.info("Client connected to " + str(address))
                     while True:
+                        receivedData = None
                         try:
                             self.logger.debug("ready to receive:")
                             receivedData = newSocket.recv(4*8192)
-                            #maybe we should increase the max receive data
-                        except:
-                            self.logger.warn("Socket error while receiving data")
+                            #maybe we should increase the max receive data.
+                        except Exception as e:
+                            self.logger.error(str(e))
+                            self.logger.error("Socket error while receiving data.")
                         if not receivedData:
                             self.logger.info("No data received")
                             break
@@ -56,9 +60,10 @@ class TcpServer:
                             try:
                                 newSocket.sendall("RECEIVED!"+";\r\n") #added TK
                             except:
-                                self.logger.warn("Error while sending return string")
+                                self.logger.error("Error while sending return string")
 
                         self.logger.debug("received data: " + str(receivedData))
+                        
                         start_time = time.time()
                         return_var = program_method(receivedData)
                         stop_time = time.time()
@@ -75,19 +80,25 @@ class TcpServer:
                         error_string = return_var.error_string
                         if (error_string==""):
                             return_string = time_str + return_string
+
                             self.logger.debug("Return string: "+return_string)
+
                             if self.answer:
                                 try:
                                     newSocket.sendall(return_string + "\r\n")
                                 except:
-                                    self.logger.warn("Error while returning value")
+                                    self.logger.error("Error while returning value")
 
                         else:
                             self.logger.debug("trying to send error: "+error_string)
+
                             if self.answer:
                                 newSocket.sendall(error_string+"\r\n")
                             error_string = ""
-                        self.logger.debug("finish connected")
+
+                        self.logger.debug("Finish process Pulse box command.")
+
+                    self.logger.info("Close " + str(address))
                     newSocket.close()
 
             finally:
