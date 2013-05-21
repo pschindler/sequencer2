@@ -461,9 +461,24 @@ def end_of_sequence(my_api, ttl_trigger_channel, ttl_word):
     my_api.jump("Infinite_loop_label")
 
 
+#def create_transition(*args):
+#    """Creates a transition object and addes it to the global transition list
+
+#    Arguments are directly passed to the generator of the transition object.
+#    Example: create_transition(transition_name, t_rabi, frequency)
+#    """
+#    global transitions
+
+#    trans_obj = transition(args)
+#    trans_name = trans_obj.name
+#    transitions[trans_name] = trans_obj
+    
+
 def set_transition(transition_name, name_str="729"):
     """Sets the frequency modifiers of the transition
-    For configuration see config/rf_setup.py"""
+    For configuration see config/rf_setup.py
+
+    DOES not generate a new transition"""
     global transitions
     assert type(transition_name)==str, \
         "set_transition needs string identifier for transition"

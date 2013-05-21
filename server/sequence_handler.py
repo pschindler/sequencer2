@@ -264,6 +264,8 @@ class transition:
 #        if ion_list == None:
 #            ion_list=configuration.ion_list
         self.ion_list = ion_list
+        assert type(t_rabi) == dict, "transition "+str(transition_name)+" has no dict t_rabi " \
+            + str(t_rabi)
         self.t_rabi = t_rabi
         self.frequency = frequency
         self.sweeprange = sweeprange

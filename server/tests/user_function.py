@@ -30,8 +30,8 @@ transitions = None
 def generate_cmd_str(filename, nr_of_car=1):
     data = "NAME,"+filename+";CYCLES,10;TRIGGER,YES;"
     data += "FLOAT,det_time,25000.0;"
+    data += "TRANSITION,carrier;FREQ,150.0;RABI,1:23,2:45,3:12;"
     for index in range(nr_of_car):
-        data += "TRANSITION,carrier;FREQ,150.0;RABI,1:23,2:45,3:12;"
         data += "TRANSITION,carrier" + str(index + 1) + ";FREQ,150.0;RABI,1:23,2:45,3:12"
         data += ";SLOPE_TYPE,blackman;"
         data += "SLOPE_DUR,0;IONS,1:201,2:202,3:203"
@@ -72,9 +72,10 @@ class TestUserFunction(unittest.TestCase):
 
         return_var = my_main_program.execute_program(cmd_str)
         print("return string: " + return_var.return_string)
-        assert(return_var.return_string == "test, Juhu;")
         if return_var.is_error:
             self.fail(return_var.return_string)
+
+        assert(return_var.return_string == "test, Juhu;sequence_duration,2000.95;")
 
     def test_nr_carrier_many(self):
         """Test how many transitions the server can handle
@@ -91,7 +92,7 @@ class TestUserFunction(unittest.TestCase):
         """Test if the shaping works at all
         Right now this test checks only if the length of the sequence
         is larger than 99"""
-        trans_obj = sequence_handler.transition("1", 0, 2, amplitude=-3, \
+        trans_obj = sequence_handler.transition("1", {0:0}, 2, amplitude=-3, \
                                                 slope_duration=10.0, slope_type="sine")
         my_sequencer=sequencer.sequencer()
         my_api = api.api(my_sequencer)
@@ -129,13 +130,13 @@ class TestUserFunction(unittest.TestCase):
         sequence_var.append(pulse1.sequence_var)
         sequence_var.append(pulse2.sequence_var)
         sequence_var.append(pulse3.sequence_var)
-        user_api.final_array = user_api.get_sequence_array(sequence_var)
-        ttl_ev1 = user_api.final_array[0]
+        user_api.final_array = user_api.get_sequence_array(sequence_var)        
+        ttl_ev1 = user_api.final_array[0][0]
         assert ttl_ev1.device_key == ["3","2","1"]
-        ttl_ev2 = user_api.final_array[1]
+        ttl_ev2 = user_api.final_array[0][1]
 
     def test_conflict_handler2(self):
-        """Test the TTL conflict handling of simultanious pulses
+        """Test the TTL conflict handling of simultaneous pulses
         This test checks whether the server raises an error if TTL
         pulses which cannot be resolved are given"""
         command_string = generate_cmd_str("test_sequence.py", 9)
@@ -193,7 +194,7 @@ class TestUserFunction(unittest.TestCase):
         sequence_var.append(pulse1.sequence_var)
 
         final_array = user_api.get_sequence_array(sequence_var)
-        for instruction in final_array:
+        for instruction in final_array[0]:
             instruction.handle_instruction(user_api.api)
         self.fail("Need a test for the API commands")
 

@@ -135,11 +135,11 @@ class CommandHandler:
         "Generate a transition object"
         if splitted[0] == "TRANSITION":
             name = splitted[1]
-            self.transitions[name] = transition(name, 0, 0)
+            self.transitions[name] = transition(name, {0:0}, 0)
             self.last_transition = splitted[1]
         if splitted[0] == "DEFAULT_TRANSITION":
             name = splitted[1]
-            self.transitions[name] = transition(name, 0, 0)
+            self.transitions[name] = transition(name, {0:0}, 0)
             self.last_transition = splitted[1]
             self.default_transition = self.transitions[self.last_transition]
 
