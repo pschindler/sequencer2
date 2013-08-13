@@ -1,0 +1,47 @@
+Testing the LVDS Connectors
+===========================
+
+The LVDS bus consists of two 50 pin flat ribbon cables conencting the
+DDS boards with the breakout boards. Unlike the digital output board
+there exists no board to test the conenctions visually with LEDs. The
+LVDS bus can be tested directly with a DDS board. For this the DDS
+board is connected to the breakout board. Then, a logic analyzer is
+programmed into the FPGA on the DDS board.
+
+For this, one needs to install QUARTUS II, which is a software from
+Altera and a FPGA programming device USB blaster. The logic analyzer
+in QUARTUS II is called SignalTap. More information about SignalTap can be found in: 
+
+http://www.altera.com/literature/hb/qts/qts_qii53009.pdf
+
+The SignalTap file is ``test_lvds_bus.stp``. In order to download the
+logic analyzer into the FPGA, the USB blaster needs to be connected to
+the JTAG port on the DDS board (labelled J1). The correct JTAG file is
+``dds_controller_stp_test_lvds_bus.sof``
+
+Now the test ``Test LVDS bus (Logic analyser)`` should be performed (see :doc:`testing_hardware`).
+
+After applying the test, the state of the bus should be
+``0xaaaaaaaa``. So all lines of the bus should be alternating
+high/low.
+
+With the next test, the timing of the bus can be investigated. The
+SignalTap should cycle between the value ``0xfffffffe`` and
+``0x00000000``. The delay between two cycles hould be roughly 15 clock
+cycles.
+
+If these tests are performed succesfully, the DDS board should work
+immediately after applying the 1GHz clock.
+
+Troubleshooting
+---------------
+
+Most common hardware errors are:
+
+* The terminators of the LVDS bus are not isntalled
+* The connector between the mainboard and the breakout board is incorrectly 
+  soldered.
+* The connectors of the flat ribbon cable are not properly attached.
+* The clock of the DDS board is not connected
+* The LVDS-TTL converters on the DDS board are incorrectly soldered.
+

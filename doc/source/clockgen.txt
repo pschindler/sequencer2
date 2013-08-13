@@ -1,0 +1,47 @@
+The Clock Generator
+===================
+
+Im Clock Generator kommt der AD9517-3 zum Einsatz zusammen mit einem
+1GHz Oszillator CVCSO-914 von Crystek. Die Ansteuerung erfolgt über
+einen Attiny25 von Atmel.  Eigenschaften des Clock Generators
+
+    4 Kanäle bis 1.4 GHz
+    4 Kanäle bis 800 MHz 
+
+Amplitude und Frequenz jeweils paarweise programmierbar
+
+Benutzungshinweise
+-------------------
+
+Der Clockgenerator detektiert die Referenzclock (10MHz) beim
+Einschalten. Deshalb 10MHz Referenzsignal vor dem Einschalten der
+Spannungsversorgung anlegen.  Programmierung
+
+Benötigt:
+---------
+
+    Programmiergerät, z.B. AVR-ISP
+    AVR-Studio (kostenlos zum Runterladen nach Registrierung)
+    Quellcodes
+    Clockgenerator mit Spannungsquelle (5V)
+    Idealerweise 10MHz Referenz und Spektrum Analysator um das Ergebnis zu verifizieren 
+
+Programmierung:
+---------------
+
+    Quellcodes in AVR-Studio öffnen.
+    Neues Projekt anlegen und Quellcodes einbinden.
+    Gewünschte Anpassungen vornehmen s.u.(hinweise im Quellcode beachten)
+    Kompilieren (F7) (Fehlermeldungen beachten!)
+    Erstellte .hex Datei zum Generator übertragen
+    Gegebenenfalls Generator aus und wieder einschalten, damit neue Einstellungen geladen werden 
+
+Funktionsweise
+--------------
+
+    Referenz: Der AD9517-2 verwendet wahlweise ein externes oder internes 10MHz referenz Signal.
+    Referenzdividierer: Das Referenzsignal kann durch einen Referenzdividierer R geteilt werden. (default R=1)
+    Multiplikator: Danach wird es mit einem Multiplikator N=P x B +A multipliziert, der sich aus einem Prescaler P sowie zwei Zählregistern B und A zusammensetzt.
+    VCO: Somit ergibt sich die Frequenz des VCO zu fVCO =fRef*N/R
+    VCO Teiler: Diese Frequenz die typischerweise um 2GHz gewählt wird, wird hernach durch einen VCO Teiler geteilt.
+    Kanalteiler: Der Ausgang des VCO Teilers geht dann an 4 Kanalteiler, die Teilungen von 2 bis 16 ermöglichen und für je 2 Kanäle gelten. 

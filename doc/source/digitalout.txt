@@ -1,0 +1,62 @@
+The digital out board
+======================
+
+This board was designed to get rid of ground-loops created by the
+pulse box. The board has 16 galvanically isolated grounds, each
+created by a DC-DC-converter. A digital isolator transfers each output
+signal from the common ground system of the pulse box to the signal's
+seperate ground system.
+
+The PCBs and parts list can be found on 
+
+\\Anna-c704\sqip\Pulse Box\Digital Out
+
+Attention: This PCB cannot drive 50 Ohm. The input resistance of each
+connected device has to be in the order of 1kOhm or higher. So, DO NOT
+CONNECT 50 Ohm DEVICES TO THE DIGITAL OUTPUTS! It can't provide enough
+current for 50 Ohms because the drivers are very fast and they have to
+drive a 5V-TTL signal. Hence, there will be rather big currents.
+Since we are using 50 Ohm-SMA cables and cannot terminate with 50
+Ohms, there will be back-reflections. If you are using a short cable
+(= low load-capacitance), there may be some voltage overshoot. With a
+1m cable, the overshoot can be 2V for 10ns. If that damages your
+circuits or try to avoid overshoots generally, you have to add a
+capacitor parallel to the output. To get an idea, what capacitor to
+use, have a look at the list below.
+
+* no capacitor parallel to the output, 1m coaxial cable, high-Ohm input resistance: overshoot 2V (7V in total), rise time <1ns
+* 330pF parallel to the output, 1m coaxial cable, high-Ohm input resistance: overshoot 1V (6V in total, rise time ~9ns
+* 1.5nF parallel to the output, 1m coaxial cable, high-Ohm input resistance: hardly any overshoot, rise time ~60ns 
+
+Troubleshooting
+---------------
+
+* The cable to the breakout board is not assembled correctly
+* The supply voltage is not applied
+* A DC-DC converter is broken
+
+Digital In board
+================
+
+This board was designed to get rid of ground-loops created by the
+pulse box. The board has 8 galvanically isolated grounds, each created
+by a DC-DC-converter. A digital isolator transfers each in signal from
+its seperate ground system to the common ground system of the pulse
+box.
+
+The PCBs and parts list can be found on \\Anna-c704\sqip\Pulse Box\Digital In .
+
+The PCBs has a high-Ohm input. This does not match 50 Ohm coaxial
+cable, therefore back-reflections will occur. If you have a device
+connected to one input channel that can drive 50 Ohm, you can put a 50
+Ohm resistor parallel to your input to get rid of the
+reflections. BUT, if you connect a device that drives 50 Ohm to a
+regular high-Ohm input, the input channel might be damaged because the
+input voltage will then be 10V. So, don't do that.
+
+Troubleshooting
+---------------
+
+* The cable to the breakout board is not assembled correctly
+* The supply voltage is not applied
+* A DC-DC converter is broken

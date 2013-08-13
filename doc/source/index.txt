@@ -1,0 +1,46 @@
+Welcome to the PBox documentation!
+===================================
+
+
+This documentation covers first the set-up of a PBox hardware and
+software. The second part is an introduction to the operation of
+generating sequences for experiments.
+
+
+The MainBoard:
+
+.. toctree::
+   :maxdepth: 1
+   
+   intro
+   mainboard   
+   network
+
+Additional Hardware
+
+.. toctree::
+   :maxdepth: 1
+
+   breakout
+   dds
+   terminator
+   clockgen
+   digitalout
+   housing
+   misc
+
+Testing the Hardware
+
+.. toctree::
+   :maxdepth: 1
+
+   testing_hardware
+   lvds_test
+
+About the programming:
+
+.. toctree::
+   :maxdepth: 1
+
+   readme-seq2
+   sequences

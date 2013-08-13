@@ -1,0 +1,28 @@
+Housing for the Box
+===================
+
+The SolidWorks files can be found under \\Anna-c704\sqip\Pulse
+Box\SolidWorks. With these files, one can order anywhere. The cheapest
+company (by much) so far was EGU Metall. Their quote can be found
+under \\Anna-c704\sqip\Pulse Box\SolidWorks\Quote.  Since the inputs
+and outputs have to be galvanically isolated and there are isolating
+SMA connectors, one has to use a non-conducting material for the front
+panel. For example, one can order 6mm POM (plastic) at "Technische
+Kunststoffe" and the guys from the mechanical workshop will mill it.
+Some additional things have to be ordered as well.
+
+    Handles: RS-Components part number 667-0365 Network cable
+    connector for front panel: RS-Components part number 186-3149
+    Power supply: RS-Components part number 177-804 Fans: if desired,
+    any 12cm fan will do
+
+
+Description
+-----------
+
+The main board and the break-out board are mounted above the frequency
+generator to save room in the case. Up to 10 DDS boards could be
+mounted in the back (but only 9 connector holes in tqhe panel). The
+frequency distributors can be mounted in the front or in the back. If
+additional PCBs have the same size as the frequency distributor (100mm
+x 70mm), they can be mounted too.

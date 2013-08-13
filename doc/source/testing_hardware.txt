@@ -1,0 +1,32 @@
+Testing the hardware of a complete PBox 
+=======================================
+
+go to the sequencer2 directory and run following command::
+
+    python test_pbox_hardware.py
+
+This should then open a window with a webbrowser displaying this
+page. 
+
+The tests will run automatically and you will be asked to check
+whether the hardware will perform correctly. If a test fails, a
+browser window will be opened to lead you towards troubleshooting
+information.
+
+Requirements
+------------
+
+* The PBox needs be connected to the ethernet
+* The router must be set-up accordingly
+* The clock generator needs to be locked
+
+Required equipment
+
+* A spectrum analyzer to test the DDS
+* A 300MHz oscilloscope
+
+In order to diagnose errors in the LVDS bus following additional
+equipment is required:
+
+* A USB Blaster to program the FPGA
+* A tested DDS board

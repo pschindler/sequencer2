@@ -1,0 +1,129 @@
+The PBox on the network
+=======================
+
+The Network Discovery Problem 
+-----------------------------
+
+The pulse sequencer's Ethernet interface allows flexible decoupling
+from the control computer. However, the Python sequencer running on the
+control computer must still determine what sequencer devices exist on
+the local network, what their addresses are, and which one(s) to
+address for any given pulse program. These problems and their solution
+we will collectively call '''discovery'''.
+
+We will more clearly define what we mean by a '''device address''' in
+the next section, but for now we use it to mean a generic way of
+distinguishing devices on a network and of sending packets to one or
+more specific devices.
+
+The current solution to the discovery problem is to hardcode all
+addresses, both in firmware and in software, so that they agree. This
+places the burden on a human user to make sure that all sequencer
+devices on the same network have unique addresses, by setting DIP
+switch settings on the sequencer boards and writing a software
+settings file accordingly. While this provides a deterministic
+solution that works every time, it removes a lot of flexibility
+promised by having a network interface in the first place.
+
+The main disadvantages are:
+
+ * Requiring a separate router to provide a "walled garden" (private subnet) containing the control computer and the sequencer devices.
+   * Although a router may still be desirable in case there are other problems with letting sequencer devices live on your main subnet with Internet access. For example, your main DHCP server may require every device to register its MAC address before it can receive an IP address and before the router will route IP packets for it.
+ * Requiring both the router and the control computer to be on the same subnet that is hardcoded in the sequencer firmware.
+ * Having to hardcode the desired device address in the Python software, and only being able to address on sequencer device at a time.
+
+Network Addresses
+-----------------
+
+A sequencer device currently has three different, but related,
+addresses associated with it.
+
+Below, x represents the 4-bit device ID set by DIP switches on the
+sequencer circuit board. See :doc:`mainboard` how to set these
+switches.
+
+* Ethernet medium access control (MAC) address, of the form 00:01:ca:22:22:2x
+* Internet protocol (IP) address, which when statically configured, is of the form 192.168.0.22x
+* The device ID for pulse transfer protocol daisy-chain transfer, the same as x.
+
+The device ID and Ethernet MAC address are taken from the DIP switch.
+The IP address can either be statically configured or dynamically
+configured, depending on DIP switch 6 (nswitch5 in firmware).
+
+The sequencer always goes through a DHCP handshake process to discover
+the DHCP server and router on its subnet. However, if it is using a
+static IP address, it will decline the offered DHCP lease address.
+
+Troubleshooting the network configuration
+-----------------------------------------
+
+The interaction between the experiment control computer, the router
+and the PBox can be investigated with the ethernet packet analzing tool
+wireshark.
+
+http://www.wireshark.org
+
+Install the tool on the experiment control computer and listen on the
+interface that is connected to the router. After switching on the
+PBox, a DHCP request from the PBox's MAC address (00:01:ca:22:22:2x)
+should be detected. If the router is configured correctly, it should
+offer the PBox the corresponding IP address (192.168.0.22x).
+
+When the sequencer2 tries to program the PBox it performs an ARP
+request, asking for the MAC address of the PBox. Then it should send
+UDP packets to the PBOx. The PBox should respond back.
+
+DHCP Support
+------------
+
+Dynamic host configuration protocol allows IP hosts to retrieve
+network parameters dynamically over the network without user
+intervention. The sequencer has a limited DHCP client implemented as a
+firmware module that is compliant with the following IETF RFC:
+
+http://www.ietf.org/rfc/rfc1531.txt?number=1531
+
+However, it has not been fully tested with a wide range of
+routers. For example, the sequencer is known to work with Linksys
+routers, but not a Dynex router. The problem is not known, but it is
+probably due to incomplete or incorrect implementation of the
+specification on either the client side (our fault) or server side
+(manufacturer's fault).
+
+The DHCP module currently is able to accept a lease address and a
+gateway from the DHCP server response. Its main limitations right now
+are:
+
+ * it does not currently store the lease time.
+ * it does not request a new IP address when its lease time has expired.
+
+Once lease time support is added, it will need to be tested by
+actually waiting past the lease time and seeing if another DHCP
+negotiation occurs. A packet sniffer such as Wireshark is useful for
+this purpose.
+
+Finally, the Python software will need to know how to find the dynamic
+IP addresses of any sequencers on the network, as described in the
+next section.
+
+Python Software Support
+-----------------------
+
+By default, the Python sequencer (both v1 and v2) assumes it is on the
+same network as a sequencer with device ID 9 configured on its DIP
+switches.  The Python sequencer settings file contains the hardcoded,
+statically configured IP address 192.168.0.229 by default.
+
+Once the firmware has been modified to handle DHCP dynamic IP
+addresses and lease times correctly, the connection still needs to be
+made between the software and the sequencer.
+
+This is currently done in the Python v1 sequencer by sending a PTP
+Broadcast Request before every pulse program is compiled and
+run. However, this software has the following limitations:
+
+ * the corresponding PTP Broadcast Replies are not collected anywhere, and the results are not stored.
+ * there is currently no way of getting the lease time remaining from a sequencer device via PTP.
+ * there is no way to specify in the API which device ID to use, even if multiple devices were detected.
+ * there is no support for rediscovering sequencer devices whose lease IP addresses have expired.
+

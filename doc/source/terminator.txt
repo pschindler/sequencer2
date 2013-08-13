@@ -1,0 +1,30 @@
+LVDS Terminators
+================
+
+General description
+-------------------
+
+LVDS is a bus where a current flows. So, if there is no terminator
+with a resistor, the right amount of current can't flow. Hence, a
+terminator is mandatory.
+
+The best thing is to connect one side of the cable with the source,
+e.g. the break-out board, and the other side with the terminator. In
+between, the DDS boards can be connected to the cable.  
+
+Building a terminator
+---------------------
+
+First, one needs to order the PCB at a manufacturer. REMEMBER ONE
+NEEDS TWO TERMINATORS FOR ONE PULSE BOX! The required PCB file can be
+found in the folder \\anna-c704\calcium40\ControlPrograms\PBox
+documents\lvds-terminator and is called lvds-terminator.PcbDoc. For
+each PCB, one needs two resistor arrays. The RS-Components order
+number can be found in the same folder in the file
+resistor_order.txt. Additionally, one needs a 50-pin-connector for
+each PCB, too.
+
+When soldering the orientation of the resistors is not import, but the
+orientation of the 50-pin-connector is important!!! The first pin on
+the PCB (the only squared pin) has to be on the same side as the
+single slit (in the middle) of 50-pin-connector.
