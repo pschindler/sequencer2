@@ -281,6 +281,43 @@ def ttl_pulse(device_key, duration, start_time=0.0, is_last=True):
     pulse1 = TTLPulse(start_time, duration, device_key, is_last)
     sequence_var.append(pulse1.sequence_var)
 
+def setTTLOn(device_key, start_time=0.0, is_last=True):
+    """sets TTL channel to high
+
+    @param device_key: string identifier of TTL channels or a list of string identifiers
+    @param start_time: pulse start time with respect to the current frame
+    @param is_last: If True a new frame is generated after this event
+    """
+    setOn = TTLOn(start_time, device_key, is_last)
+    sequence_var.append(setOn.sequence_var)
+
+
+def setTTLOff(device_key, start_time=0.0, is_last=True):
+    """sets TTL channel to low
+
+    @param device_key: string identifier of TTL channels or a list of string identifiers
+    @param start_time: pulse start time with respect to the current frame
+    @param is_last: If True a new frame is generated after this event
+    """
+    setOff = TTLOff(start_time, device_key, is_last)
+    sequence_var.append(setOff.sequence_var)
+
+
+def setTTL(device_key, value, start_time=0.0, is_last=True):
+    """sets TTL channel to the desired value
+
+    @param device_key: string identifier of TTL channels or a list of string identifiers
+    @param value: boolean whether or not the TTL channel should be set
+    @param start_time: pulse start time with respect to the current frame
+    @param is_last: If True a new frame is generated after this event
+    """
+    if value:
+        setOn = TTLOn(start_time, device_key, is_last)
+        sequence_var.append(setOn.sequence_var)
+    else:
+        setOff = TTLOff(start_time, device_key, is_last)
+        sequence_var.append(setOff.sequence_var)
+
 def rf_pulse(theta, phi, ion, transition_param, start_time=0.0, \
                  is_last=True, address=0):
     """Generates an RF pulse
@@ -522,8 +559,9 @@ class userAPI(SequenceHandler):
         # Configure the DDS devices
         self.api.dds_list = []
         ref_freq = self.config.get_float("SERVER","reference_frequency")
+        clk_div = self.config.get_float("SERVER","clk_divider")
         for dds_addr in range(dds_count):
-            self.api.dds_list.append(ad9910.AD9910(dds_addr, ref_freq))
+            self.api.dds_list.append(ad9910.AD9910(dds_addr, ref_freq, clk_div))
         # Set the parameters for the
         self.pulse_program_name = ""
         self.final_array = []

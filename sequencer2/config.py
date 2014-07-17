@@ -198,7 +198,7 @@ class Config:
                                 else:
                                     select = 3
                                 dictionary[split1[0]] = TTLChannel(split1[0], \
-                                                                   int(split3[1]), select, is_inverted)
+                                                                   int(split3[1]) % 16, select, is_inverted)
                                 self.logger.debug(str(dictionary[split1[0]]))
 
                             except SyntaxError:
