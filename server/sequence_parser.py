@@ -26,7 +26,7 @@ def parse_sequence(sequence_string, is_ramp=False):
             if line[0] == "<":
                 current_tag = line
                 got_new_tag = True
-            if line[0:1] == "</":
+            if line[0:2] == "</":
                 current_tag = ""
                 got_new_tag = True
         except IndexError:
