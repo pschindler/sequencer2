@@ -93,3 +93,12 @@ The main sources of errors are:
 * The FPGA core clock and the ethernet clock are not the same
 * The firmware is not programmed
 
+Reprogramming the firmware
+---------------------------
+
+The firmware for the can be found at
+
+http://pulse-sequencer.sourceforge.net/firmware/sequencer_top-v0_29.pof
+
+:download:`Local copy of the programming file<sequencer_top-v0_29.pof>`
+

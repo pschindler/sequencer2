@@ -240,6 +240,37 @@ class HardwareTests:
         self.compile(my_sequencer)
 
 
+    def test_phase_switching_simultan(self, freq1=45, freq2=45, amplitude=-15, address1=0, address2=1, clock=800):
+        "Test two dds simultaneous on"
+        my_sequencer = sequencer.sequencer()
+        my_api = api.api(my_sequencer)
+        dds_device = ad9910.AD9910(address1, clock)
+        dds_device2 = ad9910.AD9910(address2, clock)
+        my_api.init_dds(dds_device)
+        my_api.init_dds(dds_device2)
+
+        my_api.label("test")
+        my_api.init_frequency(dds_device, 0.0, 0)
+        my_api.init_frequency(dds_device2, 0.0, 0)
+        my_api.init_frequency(dds_device, freq1, 1)
+        my_api.init_frequency(dds_device2, freq2, 2)
+        my_api.dac_value(amplitude, address1)
+        my_api.dac_value(amplitude, address2)
+        my_api.ttl_value(0x1, 2)
+
+        my_api.switch_frequency(dds_device, 0, 0)
+        my_api.switch_frequency(dds_device2, 0, 0)
+        my_api.wait(2000)
+        my_api.switch_frequency(dds_device, 1, 0)
+        my_api.switch_frequency(dds_device2, 1, 0)
+        my_api.ttl_value(0x0, 2)
+        my_api.wait(10000)
+        my_api.jump("test")
+        
+        self.compile(my_sequencer)
+
+
+
     def test_switch_off(self, freq1=45, amplitude=-15, address1=0, wait=0.0, clock=800):
         "Just sets a loop profile of the dds and activates it"
         my_sequencer = sequencer.sequencer()

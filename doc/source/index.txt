@@ -1,13 +1,26 @@
 Welcome to the PBox documentation!
 ===================================
 
+This documentation covers the PBox experimental control system that is
+currently used at University of Innsbruck. The two most relevant
+repositories are hosted on github. For specific documentation refer to
+the README file of the corresponding repository:
 
-This documentation covers first the set-up of a PBox hardware and
-software. The second part is an introduction to the operation of
-generating sequences for experiments.
+The sequencer2 compiler
+
+https://github.com/pschindler/sequencer2
+
+The VHDL code for the DDS board
+
+https://github.com/pschindler/vhdl-ad9910
+
+
+The following gives a quick tour to the Hardware and Software options
+of the various versions of the PBox.
 
 
 The MainBoard:
+--------------
 
 .. toctree::
    :maxdepth: 1
@@ -17,6 +30,7 @@ The MainBoard:
    network
 
 Additional Hardware
+-------------------
 
 .. toctree::
    :maxdepth: 1
@@ -44,3 +58,6 @@ About the programming:
 
    readme-seq2
    sequences
+
+This documentation is based on SPHINX and is contained in the
+doc/ folder in the sequencer2 repository.
