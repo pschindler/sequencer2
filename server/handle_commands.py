@@ -75,6 +75,7 @@ class CommandHandler:
         command_dict["IONS"] = self.get_transition
         command_dict["FREQ2"] = self.get_transition
         command_dict["AMPL2"] = self.get_transition
+        command_dict["SWEEP"] = self.get_transition
 
         # The DAC commands:
         command_dict["DAC"] = self.get_dac
@@ -157,6 +158,9 @@ class CommandHandler:
             self.transition.freq_is_init = False
         elif splitted[0] == "AMPL2":
             self.transition.amplitude2 = float(splitted[1])
+        elif splitted[0] == "SWEEP":
+            self.transition.sweeprange = float(splitted[1])
+
         elif splitted[0] == "FREQ2":
             self.transition.frequency2 = float(splitted[1])
             self.transition.freq_is_init = False
