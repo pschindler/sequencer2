@@ -111,12 +111,12 @@ class api:
                 # Subtract one more cycle - we need it for the wait
                 # instruction itself
                 if wait_cycles > self.max_wait_cycles:
-                    my_wait = self.max_wait_cycles 
+                    my_wait = self.max_wait_cycles - self.branch_delay_slots
                 else:
-                    my_wait = wait_cycles - self.branch_delay_slots - 1
+                    my_wait = wait_cycles - self.branch_delay_slots #- 1
                 wait_insn = instructions.wait(my_wait)
                 # Do we really need wait_cycles - 5 ??
-                wait_cycles -= my_wait + self.branch_delay_slots + 1
+                wait_cycles -= my_wait + self.branch_delay_slots #+ 1
                 self.sequencer.add_insn(wait_insn)
                 
                 for i in range(self.branch_delay_slots):
